@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/WelcomeFragment">
+
+    <fragment
+        android:id="@+id/WelcomeFragment"
+        android:name="com.komiker.events.ui.fragments.WelcomeFragment"
+        android:label="@string/welcome_fragment"
+        tools:layout="@layout/fragment_welcome" >
+
+        <action
+            android:id="@+id/action_WelcomeFragment_to_RegistrationFragment"
+            app:destination="@id/RegistrationFragment" />
+
+        <action
+            android:id="@+id/action_WelcomeFragment_to_RegistrationSuccessFragment"
+            app:destination="@id/RegistrationSuccessFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/RegistrationFragment"
+        android:name="com.komiker.events.ui.fragments.RegistrationFragment"
+        android:label="RegistrationFragment"
+        tools:layout="@layout/fragment_registration">
+        <action
+            android:id="@+id/action_RegistrationFragment_to_WelcomeFragment"
+            app:destination="@id/WelcomeFragment" />
+        <action
+            android:id="@+id/action_RegistrationFragment_to_CheckYourEmailFragment"
+            app:destination="@id/CheckYourEmailFragment" />
+        <action
+            android:id="@+id/action_RegistrationFragment_to_RegistrationErrorFragment"
+            app:destination="@id/RegistrationErrorFragment" />
+        <action
+            android:id="@+id/action_RegistrationFragment_to_InternetErrorFragment"
+            app:destination="@id/InternetErrorFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/CheckYourEmailFragment"
+        android:name="com.komiker.events.ui.fragments.CheckYourEmailFragment"
+        android:label="CheckYourEmailFragment"
+        tools:layout="@layout/fragment_check_your_email">
+        <action
+            android:id="@+id/action_CheckYourEmailFragment_to_OtpEntryFragment"
+            app:destination="@id/OtpEntryFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/RegistrationErrorFragment"
+        android:name="com.komiker.events.ui.fragments.RegistrationErrorFragment"
+        android:label="RegistrationErrorFragment"
+        tools:layout="@layout/fragment_registration_error">
+        <action
+            android:id="@+id/action_RegistrationErrorFragment_to_RegistrationFragment"
+            app:destination="@id/RegistrationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/RegistrationSuccessFragment"
+        android:name="com.komiker.events.ui.fragments.RegistrationSuccessFragment"
+        android:label="RegistrationSuccessFragment"
+        tools:layout="@layout/fragment_registration_success">
+        <action
+            android:id="@+id/action_RegistrationSuccessFragment_to_MainMenuFragment"
+            app:destination="@id/MainMenuFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/InternetErrorFragment"
+        android:name="com.komiker.events.ui.fragments.InternetErrorFragment"
+        android:label="InternetErrorFragment"
+        tools:layout="@layout/fragment_internet_error">
+        <action
+            android:id="@+id/action_InternetErrorFragment_to_CheckYourEmailFragment"
+            app:destination="@id/CheckYourEmailFragment" />
+    </fragment>
+    <action
+        android:id="@+id/action_global_RegistrationSuccessFragment"
+        app:destination="@id/RegistrationSuccessFragment" />
+    <fragment
+        android:id="@+id/MainMenuFragment"
+        android:name="com.komiker.events.ui.fragments.MainMenuFragment"
+        android:label="@string/main_menu_fragment"
+        tools:layout="@layout/fragment_main_menu" >
+        <action
+            android:id="@+id/action_MainMenuFragment_to_FilterFragment"
+            app:destination="@id/FilterFragment" />
+        <action
+            android:id="@+id/action_MainMenuFragment_to_CreateEventFragment"
+            app:destination="@id/CreateEventFragment" />
+        <action
+            android:id="@+id/action_ProfileFragment_to_EditProfileFragment"
+            app:destination="@id/EditProfileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/FilterFragment"
+        android:name="com.komiker.events.ui.fragments.FilterFragment"
+        android:label="@string/filter_fragment"
+        tools:layout="@layout/fragment_filter" >
+        <action
+            android:id="@+id/action_FilterFragment_to_MainMenuFragment"
+            app:destination="@id/MainMenuFragment" />
+        <action
+            android:id="@+id/action_FilterFragment_to_CategoryFragment"
+            app:destination="@id/CategoryFragment" />
+        <action
+            android:id="@+id/action_FilterFragment_to_LocationFragment"
+            app:destination="@id/LocationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/CategoryFragment"
+        android:name="com.komiker.events.ui.fragments.CategoryFragment"
+        android:label="@string/filter_fragment"
+        tools:layout="@layout/fragment_category" >
+        <action
+            android:id="@+id/action_CategoryFragment_to_FilterFragment"
+            app:destination="@id/FilterFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/LocationFragment"
+        android:name="com.komiker.events.ui.fragments.LocationFragment"
+        android:label="@string/location_fragment"
+        tools:layout="@layout/fragment_location" >
+        <action
+            android:id="@+id/action_LocationFragment_to_FilterFragment"
+            app:destination="@id/FilterFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/CreateEventFragment"
+        android:name="com.komiker.events.ui.fragments.CreateEventFragment"
+        android:label="@string/create_event_fragment"
+        tools:layout="@layout/fragment_create_event" >
+        <action
+            android:id="@+id/action_CreateEventFragment_to_MainMenuFragment"
+            app:destination="@id/MainMenuFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/ProfileFragment"
+        android:name="com.komiker.events.ui.fragments.ProfileFragment"
+        android:label="@string/profile_fragment"
+        tools:layout="@layout/fragment_profile" >
+        <action
+            android:id="@+id/action_ProfileFragment_to_EditProfileFragment"
+            app:destination="@id/EditProfileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/EditProfileFragment"
+        android:name="com.komiker.events.ui.fragments.EditProfileFragment"
+        android:label="@string/edit_profile_fragment"
+        tools:layout="@layout/fragment_edit_profile" >
+        <action
+            android:id="@+id/action_EditProfileFragment_to_MainMenuFragment"
+            app:destination="@id/MainMenuFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/OtpEntryFragment"
+        android:name="com.komiker.events.ui.fragments.OtpEntryFragment"
+        android:label="OtpEntryFragment"
+        tools:layout="@layout/fragment_otp_entry">
+        <action
+            android:id="@+id/action_OtpEntryFragment_to_RegistrationSuccessFragment"
+            app:destination="@id/RegistrationSuccessFragment" />
+        <action
+            android:id="@+id/action_OtpEntryFragment_to_CheckYourEmailFragment"
+            app:destination="@id/CheckYourEmailFragment" />
+    </fragment>
+</navigation>

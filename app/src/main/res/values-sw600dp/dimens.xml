@@ -1,0 +1,7 @@
+<resources>
+	<dimen name="text_size_button">30sp</dimen>
+
+	<dimen name="margin_end_image_google">128dp</dimen>
+	<dimen name="width_image_social_media">36sp</dimen>
+	<dimen name="height_image_social_media">36sp</dimen>
+</resources>

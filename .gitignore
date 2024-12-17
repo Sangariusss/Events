@@ -1,0 +1,91 @@
+# Build artifacts
+*.apk
+*.aar
+*.aab
+*.ap_
+*.dex
+*.class
+*.jar
+*.war
+*.ear
+
+# Gradle-specific files
+.gradle/
+build/
+
+# Local configuration files (e.g., SDK paths)
+local.properties
+
+# Android Studio/IntelliJ IDEA-specific files
+.idea/
+*.iml
+*.hprof
+*.log
+
+# Keystore files
+*.jks
+*.keystore
+
+# External native build
+.externalNativeBuild/
+.cxx/
+
+# Firebase and Google Services
+google-services.json
+google-services.xml
+
+# Fastlane files
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+fastlane/readme.md
+
+# Lint and inspection reports
+lint/intermediates/
+lint/generated/
+lint/outputs/
+lint/tmp/
+
+# Capture files
+captures/
+
+# macOS system files
+.DS_Store
+
+# Log files
+*.log
+
+# Release files
+app/release/*
+app/release/output.json
+
+# Proguard folder (if used)
+proguard/
+
+# VCS files
+vcs.xml
+
+# Navigation Editor files
+.idea/navigation.xml
+.idea/navEditor.xml
+
+# Code styles
+.idea/codeStyles/
+.idea/libraries/
+
+# Environment variables
+env
+.env
+.env.*
+
+# Custom exclusions
+*.bak
+*.swp
+*.tmp
+
+# Kotlin or Java annotation processors
+build/generated/
+
+# Specific cases
+app/debug.keystore

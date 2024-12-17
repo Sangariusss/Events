@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="ButtonWhite" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_btn_rounded_white</item>
+        <item name="android:textColor">@color/neutral_0</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="ButtonBlack" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_btn_rounded_black</item>
+        <item name="android:textColor">@color/neutral_100</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="ButtonRegistrationContinueBlack" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_btn_rounded_black_inactive</item>
+        <item name="android:textColor">@color/neutral_100</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:enabled">false</item>
+    </style>
+
+    <style name="ButtonSocialMediaLogin" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_btn_rounded_social_media_white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="ButtonSkip" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_btn_skip</item>
+        <item name="android:textColor">@color/neutral_0</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="SnackbarCustom" parent="Widget.Design.Snackbar">
+        <item name="android:fontFamily">@font/fixel_regular</item>
+        <item name="android:background">@color/neutral_0</item>
+    </style>
+
+    <style name="EditTextRegistrationCustom" parent="Widget.AppCompat.EditText">
+        <item name="android:background">@drawable/bg_et_registration</item>
+        <item name="android:fontFamily">@font/fixel_regular</item>
+        <item name="android:hint">@string/example_gmail_com</item>
+        <item name="android:inputType">textEmailAddress</item>
+        <item name="android:textColorHint">@color/neutral_95</item>
+        <item name="android:textSize">@dimen/text_size_button</item>
+        <item name="android:textColor">@color/neutral_0</item>
+    </style>
+
+    <style name="EditTextRegistrationError" parent="@android:style/TextAppearance">
+        <item name="android:background">@drawable/bg_et_registration_error</item>
+        <item name="android:textColor">@color/red_50</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="BottomNavigationViewCustom" parent="Widget.Material3.BottomNavigationView">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.BottomNavigationView</item>
+        <item name="itemIconTint">@color/tint_bar_item_with_indicator</item>
+    </style>
+
+    <style name="ThemeOverlay.App.BottomNavigationView" parent="">
+        <item name="colorSecondaryContainer">@android:color/transparent</item>
+        <item name="colorOnSurface">@color/red_60</item>
+        <item name="colorOnSecondaryContainer">@color/red_60</item>
+        <item name="colorOnSurfaceVariant">@color/neutral_0</item>
+        <item name="colorOnContainer">@color/neutral_95</item>
+    </style>
+
+    <style name="TabTextCustom" parent="Widget.Material3.TabLayout">
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">@font/fixel_semibold</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="ButtonEditProfile" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_btn_edit_profile</item>
+        <item name="android:textColor">@color/neutral_0</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:fontFamily">@font/fixel_medium</item>
+    </style>
+
+    <style name="EditTextFindCustom" parent="Widget.AppCompat.EditText">
+        <item name="android:background">@drawable/bg_et_find_empty</item>
+        <item name="android:fontFamily">@font/fixel_regular</item>
+        <item name="android:hint">@string/find_events</item>
+        <item name="android:inputType">text</item>
+        <item name="android:textColorHint">@color/neutral_60</item>
+        <item name="android:textSize">@dimen/text_size_button</item>
+        <item name="android:textColor">@color/neutral_0</item>
+        <item name="android:drawableEnd">@drawable/ic_search</item>
+        <item name="android:textCursorDrawable">@drawable/cursor_black</item>
+        <item name="android:paddingStart">15dp</item>
+        <item name="android:paddingEnd">15dp</item>
+    </style>
+
+    <style name="ButtonFilterInactive" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_btn_filter_inactive</item>
+        <item name="android:src">@drawable/ic_filter_inactive</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="ButtonFilterActive" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_btn_filter_active</item>
+        <item name="android:src">@drawable/ic_filter_icon</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="ButtonResetAll" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_btn_edit_profile</item>
+        <item name="android:textColor">@color/neutral_0</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:fontFamily">@font/fixel_semibold</item>
+    </style>
+
+    <style name="ButtonViewAll" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_btn_edit_profile</item>
+        <item name="android:textColor">@color/neutral_0</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:fontFamily">@font/fixel_semibold</item>
+    </style>
+
+    <style name="ButtonCreateEvent" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_btn_rounded_red</item>
+        <item name="android:src">@drawable/ic_plus</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="EditTextCreateEventCustom" parent="Widget.AppCompat.EditText">
+        <item name="android:background">@drawable/bg_et_create_event_empty</item>
+        <item name="android:fontFamily">@font/fixel_regular</item>
+        <item name="android:hint">@string/find_events</item>
+        <item name="android:textColorHint">@color/neutral_60</item>
+        <item name="android:textSize">@dimen/text_size_button</item>
+        <item name="android:textColor">@color/neutral_0</item>
+        <item name="android:textCursorDrawable">@drawable/cursor_black</item>
+        <item name="android:paddingStart">15dp</item>
+        <item name="android:paddingEnd">15dp</item>
+    </style>
+
+    <style name="EditTextCustomUsername" parent="Widget.AppCompat.EditText">
+        <item name="android:background">@drawable/bg_et_edit_profile</item>
+        <item name="android:fontFamily">@font/fixel_medium</item>
+        <item name="android:text">@string/example_name</item>
+        <item name="android:inputType">textNoSuggestions</item>
+        <item name="android:drawableEnd">@drawable/ic_clear_text</item>
+        <item name="android:textSize">@dimen/text_size_button</item>
+        <item name="android:textColor">@color/neutral_0</item>
+        <item name="android:gravity">center|start</item>
+        <item name="android:textCursorDrawable">@drawable/cursor_black</item>
+        <item name="android:paddingStart">15dp</item>
+        <item name="android:paddingEnd">15dp</item>
+    </style>
+
+</resources>
