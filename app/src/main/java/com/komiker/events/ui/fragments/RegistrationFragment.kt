@@ -6,8 +6,14 @@ import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
+import android.text.SpannableString
+import android.text.Spanned
 import android.text.TextUtils
 import android.text.TextWatcher
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.text.style.ForegroundColorSpan
+import android.text.style.UnderlineSpan
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +21,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -67,6 +74,8 @@ class RegistrationFragment : Fragment() {
             emailEditText?.requestFocus()
             imm.showSoftInput(emailEditText, InputMethodManager.SHOW_IMPLICIT)
         }, 0)
+
+        setupClickableAndUnderlinedText(binding.textTermsAndPrivacy)
     }
 
     override fun onDestroyView() {
@@ -281,5 +290,43 @@ class RegistrationFragment : Fragment() {
             activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
             else -> false
         }
+    }
+
+    private fun setupClickableAndUnderlinedText(textView: TextView) {
+        val text = "By continuing, you agree to Terms of Use and Privacy Policy"
+        val spannableString = SpannableString(text)
+
+        val termsColor = ContextCompat.getColor(requireContext(), R.color.red_60)
+        val privacyColor = ContextCompat.getColor(requireContext(), R.color.red_60)
+
+        val termsClickableSpan = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+
+            }
+        }
+
+        val privacyClickableSpan = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+
+            }
+        }
+
+        val termsStartIndex = text.indexOf("Terms of Use")
+        val termsEndIndex = termsStartIndex + "Terms of Use".length
+        spannableString.setSpan(termsClickableSpan, termsStartIndex, termsEndIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(UnderlineSpan(), termsStartIndex, termsEndIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(ForegroundColorSpan(termsColor), termsStartIndex, termsEndIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        val privacyStartIndex = text.indexOf("Privacy Policy")
+        val privacyEndIndex = privacyStartIndex + "Privacy Policy".length
+        spannableString.setSpan(privacyClickableSpan, privacyStartIndex, privacyEndIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(UnderlineSpan(), privacyStartIndex, privacyEndIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(ForegroundColorSpan(privacyColor), privacyStartIndex, privacyEndIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        textView.text = spannableString
+
+        textView.movementMethod = LinkMovementMethod.getInstance()
+
+        textView.highlightColor = ContextCompat.getColor(requireContext(), android.R.color.transparent)
     }
 }

@@ -4,7 +4,7 @@
     <!-- Strings used for fragments for navigation -->
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-    <string name="continue_with_email_button_text">Continue with email</string>
+    <string name="continue_with_email_button_text">Continue with Email</string>
     <string name="google">Google</string>
     <string name="google_icon">GoogleIcon</string>
     <string name="terms_of_use_and_privacy_policy">By continuing, you agree to Terms of Use and Privacy Policy</string>
@@ -95,7 +95,7 @@
     <string name="user_not_found">User not found</string>
     <string name="profile">Profile</string>
     <string name="home">Home</string>
-    <string name="or_with">or with</string>
+    <string name="or">or</string>
     <string name="x_icon">XIcon</string>
     <string name="facebook_icon">FacebookIcon</string>
     <string name="recently_posted">Recently posted</string>
