@@ -7,6 +7,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -25,13 +26,12 @@ import kotlinx.coroutines.withContext
 class OtpEntryFragment : Fragment() {
 
     private var _binding: FragmentOtpEntryBinding? = null
-
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     private lateinit var otpEditTexts: Array<EditText>
     private lateinit var verifyOtpButton: Button
     private lateinit var email: String
+    private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,10 +48,15 @@ class OtpEntryFragment : Fragment() {
         initializeViews()
         setupVerifyOtpButton()
         setupOtpInputs()
+        setupKeyboardListener()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        globalLayoutListener?.let {
+            binding.root.viewTreeObserver.removeOnGlobalLayoutListener(it)
+            globalLayoutListener = null
+        }
         _binding = null
     }
 
@@ -167,6 +172,61 @@ class OtpEntryFragment : Fragment() {
                 }
                 Toast.makeText(requireContext(), "Invalid OTP", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    private fun setupKeyboardListener() {
+        globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
+            _binding?.let { binding ->
+                val rect = android.graphics.Rect()
+                binding.root.getWindowVisibleDisplayFrame(rect)
+                val screenHeight = binding.root.height
+                val keypadHeight = screenHeight - rect.bottom
+                val isKeyboardShown = keypadHeight > screenHeight * 0.15
+                adjustDigitsForKeyboard(isKeyboardShown, keypadHeight)
+            }
+        }
+        _binding?.root?.viewTreeObserver?.addOnGlobalLayoutListener(globalLayoutListener)
+    }
+
+    private fun adjustDigitsForKeyboard(isKeyboardShown: Boolean, keypadHeight: Int) {
+        val screenHeight = binding.root.height.toFloat()
+        val offset = screenHeight * 0.075f
+
+        val translationY = if (isKeyboardShown) {
+            val keypadHeightFloat = keypadHeight.toFloat()
+            val digitsBottom = otpEditTexts.last().bottom.toFloat()
+            val keyboardTop = (screenHeight - keypadHeightFloat)
+            val requiredShift = digitsBottom - keyboardTop + offset
+            if (requiredShift > 0) {
+                -requiredShift
+            } else {
+                0f
+            }
+        } else {
+            0f
+        }
+
+        binding.imageSayMyCode.animate()
+            .translationY(translationY)
+            .setDuration(100)
+            .start()
+
+        binding.textCodeTitle.animate()
+            .translationY(translationY)
+            .setDuration(100)
+            .start()
+
+        binding.textCodeDescription.animate()
+            .translationY(translationY)
+            .setDuration(100)
+            .start()
+
+        otpEditTexts.forEach { editText ->
+            editText.animate()
+                .translationY(translationY)
+                .setDuration(100)
+                .start()
         }
     }
 }

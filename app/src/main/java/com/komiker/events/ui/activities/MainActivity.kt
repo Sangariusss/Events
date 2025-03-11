@@ -98,7 +98,11 @@ class MainActivity : AppCompatActivity() {
             userId?.let { profileViewModel.loadUser(it) }
             navController.navigate(R.id.MainMenuFragment)
         } else {
-            navController.navigate(R.id.WelcomeFragment)
+            val currentDestination = navController.currentDestination?.id
+            if (currentDestination != R.id.WelcomeFragment &&
+                currentDestination != R.id.RegistrationFragment) {
+                navController.navigate(R.id.WelcomeFragment)
+            }
         }
     }
 

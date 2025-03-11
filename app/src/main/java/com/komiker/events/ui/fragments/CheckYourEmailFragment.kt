@@ -51,6 +51,7 @@ class CheckYourEmailFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        timer?.cancel()
         _binding = null
     }
 
@@ -120,10 +121,10 @@ class CheckYourEmailFragment : Fragment() {
 
     private fun startTimer() {
         isTimerRunning = true
-        binding.textClickToResend.text = getString(R.string._60)
-
+        binding.textClickToResend.text = getString(R.string.click_to_resend)
         binding.textClickToResend.isClickable = false
         binding.textTimer.visibility = View.VISIBLE
+        binding.textTimer.text = getString(R.string._60)
 
         timer = object : CountDownTimer(60000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
@@ -140,7 +141,7 @@ class CheckYourEmailFragment : Fragment() {
 
     private fun updateTimerText(millisUntilFinished: Long) {
         val secondsLeft = millisUntilFinished / 1000
-        binding.textClickToResend.text = "$secondsLeft"
+        binding.textTimer.text = "$secondsLeft"
     }
 
     private fun resetTimerView() {
