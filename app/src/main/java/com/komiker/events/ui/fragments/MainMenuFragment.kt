@@ -22,8 +22,6 @@ class MainMenuFragment : Fragment() {
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
-    private var currentLottieDrawable: LottieDrawable? = null
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -95,70 +93,24 @@ class MainMenuFragment : Fragment() {
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.navigation_home -> {
-                    stopAllAnimations()
-                    playAnimation(R.id.navigation_home, R.raw.anim_navigation_home_icon, R.drawable.ic_home)
                     replaceFragment(HomeFragment())
                     true
                 }
                 R.id.navigation_calendar -> {
-                    stopAllAnimations()
-                    playAnimation(R.id.navigation_calendar, R.raw.anim_navigation_calendar_icon, R.drawable.ic_calendar)
                     replaceFragment(CalendarFragment())
                     true
                 }
                 R.id.navigation_compass -> {
-                    stopAllAnimations()
-                    playAnimation(R.id.navigation_compass, R.raw.anim_navigation_compass_icon, R.drawable.ic_compass)
                     replaceFragment(CompassFragment())
                     true
                 }
                 R.id.navigation_profile -> {
-                    stopAllAnimations()
-                    playAnimation(R.id.navigation_profile, R.raw.anim_navigation_user_icon, R.drawable.ic_profile)
                     replaceFragment(ProfileFragment())
                     true
                 }
                 else -> false
             }
         }
-    }
-
-    private fun playAnimation(menuItemId: Int, animationResId: Int, defaultIconResId: Int) {
-        val menuItem = binding.bottomNavigation.menu.findItem(menuItemId)
-
-        currentLottieDrawable?.cancelAnimation()
-
-        val lottieDrawable = LottieDrawable()
-
-        LottieCompositionFactory.fromRawRes(requireContext(), animationResId)
-            .addListener { result ->
-                lottieDrawable.composition = result
-                lottieDrawable.repeatCount = 0
-                lottieDrawable.playAnimation()
-
-                menuItem.icon = lottieDrawable
-            }
-            .addFailureListener {
-                menuItem.icon = ContextCompat.getDrawable(requireContext(), defaultIconResId)
-            }
-
-        currentLottieDrawable = lottieDrawable
-    }
-
-    private fun stopAllAnimations() {
-        currentLottieDrawable?.cancelAnimation()
-        resetMenuIcons()
-    }
-
-    private fun resetMenuIcons() {
-        binding.bottomNavigation.menu.findItem(R.id.navigation_home).icon =
-            ContextCompat.getDrawable(requireContext(), R.drawable.ic_home)
-        binding.bottomNavigation.menu.findItem(R.id.navigation_calendar).icon =
-            ContextCompat.getDrawable(requireContext(), R.drawable.ic_calendar)
-        binding.bottomNavigation.menu.findItem(R.id.navigation_compass).icon =
-            ContextCompat.getDrawable(requireContext(), R.drawable.ic_compass)
-        binding.bottomNavigation.menu.findItem(R.id.navigation_profile).icon =
-            ContextCompat.getDrawable(requireContext(), R.drawable.ic_profile)
     }
 
     private fun replaceFragment(fragment: Fragment) {

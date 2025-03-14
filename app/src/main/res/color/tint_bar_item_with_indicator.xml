@@ -11,11 +11,11 @@
         android:state_checked="true" />
 
     <!-- Inactive item -->
-    <item android:color="@color/neutral_0"
+    <item android:color="@color/neutral_60"
         android:state_pressed="true" />
-    <item android:color="@color/neutral_0"
+    <item android:color="@color/neutral_60"
         android:state_focused="true" />
-    <item android:color="@color/neutral_0"
+    <item android:color="@color/neutral_60"
         android:state_hovered="true" />
-    <item android:color="@color/neutral_0" />
+    <item android:color="@color/neutral_60" />
 </selector>

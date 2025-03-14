@@ -70,7 +70,7 @@
         <item name="colorSecondaryContainer">@android:color/transparent</item>
         <item name="colorOnSurface">@color/red_60</item>
         <item name="colorOnSecondaryContainer">@color/red_60</item>
-        <item name="colorOnSurfaceVariant">@color/neutral_0</item>
+        <item name="colorOnSurfaceVariant">@color/neutral_60</item>
         <item name="colorOnContainer">@color/neutral_95</item>
     </style>
 

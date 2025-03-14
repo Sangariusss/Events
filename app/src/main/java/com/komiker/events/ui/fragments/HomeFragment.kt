@@ -37,16 +37,7 @@ class HomeFragment : Fragment() {
 
         setupEditTextBackgroundChange()
         setupButtonFilter()
-
-        binding.root.viewTreeObserver.addOnGlobalLayoutListener(object :
-            ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                initButtonFavorite()
-                initButtonNotification()
-
-                binding.root.viewTreeObserver.removeOnGlobalLayoutListener(this)
-            }
-        })
+        setupButtonNotification()
     }
 
     override fun onDestroyView() {
@@ -54,37 +45,9 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 
-    private fun initButtonFavorite() {
-        val buttonFavorite = view?.findViewById<ImageButton>(R.id.button_favorite)
-        buttonFavorite?.post {
-            val buttonWidth = buttonFavorite.width
-
-            val padding = (buttonWidth * 0.1625).toInt()
-
-            buttonFavorite.setPadding(padding, padding, padding, padding)
-
-            buttonFavorite.visibility = View.VISIBLE
-
-            buttonFavorite.setOnClickListener {
-
-            }
-        }
-    }
-
-    private fun initButtonNotification() {
-        val buttonNotification = view?.findViewById<ImageButton>(R.id.button_notification)
-        buttonNotification?.post {
-            val buttonWidth = buttonNotification.width
-
-            val padding = (buttonWidth * 0.1625).toInt()
-
-            buttonNotification.setPadding(padding, padding, padding, padding)
-
-            buttonNotification.visibility = View.VISIBLE
-
-            buttonNotification.setOnClickListener {
-
-            }
+    private fun setupButtonNotification() {
+        binding.buttonNotification.setOnClickListener {
+            //
         }
     }
 
