@@ -46,6 +46,7 @@
     <string name="your_events">Your events</string>
     <string name="profile_image">ProfileImage</string>
     <string name="example_name">Example</string>
+    <string name="example_username">"@Example"</string>
     <string name="edit_profile">Edit profile</string>
     <string name="general">General</string>
     <string name="change_email">Change email</string>
@@ -107,4 +108,8 @@
     <string name="create_event_button">Create event button</string>
     <string name="for_you">For you</string>
     <string name="search">Search</string>
+    <string name="add_social_media">Add social media</string>
+    <string name="add_social_media_icon">Add Social Media Icon</string>
+    <string name="my_events_icon">My Events Icon</string>
+    <string name="delete_account_icon">Delete Account Icon</string>
 </resources>

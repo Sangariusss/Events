@@ -61,16 +61,6 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.root.viewTreeObserver.addOnGlobalLayoutListener(object :
-            ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                initButtonFavorite()
-                initButtonNotification()
-
-                binding.root.viewTreeObserver.removeOnGlobalLayoutListener(this)
-            }
-        })
-
         initializeUIComponents(view)
 
         profileViewModel.userLiveData.observe(viewLifecycleOwner) { user ->
@@ -81,6 +71,8 @@ class ProfileFragment : Fragment() {
             }
         }
 
+        setupButtonFavorite()
+        setupButtonNotification()
         initButtonEditProfile()
         initButtonLogOut()
         initButtonDelete()
@@ -96,7 +88,7 @@ class ProfileFragment : Fragment() {
         buttonNotification = view.findViewById(R.id.button_notification)
         profileImage = view.findViewById(R.id.image_profile)
         profileName = view.findViewById(R.id.text_profile_name)
-        profileEmail = view.findViewById(R.id.text_profile_email)
+        profileEmail = view.findViewById(R.id.text_profile_username)
     }
 
     private fun updateUIWithUserData(user: User) {
@@ -120,35 +112,15 @@ class ProfileFragment : Fragment() {
         profileImage.setImageResource(R.drawable.img_profile_placeholder)
     }
 
-    private fun initButtonFavorite() {
-        buttonFavorite.post {
-            val buttonWidth = buttonFavorite.width
-
-            val padding = (buttonWidth * 0.1625).toInt()
-
-            buttonFavorite.setPadding(padding, padding, padding, padding)
-
-            buttonFavorite.visibility = View.VISIBLE
-
-            buttonFavorite.setOnClickListener {
-
-            }
+    private fun setupButtonFavorite() {
+        buttonFavorite.setOnClickListener {
+            //
         }
     }
 
-    private fun initButtonNotification() {
-        buttonNotification.post {
-            val buttonWidth = buttonNotification.width
-
-            val padding = (buttonWidth * 0.1625).toInt()
-
-            buttonNotification.setPadding(padding, padding, padding, padding)
-
-            buttonNotification.visibility = View.VISIBLE
-
-            buttonNotification.setOnClickListener {
-
-            }
+    private fun setupButtonNotification() {
+        buttonNotification.setOnClickListener {
+            //
         }
     }
 
