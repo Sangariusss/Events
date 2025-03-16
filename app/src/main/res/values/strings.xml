@@ -112,4 +112,8 @@
     <string name="add_social_media_icon">Add Social Media Icon</string>
     <string name="my_events_icon">My Events Icon</string>
     <string name="delete_account_icon">Delete Account Icon</string>
+    <string name="cancel">Cancel</string>
+    <string name="submit">Submit</string>
+    <string name="delete_account_dialog_message">Are you sure you want to delete your account? This will permanently remove all your data</string>
+    <string name="warning_icon">Warning Icon</string>
 </resources>

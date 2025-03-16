@@ -1,11 +1,13 @@
 package com.komiker.events.ui.fragments
 
+import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
+import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -161,9 +163,27 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun initButtonDelete() {
         binding.constraintDeleteAccountButtonLayout.setOnClickListener {
+            showDeleteAccountDialog()
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun showDeleteAccountDialog() {
+        val tempRoot = FrameLayout(requireContext())
+
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_delete_account, tempRoot, false)
+
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(dialogView)
+        dialog.setCancelable(true)
+
+        dialogView.findViewById<Button>(R.id.button_cancel).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.button_submit).setOnClickListener {
             GlobalScope.launch(Dispatchers.Main) {
                 val userId = supabaseClient.auth.currentSessionOrNull()?.user?.id
                 userId?.let {
@@ -190,6 +210,22 @@ class ProfileFragment : Fragment() {
                         .build()
                 )
             }
+            dialog.dismiss()
+        }
+
+        dialog.show()
+
+        val window = dialog.window
+        window?.let {
+            val displayMetrics = resources.displayMetrics
+            val dialogWidth = (displayMetrics.widthPixels * 0.867).toInt()
+            val dialogHeight = (displayMetrics.heightPixels * 0.331).toInt()
+
+            it.setLayout(dialogWidth, dialogHeight)
+
+            it.setBackgroundDrawableResource(android.R.color.transparent)
+
+            it.setDimAmount(0.2f)
         }
     }
 }

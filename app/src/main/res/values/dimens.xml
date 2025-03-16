@@ -1,14 +1,4 @@
 <resources>
-	<dimen name="padding_standard">36dp</dimen>
-
-	<dimen name="margin_top_eeventsLogo">203dp</dimen>
-	<dimen name="margin_top_button_continue">617dp</dimen>
-	<dimen name="margin_top_relative_layout_connect_with">688dp</dimen>
-	<dimen name="margin_top_button_google">546dp</dimen>
-	<dimen name="margin_top_button_facebook">638dp</dimen>
-	<dimen name="margin_end_image_google">64dp</dimen>
-	<dimen name="margin_end_image_facebook">80dp</dimen>
-
 	<dimen name="button_corner_radius">100dp</dimen>
 	<dimen name="tab_corner_radius">100dp</dimen>
 	<dimen name="email_edit_text_corner_radius">10dp</dimen>
@@ -17,6 +7,7 @@
 	<dimen name="edit_profile_edit_text_corner_radius">10dp</dimen>
 	<dimen name="rounded_line_corner_radius">100dp</dimen>
 	<dimen name="digit_box_corner_radius">10dp</dimen>
+	<dimen name="button_dialog_delete_account_corner_radius">10dp</dimen>
 
 	<dimen name="text_size_button">18sp</dimen>
 
