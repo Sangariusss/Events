@@ -45,8 +45,8 @@
     <string name="all_events">All events</string>
     <string name="your_events">Your events</string>
     <string name="profile_image">ProfileImage</string>
-    <string name="example_name">Example</string>
-    <string name="example_username">"@Example"</string>
+    <string name="example_name">example</string>
+    <string name="example_username">"@example"</string>
     <string name="edit_profile">Edit profile</string>
     <string name="general">General</string>
     <string name="change_email">Change email</string>
@@ -116,4 +116,10 @@
     <string name="submit">Submit</string>
     <string name="delete_account_dialog_message">Are you sure you want to delete your account? This will permanently remove all your data</string>
     <string name="warning_icon">Warning Icon</string>
+    <string name="user_name">User name</string>
+    <string name="user_id">User ID</string>
+    <string name="upload_profile_image_button">Upload Profile Image Button</string>
+    <string name="image_overflow_menu">ImageOverflowMenu</string>
+    <string name="button_overflow_menu">ButtonOverflowMenu</string>
+    <string name="formatted_username">"@%1$s</string>
 </resources>

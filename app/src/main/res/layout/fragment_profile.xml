@@ -107,7 +107,7 @@
         app:layout_constraintWidth_percent="0.404" />
 
     <TextView
-        android:id="@+id/text_profile_username"
+        android:id="@+id/text_profile_email"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:autoSizeMaxTextSize="1000dp"
@@ -115,7 +115,7 @@
         android:autoSizeTextType="uniform"
         android:fontFamily="@font/fixel_regular"
         android:gravity="start|center_vertical"
-        android:text="@string/example_username"
+        android:text="@string/example_gmail_com"
         android:textColor="@color/neutral_0"
         app:layout_constraintBottom_toTopOf="@+id/guideline7"
         app:layout_constraintEnd_toEndOf="parent"

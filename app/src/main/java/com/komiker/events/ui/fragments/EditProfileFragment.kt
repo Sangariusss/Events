@@ -1,19 +1,10 @@
 package com.komiker.events.ui.fragments
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -42,9 +33,6 @@ class EditProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by activityViewModels {
         ProfileViewModelFactory(supabaseUserDao)
     }
-    private lateinit var profileImage: ImageView
-    private lateinit var nicknameTitle: TextView
-    private lateinit var usernameEditText: EditText
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,7 +45,14 @@ class EditProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initializeUIComponents(view)
+        setupSystemBars()
+        initButtonBack()
+        initButtonOverflowMenu()
+        initButtonUploadMedia()
+        initButtonUserName()
+        initButtonUserId()
+        setupOnBackPressedCallback()
+        observeUserData()
 
         binding.root.viewTreeObserver.addOnGlobalLayoutListener(object :
             ViewTreeObserver.OnGlobalLayoutListener {
@@ -65,21 +60,6 @@ class EditProfileFragment : Fragment() {
                 binding.root.viewTreeObserver.removeOnGlobalLayoutListener(this)
             }
         })
-
-        profileViewModel.userLiveData.observe(viewLifecycleOwner) { user ->
-            if (user != null) {
-                updateUIWithUserData(user)
-            } else {
-                handleEmptyUserData()
-            }
-        }
-
-        setupSystemBars()
-        initButtonBack()
-        initButtonCheckmark()
-        initButtonImage()
-        setupOnBackPressedCallback()
-        setupClearButtonWithAction(R.id.edittext_username)
     }
 
     override fun onDestroyView() {
@@ -99,24 +79,28 @@ class EditProfileFragment : Fragment() {
         }
     }
 
-    private fun initButtonCheckmark() {
-        binding.buttonCheckmark.setOnClickListener {
-            val username = usernameEditText.text.toString()
-
-            if (username.isNotEmpty()) {
-                profileViewModel.updateUsername(username)
-
-                navigateToMainMenuWithProfile()
-            } else {
-                Toast.makeText(context, "Please enter a username", Toast.LENGTH_SHORT).show()
-            }
+    private fun initButtonOverflowMenu() {
+        binding.buttonOverflowMenu.setOnClickListener {
+            //
         }
     }
 
-    private fun initButtonImage() {
-        binding.imageProfile.setOnClickListener {
+    private fun initButtonUploadMedia() {
+        binding.buttonUploadMedia.setOnClickListener {
             val bottomSheet = BottomSheetAvatarFragment()
             bottomSheet.show(parentFragmentManager, bottomSheet.tag)
+        }
+    }
+
+    private fun initButtonUserName() {
+        binding.buttonUserName.setOnClickListener {
+            //
+        }
+    }
+
+    private fun initButtonUserId() {
+        binding.buttonUserId.setOnClickListener {
+            //
         }
     }
 
@@ -141,15 +125,21 @@ class EditProfileFragment : Fragment() {
         )
     }
 
-    private fun initializeUIComponents(view: View) {
-        profileImage = view.findViewById(R.id.image_profile)
-        nicknameTitle = view.findViewById(R.id.text_nickname_title)
-        usernameEditText = view.findViewById(R.id.edittext_username)
+    private fun observeUserData() {
+        profileViewModel.userLiveData.observe(viewLifecycleOwner) { user ->
+            if (user != null) {
+                updateUIWithUserData(user)
+            } else {
+                handleEmptyUserData()
+            }
+        }
     }
 
     private fun updateUIWithUserData(user: User) {
-        nicknameTitle.text = user.username
-        usernameEditText.setText(user.username)
+        binding.textProfileName.text = user.username
+        binding.textProfileUsername.text = user.username
+        binding.textUserNameValue.text = user.username
+        binding.textUserIdValue.text = getString(R.string.formatted_username, user.username.lowercase())
 
         Glide.with(this)
             .load(user.avatar)
@@ -159,34 +149,14 @@ class EditProfileFragment : Fragment() {
             .skipMemoryCache(false)
             .placeholder(R.drawable.img_profile_placeholder)
             .transform(CircleCropTransformation())
-            .into(profileImage)
+            .into(binding.imageProfile)
     }
 
     private fun handleEmptyUserData() {
-        nicknameTitle.text = getString(R.string.user_not_found)
-        usernameEditText.setText("")
-        profileImage.setImageResource(R.drawable.img_profile_placeholder)
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupClearButtonWithAction(editTextId: Int) {
-        val editText = view?.findViewById<EditText>(editTextId)
-        val clearButton: Drawable? = editText?.compoundDrawablesRelative?.get(2)
-
-        editText?.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_UP) {
-                if (event.rawX >= (editText.right - clearButton!!.bounds.width())) {
-                    editText.setText("")
-
-                    editText.requestFocus()
-
-                    val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
-
-                    return@setOnTouchListener true
-                }
-            }
-            false
-        }
+        binding.textProfileName.text = getString(R.string.user_not_found)
+        binding.textProfileUsername.text = ""
+        binding.textUserNameValue.text = ""
+        binding.textUserIdValue.text = ""
+        binding.imageProfile.setImageResource(R.drawable.img_profile_placeholder)
     }
 }

@@ -8,9 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavOptions
@@ -45,11 +42,6 @@ class ProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by activityViewModels {
         ProfileViewModelFactory(supabaseUserDao)
     }
-    private lateinit var buttonFavorite: ImageButton
-    private lateinit var buttonNotification: ImageButton
-    private lateinit var profileImage: ImageView
-    private lateinit var profileName: TextView
-    private lateinit var profileEmail: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -63,8 +55,6 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initializeUIComponents(view)
-
         profileViewModel.userLiveData.observe(viewLifecycleOwner) { user ->
             if (user != null) {
                 updateUIWithUserData(user)
@@ -73,8 +63,8 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        setupButtonFavorite()
-        setupButtonNotification()
+        initButtonFavorite()
+        initButtonNotification()
         initButtonEditProfile()
         initButtonLogOut()
         initButtonDelete()
@@ -85,17 +75,9 @@ class ProfileFragment : Fragment() {
         _binding = null
     }
 
-    private fun initializeUIComponents(view: View) {
-        buttonFavorite = view.findViewById(R.id.button_favorite)
-        buttonNotification = view.findViewById(R.id.button_notification)
-        profileImage = view.findViewById(R.id.image_profile)
-        profileName = view.findViewById(R.id.text_profile_name)
-        profileEmail = view.findViewById(R.id.text_profile_username)
-    }
-
     private fun updateUIWithUserData(user: User) {
-        profileName.text = user.username
-        profileEmail.text = user.email
+        binding.textProfileName.text = user.username
+        binding.textProfileEmail.text = user.email
 
         Glide.with(this)
             .load(user.avatar)
@@ -105,23 +87,23 @@ class ProfileFragment : Fragment() {
             .skipMemoryCache(false)
             .placeholder(R.drawable.img_profile_placeholder)
             .transform(CircleCropTransformation())
-            .into(profileImage)
+            .into(binding.imageProfile)
     }
 
     private fun handleEmptyUserData() {
-        profileName.text = getString(R.string.user_not_found)
-        profileEmail.text = ""
-        profileImage.setImageResource(R.drawable.img_profile_placeholder)
+        binding.textProfileName.text = getString(R.string.user_not_found)
+        binding.textProfileEmail.text = ""
+        binding.imageProfile.setImageResource(R.drawable.img_profile_placeholder)
     }
 
-    private fun setupButtonFavorite() {
-        buttonFavorite.setOnClickListener {
+    private fun initButtonFavorite() {
+        binding.buttonFavorite.setOnClickListener {
             //
         }
     }
 
-    private fun setupButtonNotification() {
-        buttonNotification.setOnClickListener {
+    private fun initButtonNotification() {
+        binding.buttonNotification.setOnClickListener {
             //
         }
     }

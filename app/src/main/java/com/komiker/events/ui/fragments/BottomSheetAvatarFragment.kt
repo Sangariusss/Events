@@ -69,6 +69,7 @@ class BottomSheetAvatarFragment : BottomSheetDialogFragment() {
         super.onStart()
         dialog?.window?.let { window ->
             window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.neutral_98)
+            window.setDimAmount(0.2f)
         }
 
         dialog?.let {
