@@ -85,7 +85,8 @@ class GoogleAuthManager {
                     val userId = supabaseClient.auth.currentSessionOrNull()?.user?.id
 
                     val user = User(
-                        id_user = userId.toString(),
+                        user_id = userId.toString(),
+                        generateUsername(),
                         generateUsername(),
                         email,
                         pictureUrl

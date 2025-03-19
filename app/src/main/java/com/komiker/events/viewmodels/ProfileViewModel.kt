@@ -27,6 +27,17 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
         }
     }
 
+    fun updateName(newName: String) {
+        viewModelScope.launch {
+            val user = userLiveData.value
+            if (user != null) {
+                user.name = newName
+                supabaseUserDao.updateUser(user)
+                userLiveData.value = user
+            }
+        }
+    }
+
     fun updateUsername(newUsername: String) {
         viewModelScope.launch {
             val user = userLiveData.value
@@ -61,6 +72,6 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
     }
 
     fun getUserId(): String {
-        return userLiveData.value?.id_user ?: ""
+        return userLiveData.value?.user_id ?: ""
     }
 }

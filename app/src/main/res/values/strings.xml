@@ -116,10 +116,19 @@
     <string name="submit">Submit</string>
     <string name="delete_account_dialog_message">Are you sure you want to delete your account? This will permanently remove all your data</string>
     <string name="warning_icon">Warning Icon</string>
-    <string name="user_name">User name</string>
-    <string name="user_id">User ID</string>
+    <string name="name">Name</string>
+    <string name="username">Username</string>
     <string name="upload_profile_image_button">Upload Profile Image Button</string>
     <string name="image_overflow_menu">ImageOverflowMenu</string>
     <string name="button_overflow_menu">ButtonOverflowMenu</string>
     <string name="formatted_username">"@%1$s</string>
+    <string name="edit_name_fragment">EditNameFragment</string>
+    <string name="edit_username_fragment">EditUsernameFragment</string>
+    <string name="image_checkmark">ImageCheckmark</string>
+    <string name="button_checkmark">ButtonCheckmark</string>
+    <string name="name_requirements">Latin letters, numbers, and superscripts (_) are allowed. The minimum length is 5 characters.</string>
+    <string name="set_name">Set name</string>
+    <string name="set_username">Set username</string>
+    <string name="available">available</string>
+    <string name="not_available">not available</string>
 </resources>

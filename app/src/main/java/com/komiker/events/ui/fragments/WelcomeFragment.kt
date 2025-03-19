@@ -14,9 +14,7 @@
     import android.widget.TextView
     import androidx.core.content.ContextCompat
     import androidx.fragment.app.Fragment
-    import androidx.lifecycle.Lifecycle
     import androidx.lifecycle.lifecycleScope
-    import androidx.lifecycle.repeatOnLifecycle
     import androidx.navigation.NavOptions
     import androidx.navigation.fragment.findNavController
     import com.komiker.events.R
@@ -24,7 +22,6 @@
     import com.komiker.events.services.auth.FacebookAuthManager
     import com.komiker.events.services.auth.GoogleAuthManager
     import com.komiker.events.services.auth.TwitterAuthManager
-    import kotlinx.coroutines.launch
 
     class WelcomeFragment : Fragment() {
 

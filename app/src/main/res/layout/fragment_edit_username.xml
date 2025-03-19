@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/neutral_100"
+    tools:context=".ui.fragments.EditUsernameFragment">
+
+    <ImageButton
+        android:id="@+id/button_back"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_toolbar_button"
+        android:contentDescription="@string/buttonback"
+        app:layout_constraintBottom_toTopOf="@+id/guideline1"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.013"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.133" />
+
+    <ImageView
+        android:id="@+id/button_back_image"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="start"
+        android:contentDescription="@string/button_back_image"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_back_arrow"
+        app:layout_constraintBottom_toBottomOf="@id/button_back"
+        app:layout_constraintDimensionRatio="0.5:1"
+        app:layout_constraintEnd_toEndOf="@id/button_back"
+        app:layout_constraintStart_toStartOf="@id/button_back"
+        app:layout_constraintTop_toTopOf="@id/button_back" />
+
+    <TextView
+        android:id="@+id/text_edit_username_title"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:autoSizeMaxTextSize="1000dp"
+        android:autoSizeMinTextSize="1dp"
+        android:autoSizeTextType="uniform"
+        android:fontFamily="@font/fixel_semibold"
+        android:gravity="center"
+        android:maxLines="1"
+        android:text="@string/username"
+        android:textColor="@color/neutral_0"
+        app:layout_constraintBottom_toTopOf="@+id/guideline3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/guideline2"
+        app:layout_constraintWidth_percent="0.222" />
+
+    <ImageButton
+        android:id="@+id/button_checkmark"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_toolbar_button"
+        android:contentDescription="@string/button_checkmark"
+        app:layout_constraintBottom_toBottomOf="@+id/guideline1"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.987"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.133"/>
+
+    <ImageView
+        android:id="@+id/image_checkmark"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="@string/image_checkmark"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_checkmark"
+        app:layout_constraintBottom_toBottomOf="@id/button_checkmark"
+        app:layout_constraintDimensionRatio="0.5:1"
+        app:layout_constraintEnd_toEndOf="@id/button_checkmark"
+        app:layout_constraintStart_toStartOf="@id/button_checkmark"
+        app:layout_constraintTop_toTopOf="@id/button_checkmark" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/username_input_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/neutral_98"
+        app:layout_constraintBottom_toTopOf="@id/guideline4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/guideline1" >
+
+        <TextView
+            android:id="@+id/text_set_username_label"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:autoSizeMaxTextSize="1000dp"
+            android:autoSizeMinTextSize="1dp"
+            android:autoSizeTextType="uniform"
+            android:fontFamily="@font/fixel_semibold"
+            android:gravity="start|center_vertical"
+            android:text="@string/set_username"
+            android:textColor="@color/blue_60"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.243"
+            app:layout_constraintHorizontal_bias="0.054"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.217"
+            app:layout_constraintWidth_percent="0.261" />
+
+        <EditText
+            android:id="@+id/edit_username_input"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:paddingTop="25dp"
+            android:gravity="start|center_vertical"
+            android:textColor="@color/neutral_0"
+            android:textSize="18sp"
+            android:background="@null"
+            android:hint="@string/example_username"
+            android:textColorHint="@color/neutral_60"
+            android:textCursorDrawable="@drawable/cursor_black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintHeight_percent="0.671"
+            app:layout_constraintWidth_percent="0.922"
+            android:importantForAutofill="no"
+            android:inputType="text" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/text_username_requirements"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:autoSizeMaxTextSize="1000dp"
+        android:autoSizeMinTextSize="1dp"
+        android:autoSizeTextType="uniform"
+        android:fontFamily="@font/fixel_regular"
+        android:gravity="start|center_vertical"
+        android:lineSpacingMultiplier="1.4"
+        android:maxLines="2"
+        android:text="@string/name_requirements"
+        android:textColor="@color/neutral_60"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.049"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.188"
+        app:layout_constraintWidth_percent="0.922" />
+
+    <TextView
+        android:id="@+id/text_username_availability"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:autoSizeMaxTextSize="1000dp"
+        android:autoSizeMinTextSize="1dp"
+        android:autoSizeTextType="uniform"
+        android:text=""
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.027"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.178"
+        app:layout_constraintWidth_percent="0.922" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.066" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.018" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.048" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.151" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

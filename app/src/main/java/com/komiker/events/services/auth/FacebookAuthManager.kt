@@ -28,12 +28,12 @@ class FacebookAuthManager {
     ) {
         button.setOnClickListener {
             lifecycleScope.launch {
-                startFacebookSignIn(context, navController)
+                startFacebookSignIn(context)
             }
         }
     }
 
-    private suspend fun startFacebookSignIn(context: Context, navController: NavController) {
+    private suspend fun startFacebookSignIn(context: Context) {
         try {
             val authUrl = supabaseClient.auth.signInWith(Facebook) {}
 
@@ -55,7 +55,8 @@ class FacebookAuthManager {
                     ?: R.drawable.img_profile_placeholder.toString()
 
                 val user = User(
-                    id_user = userId.toString(),
+                    user_id = userId.toString(),
+                    name = generateUsername(),
                     username = generateUsername(),
                     email = email,
                     avatar = pictureUrl

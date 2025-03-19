@@ -49,8 +49,8 @@ class EditProfileFragment : Fragment() {
         initButtonBack()
         initButtonOverflowMenu()
         initButtonUploadMedia()
-        initButtonUserName()
-        initButtonUserId()
+        initButtonName()
+        initButtonUsername()
         setupOnBackPressedCallback()
         observeUserData()
 
@@ -92,15 +92,15 @@ class EditProfileFragment : Fragment() {
         }
     }
 
-    private fun initButtonUserName() {
-        binding.buttonUserName.setOnClickListener {
-            //
+    private fun initButtonName() {
+        binding.buttonName.setOnClickListener {
+            findNavController().navigate(R.id.action_EditProfileFragment_to_EditNameFragment)
         }
     }
 
-    private fun initButtonUserId() {
-        binding.buttonUserId.setOnClickListener {
-            //
+    private fun initButtonUsername() {
+        binding.buttonUsername.setOnClickListener {
+            findNavController().navigate(R.id.action_EditProfileFragment_to_EditUsernameFragment)
         }
     }
 
@@ -136,10 +136,10 @@ class EditProfileFragment : Fragment() {
     }
 
     private fun updateUIWithUserData(user: User) {
-        binding.textProfileName.text = user.username
-        binding.textProfileUsername.text = user.username
-        binding.textUserNameValue.text = user.username
-        binding.textUserIdValue.text = getString(R.string.formatted_username, user.username.lowercase())
+        binding.textProfileName.text = user.name
+        binding.textProfileUsername.text = getString(R.string.formatted_username, user.username.lowercase())
+        binding.textNameValue.text = user.name
+        binding.textUsernameValue.text = getString(R.string.formatted_username, user.username.lowercase())
 
         Glide.with(this)
             .load(user.avatar)
@@ -155,8 +155,8 @@ class EditProfileFragment : Fragment() {
     private fun handleEmptyUserData() {
         binding.textProfileName.text = getString(R.string.user_not_found)
         binding.textProfileUsername.text = ""
-        binding.textUserNameValue.text = ""
-        binding.textUserIdValue.text = ""
+        binding.textNameValue.text = ""
+        binding.textUsernameValue.text = ""
         binding.imageProfile.setImageResource(R.drawable.img_profile_placeholder)
     }
 }

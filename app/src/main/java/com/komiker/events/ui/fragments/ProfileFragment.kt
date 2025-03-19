@@ -76,7 +76,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun updateUIWithUserData(user: User) {
-        binding.textProfileName.text = user.username
+        binding.textProfileName.text = user.name
         binding.textProfileEmail.text = user.email
 
         Glide.with(this)
@@ -171,7 +171,7 @@ class ProfileFragment : Fragment() {
                 userId?.let {
                     supabaseClient.from("users").delete {
                         filter {
-                            eq("id_user", userId)
+                            eq("user_id", userId)
                         }
                     }
                 } ?: run {

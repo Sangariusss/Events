@@ -56,7 +56,8 @@ class TwitterAuthManager {
                     ?: R.drawable.img_profile_placeholder.toString()
 
                 val user = User(
-                    id_user = userId.toString(),
+                    user_id = userId.toString(),
+                    name = username,
                     username = username,
                     email = email,
                     avatar = avatar

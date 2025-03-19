@@ -35,7 +35,8 @@ class SignInWithEmail(private val supabase: SupabaseClient, private val mail: St
             val session = supabaseClient.auth.currentSessionOrNull()
             val userId = session?.user?.id
             val user = User(
-                id_user = userId.toString(),
+                user_id = userId.toString(),
+                generateUsername(),
                 generateUsername(),
                 mail,
                 R.drawable.img_profile_placeholder.toString()

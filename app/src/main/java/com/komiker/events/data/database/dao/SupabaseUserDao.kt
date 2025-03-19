@@ -18,7 +18,7 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
                 supabase.from("users").insert(user)
             } catch (e: UnknownRestException) {
                 if (e.message?.contains("duplicate key value violates unique constraint") == true) {
-                    println("User with UUID ${user.id_user} already exists.")
+                    println("User with UUID ${user.user_id} already exists.")
                 } else {
                     throw e
                 }
@@ -30,9 +30,9 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
 
     override suspend fun getUserById(id: String): PostgrestResult {
         return withContext(Dispatchers.IO) {
-            supabase.from("users").select(columns = Columns.list("id_user", "username", "email", "avatar")) {
+            supabase.from("users").select(columns = Columns.list("user_id", "name", "username", "email", "avatar")) {
                 filter {
-                    eq("id_user", id)
+                    eq("user_id", id)
                 }
             }
         }
@@ -43,7 +43,7 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
             try {
                 supabase.from("users").update(user) {
                     filter {
-                        eq("id_user", user.id_user)
+                        eq("user_id", user.user_id)
                     }
                 }
             } catch (e: Exception) {
