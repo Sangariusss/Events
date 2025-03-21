@@ -9,7 +9,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -117,11 +116,7 @@ class EditProfileFragment : Fragment() {
             R.id.action_EditProfileFragment_to_MainMenuFragment,
             Bundle().apply {
                 putString("navigateTo", "profile")
-            },
-            NavOptions.Builder()
-                .setEnterAnim(R.anim.fade_in)
-                .setExitAnim(R.anim.fade_out)
-                .build()
+            }
         )
     }
 

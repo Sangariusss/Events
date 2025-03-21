@@ -14,6 +14,7 @@
         android:background="@drawable/bg_toolbar_button"
         android:contentDescription="@string/buttonback"
         app:layout_constraintBottom_toTopOf="@+id/guideline1"
+        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.013"
         app:layout_constraintStart_toStartOf="parent"
@@ -41,6 +42,7 @@
         android:background="@drawable/bg_toolbar_button"
         android:contentDescription="@string/button_overflow_menu"
         app:layout_constraintBottom_toBottomOf="@+id/guideline1"
+        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.987"
         app:layout_constraintStart_toStartOf="parent"
@@ -265,7 +267,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.055" />
+        app:layout_constraintGuide_percent="0.066" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline2"

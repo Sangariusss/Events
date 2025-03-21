@@ -65,7 +65,9 @@ class ProfileFragment : Fragment() {
 
         initButtonFavorite()
         initButtonNotification()
+        initButtonAddSocialMedia()
         initButtonEditProfile()
+        initButtonChangeEmail()
         initButtonLogOut()
         initButtonDelete()
     }
@@ -108,19 +110,21 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    private fun initButtonAddSocialMedia() {
+        binding.constraintAddSocialMediaButtonLayout.setOnClickListener {
+            findNavController().navigate(R.id.action_ProfileFragment_to_AddSocialMediaFragment)
+        }
+    }
+
     private fun initButtonEditProfile() {
         binding.constraintEditProfileButtonLayout.setOnClickListener {
-            val fadeOutAnimation = R.anim.fade_out
-            val fadeInAnimation = R.anim.fade_in
+            findNavController().navigate(R.id.action_ProfileFragment_to_EditProfileFragment)
+        }
+    }
 
-            findNavController().navigate(
-                R.id.action_ProfileFragment_to_EditProfileFragment,
-                null,
-                NavOptions.Builder()
-                    .setEnterAnim(fadeInAnimation)
-                    .setExitAnim(fadeOutAnimation)
-                    .build()
-            )
+    private fun initButtonChangeEmail() {
+        binding.constraintChangeEmailButtonLayout.setOnClickListener {
+            findNavController().navigate(R.id.action_ProfileFragment_to_ChangeEmailFragment)
         }
     }
 

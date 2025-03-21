@@ -7,53 +7,78 @@
     android:background="@color/neutral_100"
     tools:context=".ui.fragments.HomeFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraint_toolbar_layout"
+    <TextView
+        android:id="@+id/text_toolbar_title"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@+id/guideline1"
+        android:autoSizeMaxTextSize="1000dp"
+        android:autoSizeMinTextSize="1dp"
+        android:autoSizeTextType="uniform"
+        android:fontFamily="@font/fixel_bold"
+        android:gravity="center"
+        android:text="@string/home"
+        android:textColor="@color/neutral_0"
+        app:layout_constraintBottom_toBottomOf="@id/guideline1"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.052"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.144"
+        app:layout_constraintHeight_percent="0.03" />
 
-        <TextView
-            android:id="@+id/text_toolbar_title"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:autoSizeMaxTextSize="1000dp"
-            android:autoSizeMinTextSize="1dp"
-            android:autoSizeTextType="uniform"
-            android:fontFamily="@font/fixel_bold"
-            android:gravity="center"
-            android:text="@string/home"
-            android:textColor="@color/neutral_0"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.052"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent="0.147"
-            app:layout_constraintHeight_percent="0.625" />
+    <ImageButton
+        android:id="@+id/button_favorite"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_toolbar_button"
+        android:contentDescription="@string/heart_icon"
+        app:layout_constraintBottom_toBottomOf="@id/guideline1"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.833"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.133" />
 
-        <ImageButton
-            android:id="@+id/button_notification"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="@drawable/bg_toolbar_button"
-            android:contentDescription="@string/notification_icon"
-            android:padding="6dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_notification"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.965"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent="0.112"
-            tools:ignore="RtlSymmetry" />
+    <ImageView
+        android:id="@+id/image_favorite"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="@string/image_favorite"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_heart"
+        app:layout_constraintBottom_toBottomOf="@id/button_favorite"
+        app:layout_constraintDimensionRatio="0.5:1"
+        app:layout_constraintEnd_toEndOf="@id/button_favorite"
+        app:layout_constraintStart_toStartOf="@id/button_favorite"
+        app:layout_constraintTop_toTopOf="@id/button_favorite" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <ImageButton
+        android:id="@+id/button_notification"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_toolbar_button"
+        android:contentDescription="@string/notification_icon"
+        app:layout_constraintBottom_toBottomOf="@id/guideline1"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.987"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.133" />
+
+    <ImageView
+        android:id="@+id/image_notification"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="@string/image_favorite"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_notification"
+        app:layout_constraintBottom_toBottomOf="@id/button_notification"
+        app:layout_constraintDimensionRatio="0.5:1"
+        app:layout_constraintEnd_toEndOf="@id/button_notification"
+        app:layout_constraintStart_toStartOf="@id/button_notification"
+        app:layout_constraintTop_toTopOf="@id/button_notification" />
 
     <EditText
         android:id="@+id/edit_text_find_events"
@@ -89,20 +114,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.059" />
+        app:layout_constraintGuide_percent="0.070" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.082" />
+        app:layout_constraintGuide_percent="0.088" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.153" />
+        app:layout_constraintGuide_percent="0.159" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

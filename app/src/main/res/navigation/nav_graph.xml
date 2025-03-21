@@ -88,8 +88,20 @@
             android:id="@+id/action_MainMenuFragment_to_CreateEventFragment"
             app:destination="@id/CreateEventFragment" />
         <action
+            android:id="@+id/action_ProfileFragment_to_AddSocialMediaFragment"
+            app:destination="@id/AddSocialMediaFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+        <action
             android:id="@+id/action_ProfileFragment_to_EditProfileFragment"
-            app:destination="@id/EditProfileFragment" />
+            app:destination="@id/EditProfileFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_ProfileFragment_to_ChangeEmailFragment"
+            app:destination="@id/ChangeEmailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/FilterFragment"
@@ -139,8 +151,36 @@
         android:label="@string/profile_fragment"
         tools:layout="@layout/fragment_profile" >
         <action
+            android:id="@+id/action_ProfileFragment_to_AddSocialMediaFragment"
+            app:destination="@id/AddSocialMediaFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+        <action
             android:id="@+id/action_ProfileFragment_to_EditProfileFragment"
-            app:destination="@id/EditProfileFragment" />
+            app:destination="@id/EditProfileFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_ProfileFragment_to_ChangeEmailFragment"
+            app:destination="@id/ChangeEmailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/AddSocialMediaFragment"
+        android:name="com.komiker.events.ui.fragments.AddSocialMediaFragment"
+        android:label="@string/add_social_media_fragment"
+        tools:layout="@layout/fragment_add_social_media" >
+        <action
+            android:id="@+id/action_AddSocialMediaFragment_to_MainMenuFragment"
+            app:destination="@id/MainMenuFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_AddSocialMediaFragment_to_ProfileFragment"
+            app:destination="@id/ProfileFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/EditProfileFragment"
@@ -149,13 +189,14 @@
         tools:layout="@layout/fragment_edit_profile" >
         <action
             android:id="@+id/action_EditProfileFragment_to_MainMenuFragment"
-            app:destination="@id/MainMenuFragment" />
+            app:destination="@id/MainMenuFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
         <action
             android:id="@+id/action_EditProfileFragment_to_EditNameFragment"
             app:destination="@id/EditNameFragment"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out" />
-
         <action
             android:id="@+id/action_EditProfileFragment_to_EditUsernameFragment"
             app:destination="@id/EditUsernameFragment"
@@ -181,6 +222,22 @@
         <action
             android:id="@+id/action_EditUsernameFragment_to_EditProfileFragment"
             app:destination="@id/EditProfileFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/ChangeEmailFragment"
+        android:name="com.komiker.events.ui.fragments.ChangeEmailFragment"
+        android:label="@string/change_email_fragment"
+        tools:layout="@layout/fragment_change_email" >
+        <action
+            android:id="@+id/action_ChangeEmailFragment_to_MainMenuFragment"
+            app:destination="@id/MainMenuFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_ChangeEmailFragment_to_ProfileFragment"
+            app:destination="@id/ProfileFragment"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out" />
     </fragment>

@@ -131,4 +131,7 @@
     <string name="set_username">Set username</string>
     <string name="available">available</string>
     <string name="not_available">not available</string>
+    <string name="image_favorite">ImageFavorite</string>
+    <string name="add_social_media_fragment">AddSocialMediaFragment</string>
+    <string name="change_email_fragment">ChangeEmailFragment</string>
 </resources>
