@@ -34,7 +34,6 @@ class CheckYourNewEmailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupSystemBars()
-        setupInitialViewVisibility()
     }
 
     override fun onDestroyView() {
@@ -48,10 +47,6 @@ class CheckYourNewEmailFragment : Fragment() {
             viewLifecycleOwner,
             onBackPressedCallback
         )
-    }
-
-    private fun setupInitialViewVisibility() {
-        binding.textTimer.visibility = View.GONE
     }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
