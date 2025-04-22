@@ -60,6 +60,21 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
         }
     }
 
+    fun updateEmail(newEmail: String) {
+        viewModelScope.launch {
+            val user = userLiveData.value
+            if (user != null && user.user_id.isNotEmpty()) {
+                try {
+                    supabaseUserDao.updateEmail(user.user_id, newEmail)
+                    user.email = newEmail
+                    userLiveData.value = user
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
     private fun parseData(jsonString: String?): List<User>? {
         return try {
             val gson = Gson()

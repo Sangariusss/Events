@@ -5,23 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/neutral_100"
-    tools:context=".ui.fragments.CheckYourEmailFragment">
+    tools:context=".ui.fragments.ChangeEmailSuccessFragment">
 
     <ImageView
-        android:id="@+id/image_check_your_email"
+        android:id="@+id/image_change_email_congratulations"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:contentDescription="@string/email_icon"
-        android:src="@drawable/ic_email"
+        android:src="@drawable/ic_success_welcome"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
-        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline1"
-        app:layout_constraintWidth_percent="0.639" />
+        app:layout_constraintWidth_percent="0.528" />
 
     <TextView
-        android:id="@+id/text_email_title"
+        android:id="@+id/text_congratulations_title"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:autoSizeMaxTextSize="1000dp"
@@ -29,80 +28,46 @@
         android:autoSizeTextType="uniform"
         android:fontFamily="@font/fixel_bold"
         android:gravity="center"
-        android:text="@string/check_email"
+        android:text="@string/congratulations"
         android:textColor="@color/neutral_0"
         app:layout_constraintBottom_toTopOf="@+id/guideline4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline3"
-        app:layout_constraintWidth_percent="0.639" />
+        app:layout_constraintWidth_percent="0.572" />
 
     <TextView
-        android:id="@+id/text_function_description"
+        android:id="@+id/text_congratulations_subtitle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:autoSizeMaxTextSize="1000dp"
         android:autoSizeMinTextSize="1dp"
         android:autoSizeTextType="uniform"
-        android:lineSpacingMultiplier="1.4"
-        android:maxLines="3"
         android:fontFamily="@font/fixel_regular"
         android:gravity="center"
-        android:text="@string/email_check_spam_code"
+        android:maxLines="2"
+        android:lineSpacingMultiplier="1.4"
+        android:text="@string/you_have_successfully_changed_your_email_address"
+        android:textAlignment="center"
         android:textColor="@color/neutral_0"
         app:layout_constraintBottom_toTopOf="@+id/guideline6"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline5"
-        app:layout_constraintWidth_percent="0.833" />
-
-    <TextView
-        android:id="@+id/text_click_to_resend"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:fontFamily="@font/fixel_medium"
-        android:gravity="center"
-        android:text="@string/click_to_resend"
-        android:textAlignment="center"
-        android:textColor="@color/red_50"
-        android:autoSizeMaxTextSize="1000dp"
-        android:autoSizeMinTextSize="1dp"
-        android:autoSizeTextType="uniform"
-        app:layout_constraintBottom_toTopOf="@+id/guideline8"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline7"
-        app:layout_constraintWidth_percent="0.328" />
-
-    <TextView
-        android:id="@+id/text_timer"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:gravity="center"
-        android:text=""
-        android:textColor="@color/neutral_10"
-        android:autoSizeMaxTextSize="1000dp"
-        android:autoSizeMinTextSize="1dp"
-        android:autoSizeTextType="uniform"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/guideline12"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline11"
-        app:layout_constraintWidth_percent="0.05" />
+        app:layout_constraintWidth_percent="0.689" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_continue"
+        android:id="@+id/button_get_started"
         style="@style/ButtonBlack"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:fontFamily="@font/fixel_semibold"
-        android:text="@string/continue_text"
+        android:text="@string/get_started"
         android:textSize="@dimen/text_size_button"
-        app:layout_constraintBottom_toTopOf="@+id/guideline10"
+        app:layout_constraintBottom_toTopOf="@+id/guideline8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline9"
+        app:layout_constraintTop_toTopOf="@+id/guideline7"
         app:layout_constraintWidth_percent="0.911" />
 
     <androidx.constraintlayout.widget.Guideline
@@ -110,83 +75,55 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.165" />
+        app:layout_constraintGuide_percent="0.251" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.481" />
+        app:layout_constraintGuide_percent="0.512" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.503" />
+        app:layout_constraintGuide_percent="0.534" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.545" />
+        app:layout_constraintGuide_percent="0.577" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.567" />
+        app:layout_constraintGuide_percent="0.599" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.658"  />
+        app:layout_constraintGuide_percent="0.659" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline7"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.691" />
+        app:layout_constraintGuide_percent="0.890" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline8"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.727"  />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline9"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.890" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline10"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.967" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline11"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.738" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline12"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.768"  />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

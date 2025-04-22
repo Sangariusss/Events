@@ -5,23 +5,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/neutral_100"
-    tools:context=".ui.fragments.RegistrationSuccessFragment">
+    tools:context=".ui.fragments.CheckYourNewEmailFragment">
 
     <ImageView
-        android:id="@+id/image_registration_welcome"
+        android:id="@+id/image_check_your_email"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:contentDescription="@string/email_icon"
-        android:src="@drawable/ic_success_welcome"
+        android:src="@drawable/ic_email"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline1"
-        app:layout_constraintWidth_percent="0.528" />
+        app:layout_constraintWidth_percent="0.639" />
 
     <TextView
-        android:id="@+id/text_welcome_title"
+        android:id="@+id/text_email_title"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:autoSizeMaxTextSize="1000dp"
@@ -29,102 +29,73 @@
         android:autoSizeTextType="uniform"
         android:fontFamily="@font/fixel_bold"
         android:gravity="center"
-        android:text="@string/you_re_welcome"
+        android:text="@string/check_email"
         android:textColor="@color/neutral_0"
         app:layout_constraintBottom_toTopOf="@+id/guideline4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline3"
-        app:layout_constraintWidth_percent="0.578" />
+        app:layout_constraintWidth_percent="0.639" />
 
     <TextView
-        android:id="@+id/text_welcome_subtitle"
+        android:id="@+id/text_function_description"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:autoSizeMaxTextSize="1000dp"
         android:autoSizeMinTextSize="1dp"
         android:autoSizeTextType="uniform"
+        android:lineSpacingMultiplier="1.4"
+        android:maxLines="3"
         android:fontFamily="@font/fixel_regular"
         android:gravity="center"
-        android:maxLines="2"
-        android:lineSpacingMultiplier="1.4"
-        android:text="@string/congratulations_you_are_authorized"
-        android:textAlignment="center"
+        android:text="@string/email_check_spam_link"
         android:textColor="@color/neutral_0"
         app:layout_constraintBottom_toTopOf="@+id/guideline6"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline5"
-        app:layout_constraintWidth_percent="0.694" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_get_started"
-        style="@style/ButtonBlack"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:fontFamily="@font/fixel_semibold"
-        android:text="@string/get_started"
-        android:textSize="@dimen/text_size_button"
-        app:layout_constraintBottom_toTopOf="@+id/guideline8"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline7"
-        app:layout_constraintWidth_percent="0.911" />
+        app:layout_constraintWidth_percent="0.833" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.251" />
+        app:layout_constraintGuide_percent="0.254" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.512" />
+        app:layout_constraintGuide_percent="0.570" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.534" />
+        app:layout_constraintGuide_percent="0.592" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.577" />
+        app:layout_constraintGuide_percent="0.635" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.599" />
+        app:layout_constraintGuide_percent="0.657" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.659" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.890" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline8"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.967" />
+        app:layout_constraintGuide_percent="0.747"  />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

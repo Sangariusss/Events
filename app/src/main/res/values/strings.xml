@@ -24,7 +24,8 @@
     <string name="example_gmail_com">example@gmail.com</string>
     <string name="check_email">Check your email</string>
     <string name="third_fuction_icon">ThirdFuctionIcon</string>
-    <string name="email_check_spam">If you have not yet received an email\n with a confirmation code, please check\n your Promotions folder and spam folder</string>
+    <string name="email_check_spam_code">If you have not yet received an email\n with a confirmation code, please check\n your Promotions folder and spam folder</string>
+    <string name="email_check_spam_link">If you have not yet received an email\n with a confirmation link, please check\n your Promotions folder and spam folder</string>
     <string name="click_to_resend"><u>Click to resend</u></string>
     <string name="oooops">Oooops!</string>
     <string name="something_s_wrong_please_give_it_one_more_try">Something’s wrong. Please, give it\n one more try.</string>
@@ -134,4 +135,10 @@
     <string name="image_favorite">ImageFavorite</string>
     <string name="add_social_media_fragment">AddSocialMediaFragment</string>
     <string name="change_email_fragment">ChangeEmailFragment</string>
+    <string name="this_is_the_email_address_you_currently_use">This is the email address you currently use</string>
+    <string name="enter_your_new_email_address">Enter your new email address</string>
+    <string name="congratulations">Congratulations</string>
+    <string name="you_have_successfully_changed_your_email_address">You have successfully changed\n your email address</string>
+    <string name="change_email_success_fragment">ChangeEmailSuccessFragment</string>
+    <string name="check_your_new_email_fragment">CheckYourNewEmailFragment</string>
 </resources>

@@ -42,7 +42,7 @@
         <item name="android:fontFamily">@font/fixel_regular</item>
         <item name="android:hint">@string/example_gmail_com</item>
         <item name="android:inputType">textEmailAddress</item>
-        <item name="android:textColorHint">@color/neutral_95</item>
+        <item name="android:textColorHint">@color/neutral_60</item>
         <item name="android:textSize">@dimen/text_size_button</item>
         <item name="android:textColor">@color/neutral_0</item>
     </style>

@@ -236,7 +236,29 @@
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out" />
         <action
-            android:id="@+id/action_ChangeEmailFragment_to_ProfileFragment"
+            android:id="@+id/action_ChangeEmailFragment_to_CheckYourNewEmailFragment"
+            app:destination="@id/CheckYourNewEmailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/CheckYourNewEmailFragment"
+        android:name="com.komiker.events.ui.fragments.CheckYourNewEmailFragment"
+        android:label="@string/check_your_new_email_fragment"
+        tools:layout="@layout/fragment_check_your_new_email" >
+    </fragment>
+    <fragment
+        android:id="@+id/ChangeEmailSuccessFragment"
+        android:name="com.komiker.events.ui.fragments.ChangeEmailSuccessFragment"
+        android:label="@string/change_email_success_fragment"
+        tools:layout="@layout/fragment_change_email_success" >
+        <action
+            android:id="@+id/action_ChangeEmailSuccessFragment_to_MainMenuFragment"
+            app:destination="@id/MainMenuFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_ChangeEmailSuccessFragment_to_ProfileFragment"
             app:destination="@id/ProfileFragment"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out" />

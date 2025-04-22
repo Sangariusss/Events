@@ -18,8 +18,10 @@ import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.handleDeeplinks
 import io.github.jan.supabase.gotrue.user.UserSession
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 
 class MainActivity : AppCompatActivity() {
@@ -71,7 +73,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         intent?.let {
-            supabaseClient.handleDeeplinks(it)
+            val uri = it.data
+            if (uri != null && uri.toString().contains("type=email_change")) {
+                supabaseClient.handleDeeplinks(it)
+                navController.navigate(R.id.ChangeEmailSuccessFragment)
+                return
+            } else {
+                supabaseClient.handleDeeplinks(it)
+            }
         }
 
         var attempts = 0

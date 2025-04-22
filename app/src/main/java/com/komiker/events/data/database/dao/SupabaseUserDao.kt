@@ -4,6 +4,7 @@ import com.komiker.events.data.database.dao.implementation.UserDao
 import com.komiker.events.data.database.entities.User
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.exceptions.UnknownRestException
+import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.result.PostgrestResult
@@ -48,6 +49,26 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
                 }
             } catch (e: Exception) {
                 println("Error updating user: ${e.message}")
+            }
+        }
+    }
+
+    suspend fun updateEmail(userId: String, newEmail: String) {
+        withContext(Dispatchers.IO) {
+            try {
+                supabase.auth.updateUser {
+                    email = newEmail
+                }
+                supabase.from("users").update(
+                    mapOf("email" to newEmail)
+                ) {
+                    filter {
+                        eq("user_id", userId)
+                    }
+                }
+            } catch (e: Exception) {
+                println("Error updating email: ${e.message}")
+                throw e
             }
         }
     }
