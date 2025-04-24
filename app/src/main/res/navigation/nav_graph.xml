@@ -143,7 +143,9 @@
         tools:layout="@layout/fragment_create_event" >
         <action
             android:id="@+id/action_CreateEventFragment_to_MainMenuFragment"
-            app:destination="@id/MainMenuFragment" />
+            app:destination="@id/MainMenuFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/ProfileFragment"

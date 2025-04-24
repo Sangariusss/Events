@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="@color/neutral_0" />
-    <corners android:radius="@dimen/tab_corner_radius" />
+    <solid android:color="@color/neutral_10" />
+    <corners android:radius="@dimen/progress_segment_corner_radius" />
 </shape>

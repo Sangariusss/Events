@@ -1,6 +1,6 @@
 <resources>
 	<dimen name="button_corner_radius">100dp</dimen>
-	<dimen name="tab_corner_radius">100dp</dimen>
+	<dimen name="progress_segment_corner_radius">100dp</dimen>
 	<dimen name="email_edit_text_corner_radius">10dp</dimen>
 	<dimen name="find_events_edit_text_corner_radius">100dp</dimen>
 	<dimen name="create_event_edit_text_corner_radius">10dp</dimen>

@@ -78,9 +78,10 @@
     <string name="event_create">Event create</string>
     <string name="create_event_fragment">CreateEventFragment</string>
     <string name="step_1_7">Step 1/7</string>
-    <string name="information">Information</string>
+    <string name="title">Title</string>
     <string name="name_of_the_event">Name of the event</string>
-    <string name="description">Description...</string>
+    <string name="description">Description</string>
+    <string name="description...">Description...</string>
     <string name="edit_profile_icon">Edit Profile Icon</string>
     <string name="change_email_icon">Change Email Icon</string>
     <string name="my_events">My events</string>
@@ -141,4 +142,10 @@
     <string name="you_have_successfully_changed_your_email_address">You have successfully changed\n your email address</string>
     <string name="change_email_success_fragment">ChangeEmailSuccessFragment</string>
     <string name="check_your_new_email_fragment">CheckYourNewEmailFragment</string>
+    <string name="social_media_icon">SocialMediaIcon</string>
+    <string name="instagram_com">https://www.instagram.com/</string>
+    <string name="telegram_com">https://www.telegram.com/</string>
+    <string name="create_event">Create event</string>
+    <string name="_0_255">0/255</string>
+    <string name="char_counter_format">%1$d/%2$d</string>
 </resources>
