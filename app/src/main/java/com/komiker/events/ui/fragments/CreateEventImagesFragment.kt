@@ -1,16 +1,52 @@
 package com.komiker.events.ui.fragments
 
+import android.content.ContentResolver
+import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.komiker.events.databinding.FragmentCreateEventImagesBinding
+import com.komiker.events.ui.adapters.ImageAdapter
+import java.io.File
+import java.text.DecimalFormat
 
 class CreateEventImagesFragment : Fragment() {
 
     private var _binding: FragmentCreateEventImagesBinding? = null
     private val binding get() = _binding!!
+
+    private lateinit var imageAdapter: ImageAdapter
+    private val imagesList = mutableListOf<ImageAdapter.ImageItem>()
+
+    private val pickImagesLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+        val startPosition = imagesList.size
+        uris.forEach { uri ->
+            val contentResolver: ContentResolver = requireContext().contentResolver
+
+            val fileName = getFileName(uri, contentResolver) ?: "image_${System.currentTimeMillis()}"
+
+            val fileSizeBytes = getFileSize(uri, contentResolver)
+
+            val fileSizeFormatted = formatFileSize(fileSizeBytes)
+
+            val fileType = getFileType(uri, contentResolver, fileName).uppercase()
+
+            val fileInfo = "$fileType | $fileSizeFormatted"
+
+            val imageItem = ImageAdapter.ImageItem(File(fileName), fileName, fileInfo)
+            imagesList.add(imageItem)
+        }
+        val itemCount = uris.size
+        if (itemCount > 0) {
+            imageAdapter.notifyItemRangeInserted(startPosition, itemCount)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -20,8 +56,108 @@ class CreateEventImagesFragment : Fragment() {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupRecyclerView()
+        setupUploadButton()
+        setupRemoveAllButton()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun setupRecyclerView() {
+        binding.recyclerViewImages.post {
+            val recyclerViewHeight = binding.recyclerViewImages.height
+            imageAdapter = ImageAdapter(
+                imagesList,
+                { position ->
+                    if (position in 0 until imagesList.size) {
+                        imagesList.removeAt(position)
+                        imageAdapter.notifyItemRemoved(position)
+                        imageAdapter.notifyItemRangeChanged(position, imagesList.size)
+                    } else {
+                        Log.w("CreateEventImages", "Invalid position for removal: $position, size: ${imagesList.size}")
+                    }
+                },
+                recyclerViewHeight,
+                heightPercent = 0.181f,
+                spacePercent = 0.024f
+            )
+            binding.recyclerViewImages.layoutManager = LinearLayoutManager(requireContext())
+            binding.recyclerViewImages.adapter = imageAdapter
+        }
+    }
+
+    private fun setupUploadButton() {
+        binding.buttonUploadContainer.setOnClickListener {
+            pickImagesLauncher.launch("image/*")
+        }
+    }
+
+    private fun setupRemoveAllButton() {
+        binding.buttonRemoveAll.setOnClickListener {
+            val itemCount = imagesList.size
+            imagesList.clear()
+            if (itemCount > 0) {
+                imageAdapter.notifyItemRangeRemoved(0, itemCount)
+            }
+        }
+    }
+
+    private fun formatFileSize(sizeBytes: Long): String {
+        val kb = sizeBytes / 1000.0
+        val df = DecimalFormat("#0.00")
+        return if (kb < 1000) {
+            "${df.format(kb)} kB"
+        } else {
+            val mb = kb / 1000.0
+            "${df.format(mb)} MB"
+        }
+    }
+
+    private fun getFileName(uri: Uri, contentResolver: ContentResolver): String? {
+        contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val fileNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (fileNameIndex != -1) {
+                    return cursor.getString(fileNameIndex)
+                }
+            }
+        }
+
+        val lastPathSegment = uri.lastPathSegment
+        if (lastPathSegment != null && lastPathSegment.contains("/")) {
+            return lastPathSegment.substringAfterLast("/")
+        }
+
+        return lastPathSegment
+    }
+
+    private fun getFileSize(uri: Uri, contentResolver: ContentResolver): Long {
+        contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val fileSizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                if (fileSizeIndex != -1) {
+                    return cursor.getLong(fileSizeIndex)
+                }
+            }
+        }
+        return 0L
+    }
+
+    private fun getFileType(uri: Uri, contentResolver: ContentResolver, fileName: String): String {
+        val mimeType = contentResolver.getType(uri)
+        if (mimeType != null) {
+            when {
+                mimeType.contains("jpeg") || mimeType.contains("jpg") -> return "JPG"
+                mimeType.contains("png") -> return "PNG"
+                mimeType.contains("webp") -> return "WEBP"
+            }
+        }
+
+        return fileName.substringAfterLast(".", "UNKNOWN").uppercase()
     }
 }
