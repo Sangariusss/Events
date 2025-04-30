@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/neutral_100"
-    tools:context=".ui.fragments.LocationFragment">
+    tools:context=".ui.fragments.TagsFragment">
 
     <ImageButton
         android:id="@+id/button_back"
@@ -36,7 +36,7 @@
         app:layout_constraintTop_toTopOf="@id/button_back" />
 
     <TextView
-        android:id="@+id/text_location_title"
+        android:id="@+id/text_tags_title"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:autoSizeMaxTextSize="1000dp"
@@ -44,13 +44,13 @@
         android:autoSizeTextType="uniform"
         android:fontFamily="@font/fixel_bold"
         android:gravity="center"
-        android:text="@string/location"
+        android:text="@string/tags"
         android:textColor="@color/neutral_0"
         app:layout_constraintBottom_toBottomOf="@+id/guideline1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.189"
+        app:layout_constraintWidth_percent="0.1"
         app:layout_constraintHeight_percent="0.03" />
 
     <EditText

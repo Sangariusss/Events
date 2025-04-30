@@ -94,8 +94,8 @@
         <item name="android:textColor">@color/neutral_0</item>
         <item name="android:drawableEnd">@drawable/ic_search</item>
         <item name="android:textCursorDrawable">@drawable/cursor_black</item>
-        <item name="android:paddingStart">15dp</item>
-        <item name="android:paddingEnd">15dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
     </style>
 
     <style name="ButtonFilterInactive" parent="Widget.AppCompat.Button">
@@ -134,12 +134,6 @@
         <item name="android:textSize">16sp</item>
         <item name="android:maxLines">1</item>
         <item name="android:fontFamily">@font/fixel_semibold</item>
-    </style>
-
-    <style name="ButtonCreateEvent" parent="Widget.AppCompat.Button">
-        <item name="android:background">@drawable/bg_btn_rounded_red</item>
-        <item name="android:src">@drawable/ic_plus</item>
-        <item name="android:stateListAnimator">@null</item>
     </style>
 
     <style name="EditTextCreateEventCustom" parent="Widget.AppCompat.EditText">
@@ -203,5 +197,45 @@
         <item name="android:textSize">@dimen/text_size_button</item>
         <item name="android:maxLines">1</item>
         <item name="android:fontFamily">@font/fixel_semibold</item>
+    </style>
+
+    <style name="DatePickerField" parent="Widget.AppCompat.TextView">
+        <item name="android:background">@drawable/bg_et_create_event_empty</item>
+        <item name="android:fontFamily">@font/fixel_regular</item>
+        <item name="android:textColor">@color/neutral_0</item>
+        <item name="android:textColorHint">@color/neutral_60</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="ButtonAmPm" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">@color/text_color_am_pm</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">@font/fixel_semibold</item>
+        <item name="android:padding">0dp</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="EditTextTimeInput">
+        <item name="android:background">@drawable/bg_edit_text_time_input</item>
+        <item name="android:inputType">number</item>
+        <item name="android:maxLength">2</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/neutral_0</item>
+        <item name="android:textSize">50sp</item>
+        <item name="android:fontFamily">@font/fixel_medium</item>
+        <item name="android:textCursorDrawable">@drawable/cursor_black</item>
+    </style>
+
+    <style name="ButtonCreateEvent" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_btn_create_event_red</item>
+        <item name="android:textColor">@color/neutral_100</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
     </style>
 </resources>

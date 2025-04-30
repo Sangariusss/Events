@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.komiker.events.R
 import com.komiker.events.databinding.FragmentLocationBinding
@@ -44,22 +43,24 @@ class LocationFragment : Fragment() {
 
     private fun setupButtonBack() {
         binding.buttonBack.setOnClickListener {
-            val fadeOutAnimation = R.anim.fade_out
-            val fadeInAnimation = R.anim.fade_in
-
-            findNavController().navigate(
-                R.id.action_LocationFragment_to_FilterFragment,
-                null,
-                NavOptions.Builder()
-                    .setEnterAnim(fadeInAnimation)
-                    .setExitAnim(fadeOutAnimation)
-                    .build()
-            )
+            val sourceFragmentId = arguments?.getInt("sourceFragmentId") ?: R.id.FilterFragment
+            if (sourceFragmentId == R.id.CreateEventFragment) {
+                findNavController().popBackStack(R.id.CreateEventFragment, false)
+            } else {
+                val actionId = when (sourceFragmentId) {
+                    R.id.FilterFragment -> R.id.action_LocationFragment_to_FilterFragment
+                    else -> R.id.action_LocationFragment_to_FilterFragment
+                }
+                findNavController().navigate(
+                    actionId,
+                    null
+                )
+            }
         }
     }
 
     private fun setupEditTextBackgroundChange() {
-        val editText = requireView().findViewById<EditText>(R.id.edittext_find_location)
+        val editText = requireView().findViewById<EditText>(R.id.edit_text_find_location)
 
         val emptyDrawable: Drawable? = ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_empty)
         val filledDrawable: Drawable? = ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_filled)

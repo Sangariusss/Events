@@ -31,6 +31,25 @@ class CreateEventFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        restoreCurrentStep(savedInstanceState)
+        setupUi()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("currentStep", currentStep)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun restoreCurrentStep(savedInstanceState: Bundle?) {
+        currentStep = savedInstanceState?.getInt("currentStep") ?: 1
+    }
+
+    private fun setupUi() {
         setupSystemBars()
         setupOnBackPressed()
         setupButtonClose()
@@ -39,15 +58,19 @@ class CreateEventFragment : Fragment() {
         setupProgressBar()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun setupViewPager() {
+        initializeViewPager()
+        configureViewPager()
     }
 
-    private fun setupViewPager() {
+    private fun initializeViewPager() {
         pagerAdapter = CreateEventViewPagerAdapter(this)
         binding.viewPager.adapter = pagerAdapter
+        binding.viewPager.offscreenPageLimit = 3
+        binding.viewPager.setCurrentItem(currentStep - 1, false)
+    }
 
+    private fun configureViewPager() {
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
@@ -70,33 +93,33 @@ class CreateEventFragment : Fragment() {
     private fun setupButtonBack() {
         binding.buttonBack.setOnClickListener {
             if (currentStep > 1) {
-                val previousPage = binding.viewPager.currentItem - 1
-                binding.viewPager.currentItem = previousPage
+                binding.viewPager.setCurrentItem(binding.viewPager.currentItem - 1, true)
             } else {
-                findNavController().navigate(R.id.action_CreateEventFragment_to_MainMenuFragment)
+                navigateToMainMenu()
             }
         }
     }
 
-    private fun setupSystemBars() {
-        requireActivity().window.apply {
-            navigationBarColor = ContextCompat.getColor(requireContext(), R.color.neutral_100)
+    private fun setupButtonClose() {
+        binding.buttonClose.setOnClickListener {
+            navigateToMainMenu()
         }
+    }
+
+    private fun setupSystemBars() {
+        requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.neutral_100)
     }
 
     private fun setupOnBackPressed() {
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                findNavController().navigate(R.id.action_CreateEventFragment_to_MainMenuFragment)
+                navigateToMainMenu()
             }
         }
-
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
     }
 
-    private fun setupButtonClose() {
-        binding.buttonClose.setOnClickListener {
-            findNavController().navigate(R.id.action_CreateEventFragment_to_MainMenuFragment)
-        }
+    private fun navigateToMainMenu() {
+        findNavController().navigate(R.id.action_CreateEventFragment_to_MainMenuFragment)
     }
 }

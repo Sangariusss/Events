@@ -112,20 +112,31 @@
             android:id="@+id/action_FilterFragment_to_MainMenuFragment"
             app:destination="@id/MainMenuFragment" />
         <action
-            android:id="@+id/action_FilterFragment_to_CategoryFragment"
-            app:destination="@id/CategoryFragment" />
+            android:id="@+id/action_FilterFragment_to_TagsFragment"
+            app:destination="@id/TagsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
         <action
             android:id="@+id/action_FilterFragment_to_LocationFragment"
-            app:destination="@id/LocationFragment" />
+            app:destination="@id/LocationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
     </fragment>
     <fragment
-        android:id="@+id/CategoryFragment"
-        android:name="com.komiker.events.ui.fragments.CategoryFragment"
-        android:label="@string/filter_fragment"
-        tools:layout="@layout/fragment_category" >
+        android:id="@+id/TagsFragment"
+        android:name="com.komiker.events.ui.fragments.TagsFragment"
+        android:label="@string/tags_fragment"
+        tools:layout="@layout/fragment_tags" >
         <action
-            android:id="@+id/action_CategoryFragment_to_FilterFragment"
-            app:destination="@id/FilterFragment" />
+            android:id="@+id/action_TagsFragment_to_FilterFragment"
+            app:destination="@id/FilterFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"/>
+        <action
+            android:id="@+id/action_TagsFragment_to_CreateEventFragment"
+            app:destination="@id/CreateEventFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"/>
     </fragment>
     <fragment
         android:id="@+id/LocationFragment"
@@ -134,7 +145,14 @@
         tools:layout="@layout/fragment_location" >
         <action
             android:id="@+id/action_LocationFragment_to_FilterFragment"
-            app:destination="@id/FilterFragment" />
+            app:destination="@id/FilterFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"/>
+        <action
+            android:id="@+id/action_LocationFragment_to_CreateEventFragment"
+            app:destination="@id/CreateEventFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"/>
     </fragment>
     <fragment
         android:id="@+id/CreateEventFragment"
@@ -144,6 +162,16 @@
         <action
             android:id="@+id/action_CreateEventFragment_to_MainMenuFragment"
             app:destination="@id/MainMenuFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_CreateEventFragment_to_TagsFragment"
+            app:destination="@id/TagsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_CreateEventFragment_to_LocationFragment"
+            app:destination="@id/LocationFragment"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out" />
     </fragment>

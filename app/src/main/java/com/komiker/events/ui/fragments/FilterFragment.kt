@@ -169,32 +169,24 @@ class FilterFragment : Fragment() {
 
     private fun setupButtonLocation() {
         binding.buttonLocation.setOnClickListener {
-            val fadeOutAnimation = R.anim.fade_out
-            val fadeInAnimation = R.anim.fade_in
-
+            val bundle = Bundle().apply {
+                putInt("sourceFragmentId", R.id.FilterFragment)
+            }
             findNavController().navigate(
                 R.id.action_FilterFragment_to_LocationFragment,
-                null,
-                NavOptions.Builder()
-                    .setEnterAnim(fadeInAnimation)
-                    .setExitAnim(fadeOutAnimation)
-                    .build()
+                bundle
             )
         }
     }
 
     private fun setupButtonAllCategory() {
         binding.buttonAllCategory.setOnClickListener {
-            val fadeOutAnimation = R.anim.fade_out
-            val fadeInAnimation = R.anim.fade_in
-
+            val bundle = Bundle().apply {
+                putInt("sourceFragmentId", R.id.FilterFragment)
+            }
             findNavController().navigate(
-                R.id.action_FilterFragment_to_CategoryFragment,
-                null,
-                NavOptions.Builder()
-                    .setEnterAnim(fadeInAnimation)
-                    .setExitAnim(fadeOutAnimation)
-                    .build()
+                R.id.action_FilterFragment_to_TagsFragment,
+                bundle
             )
         }
     }

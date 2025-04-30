@@ -74,7 +74,6 @@
     <string name="location">Location</string>
     <string name="location_fragment">LocationFragment</string>
     <string name="reset">Reset</string>
-    <string name="find_location">Find location</string>
     <string name="event_create">Event create</string>
     <string name="create_event_fragment">CreateEventFragment</string>
     <string name="step_1_7">Step 1/7</string>
@@ -159,4 +158,20 @@
     <string name="max_size_label">Max size:\u0020</string>
     <string name="max_size_value">10MB</string>
     <string name="icon_info">IconInfo</string>
+    <string name="tags">Tags</string>
+    <string name="enter_date_and_time">Enter date and time</string>
+    <string name="start_date">Start date</string>
+    <string name="end_date">End date</string>
+    <string name="not_necessary">Not necessary*</string>
+    <string name="tags_fragment">TagsFragment</string>
+    <string name="date">Date</string>
+    <string name="am_label">AM</string>
+    <string name="pm_label">PM</string>
+    <string name="hour_label">Hour</string>
+    <string name="minute_label">Minute</string>
+    <string name="colon_symbol">:</string>
+    <string name="_00">00</string>
+    <string name="_01">01</string>
+    <string name="_08">08</string>
+    <string name="add_tags">Add tags</string>
 </resources>
