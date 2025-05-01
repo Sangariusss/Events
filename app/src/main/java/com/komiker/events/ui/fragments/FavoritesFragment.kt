@@ -8,11 +8,11 @@ import android.view.ViewTreeObserver
 import android.widget.ImageButton
 import androidx.fragment.app.Fragment
 import com.komiker.events.R
-import com.komiker.events.databinding.FragmentCompassBinding
+import com.komiker.events.databinding.FragmentFavoritesBinding
 
-class CompassFragment : Fragment() {
+class FavoritesFragment : Fragment() {
 
-    private var _binding: FragmentCompassBinding? = null
+    private var _binding: FragmentFavoritesBinding? = null
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
@@ -20,7 +20,7 @@ class CompassFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentCompassBinding.inflate(inflater, container, false)
+        _binding = FragmentFavoritesBinding.inflate(inflater, container, false)
 
         return binding.root
     }

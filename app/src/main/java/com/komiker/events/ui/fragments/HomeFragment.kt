@@ -37,18 +37,11 @@ class HomeFragment : Fragment() {
 
         setupEditTextBackgroundChange()
         setupButtonFilter()
-        setupButtonNotification()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun setupButtonNotification() {
-        binding.buttonNotification.setOnClickListener {
-            //
-        }
     }
 
     private fun setupEditTextBackgroundChange() {
@@ -74,17 +67,7 @@ class HomeFragment : Fragment() {
 
     private fun setupButtonFilter() {
         binding.buttonFilter.setOnClickListener {
-            val fadeOutAnimation = R.anim.fade_out
-            val fadeInAnimation = R.anim.fade_in
-
-            findNavController().navigate(
-                R.id.action_MainMenuFragment_to_FilterFragment,
-                null,
-                NavOptions.Builder()
-                    .setEnterAnim(fadeInAnimation)
-                    .setExitAnim(fadeOutAnimation)
-                    .build()
-            )
+            findNavController().navigate(R.id.action_MainMenuFragment_to_FilterFragment)
         }
     }
 }

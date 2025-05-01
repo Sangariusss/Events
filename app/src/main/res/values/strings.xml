@@ -107,7 +107,6 @@
     <string name="please_enter_the_6_digit_code_we_sent_to_your_email">Please enter the 6-digit code we\n sent to your email</string>
     <string name="confirm">Confirm</string>
     <string name="create_event_button">Create event button</string>
-    <string name="for_you">For you</string>
     <string name="search">Search</string>
     <string name="add_social_media">Add social media</string>
     <string name="add_social_media_icon">Add Social Media Icon</string>
@@ -174,4 +173,12 @@
     <string name="_01">01</string>
     <string name="_08">08</string>
     <string name="add_tags">Add tags</string>
+    <string name="proposals">Proposals</string>
+    <string name="favorites">Favorites</string>
+    <string name="write_your_event_proposal">Write your event proposal...</string>
+    <string name="proposals_fragment">ProposalsFragment</string>
+    <string name="create_proposal_fragment">CreateProposalFragment</string>
+    <string name="new_proposal">New proposal</string>
+    <string name="button_close">ButtonClose</string>
+    <string name="publish_proposal">Publish proposal</string>
 </resources>

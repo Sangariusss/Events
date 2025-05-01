@@ -59,7 +59,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@drawable/bg_toolbar_button"
-        android:contentDescription="@string/buttonback"
+        android:contentDescription="@string/button_close"
         app:layout_constraintBottom_toTopOf="@+id/guideline1"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"

@@ -6,17 +6,17 @@
         android:icon="@drawable/ic_home"
         android:title="" />
     <item
-        android:id="@+id/navigation_calendar"
+        android:id="@+id/navigation_proposals"
         android:enabled="true"
-        android:icon="@drawable/ic_calendar"
+        android:icon="@drawable/ic_compass"
         android:title="" />
     <item
         android:enabled="false"
         android:title="" />
     <item
-        android:id="@+id/navigation_compass"
+        android:id="@+id/navigation_favorites"
         android:enabled="true"
-        android:icon="@drawable/ic_compass"
+        android:icon="@drawable/ic_heart"
         android:title="" />
     <item
         android:id="@+id/navigation_profile"

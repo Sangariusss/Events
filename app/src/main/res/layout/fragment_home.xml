@@ -24,61 +24,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_percent="0.144"
-        app:layout_constraintHeight_percent="0.03" />
-
-    <ImageButton
-        android:id="@+id/button_favorite"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@drawable/bg_toolbar_button"
-        android:contentDescription="@string/heart_icon"
-        app:layout_constraintBottom_toBottomOf="@id/guideline1"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.833"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.133" />
-
-    <ImageView
-        android:id="@+id/image_favorite"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:contentDescription="@string/image_favorite"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_heart"
-        app:layout_constraintBottom_toBottomOf="@id/button_favorite"
-        app:layout_constraintDimensionRatio="0.5:1"
-        app:layout_constraintEnd_toEndOf="@id/button_favorite"
-        app:layout_constraintStart_toStartOf="@id/button_favorite"
-        app:layout_constraintTop_toTopOf="@id/button_favorite" />
-
-    <ImageButton
-        android:id="@+id/button_notification"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@drawable/bg_toolbar_button"
-        android:contentDescription="@string/notification_icon"
-        app:layout_constraintBottom_toBottomOf="@id/guideline1"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.987"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.133" />
-
-    <ImageView
-        android:id="@+id/image_notification"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:contentDescription="@string/image_favorite"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_notification"
-        app:layout_constraintBottom_toBottomOf="@id/button_notification"
-        app:layout_constraintDimensionRatio="0.5:1"
-        app:layout_constraintEnd_toEndOf="@id/button_notification"
-        app:layout_constraintStart_toStartOf="@id/button_notification"
-        app:layout_constraintTop_toTopOf="@id/button_notification" />
+        app:layout_constraintHeight_percent="0.032" />
 
     <EditText
         android:id="@+id/edit_text_find_events"
@@ -89,10 +35,9 @@
         android:importantForAutofill="no"
         app:layout_constraintBottom_toBottomOf="@+id/guideline3"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.182"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline2"
-        app:layout_constraintWidth_percent="0.756"
+        app:layout_constraintWidth_percent="0.911"
         tools:ignore="LabelFor" />
 
     <ImageButton
@@ -100,21 +45,23 @@
         style="@style/ButtonFilterInactive"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:background="@android:color/transparent"
         android:contentDescription="@string/filter_button"
-        app:layout_constraintBottom_toBottomOf="@+id/guideline3"
+        android:scaleType="centerInside"
         app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.949"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/guideline3"
+        app:layout_constraintEnd_toEndOf="@id/edit_text_find_events"
+        app:layout_constraintHorizontal_bias="0.947"
+        app:layout_constraintStart_toStartOf="@id/edit_text_find_events"
         app:layout_constraintTop_toTopOf="@+id/guideline2"
-        app:layout_constraintWidth_percent="0.133" />
+        app:layout_constraintWidth_percent="0.067" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.070" />
+        app:layout_constraintGuide_percent="0.071" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline2"

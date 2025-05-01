@@ -9,6 +9,7 @@
 	<dimen name="digit_box_corner_radius">10dp</dimen>
 	<dimen name="button_dialog_delete_account_corner_radius">10dp</dimen>
 	<dimen name="button_create_event_main_menu_corner_radius">10dp</dimen>
+	<dimen name="button_publish_corner_radius">50dp</dimen>
 
 	<dimen name="text_size_button">18sp</dimen>
 

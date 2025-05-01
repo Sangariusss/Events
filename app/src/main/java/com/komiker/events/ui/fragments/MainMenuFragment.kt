@@ -8,8 +8,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
-import com.airbnb.lottie.LottieCompositionFactory
-import com.airbnb.lottie.LottieDrawable
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.komiker.events.R
 import com.komiker.events.databinding.FragmentMainMenuBinding
@@ -82,6 +80,10 @@ class MainMenuFragment : Fragment() {
                 binding.bottomNavigation.selectedItemId = R.id.navigation_profile
                 replaceFragment(ProfileFragment())
             }
+            "proposals" -> {
+                binding.bottomNavigation.selectedItemId = R.id.navigation_proposals
+                replaceFragment(ProposalsFragment())
+            }
             else -> {
                 binding.bottomNavigation.selectedItemId = R.id.navigation_home
                 replaceFragment(HomeFragment())
@@ -96,12 +98,12 @@ class MainMenuFragment : Fragment() {
                     replaceFragment(HomeFragment())
                     true
                 }
-                R.id.navigation_calendar -> {
-                    replaceFragment(CalendarFragment())
+                R.id.navigation_proposals -> {
+                    replaceFragment(ProposalsFragment())
                     true
                 }
-                R.id.navigation_compass -> {
-                    replaceFragment(CompassFragment())
+                R.id.navigation_favorites -> {
+                    replaceFragment(FavoritesFragment())
                     true
                 }
                 R.id.navigation_profile -> {
