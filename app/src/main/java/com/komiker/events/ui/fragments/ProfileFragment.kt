@@ -63,8 +63,6 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        initButtonFavorite()
-        initButtonNotification()
         initButtonAddSocialMedia()
         initButtonEditProfile()
         initButtonChangeEmail()
@@ -96,18 +94,6 @@ class ProfileFragment : Fragment() {
         binding.textProfileName.text = getString(R.string.user_not_found)
         binding.textProfileEmail.text = ""
         binding.imageProfile.setImageResource(R.drawable.img_profile_placeholder)
-    }
-
-    private fun initButtonFavorite() {
-        binding.buttonFavorite.setOnClickListener {
-            //
-        }
-    }
-
-    private fun initButtonNotification() {
-        binding.buttonNotification.setOnClickListener {
-            //
-        }
     }
 
     private fun initButtonAddSocialMedia() {

@@ -26,60 +26,6 @@
         app:layout_constraintWidth_percent="0.161"
         app:layout_constraintHeight_percent="0.03" />
 
-    <ImageButton
-        android:id="@+id/button_favorite"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@drawable/bg_toolbar_button"
-        android:contentDescription="@string/heart_icon"
-        app:layout_constraintBottom_toBottomOf="@id/guideline1"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.833"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.133" />
-
-    <ImageView
-        android:id="@+id/image_favorite"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:contentDescription="@string/image_favorite"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_heart"
-        app:layout_constraintBottom_toBottomOf="@id/button_favorite"
-        app:layout_constraintDimensionRatio="0.5:1"
-        app:layout_constraintEnd_toEndOf="@id/button_favorite"
-        app:layout_constraintStart_toStartOf="@id/button_favorite"
-        app:layout_constraintTop_toTopOf="@id/button_favorite" />
-
-    <ImageButton
-        android:id="@+id/button_notification"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@drawable/bg_toolbar_button"
-        android:contentDescription="@string/notification_icon"
-        app:layout_constraintBottom_toBottomOf="@id/guideline1"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.987"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.133" />
-
-    <ImageView
-        android:id="@+id/image_notification"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:contentDescription="@string/image_favorite"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_notification"
-        app:layout_constraintBottom_toBottomOf="@id/button_notification"
-        app:layout_constraintDimensionRatio="0.5:1"
-        app:layout_constraintEnd_toEndOf="@id/button_notification"
-        app:layout_constraintStart_toStartOf="@id/button_notification"
-        app:layout_constraintTop_toTopOf="@id/button_notification" />
-
     <ImageView
         android:id="@+id/image_profile"
         android:layout_width="0dp"

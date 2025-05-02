@@ -22,6 +22,11 @@ import com.komiker.events.databinding.FragmentCreateProposalBinding
 import com.komiker.events.glide.CircleCropTransformation
 import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory
+import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.postgrest.from
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class CreateProposalFragment : Fragment() {
 
@@ -74,6 +79,7 @@ class CreateProposalFragment : Fragment() {
         binding.buttonPublishProposal.setOnClickListener {
             val proposalText = binding.editTextProposal.text.toString()
             if (proposalText.isNotEmpty()) {
+                saveProposal(proposalText)
                 navigateToMainMenuWithProposals()
             }
         }
@@ -104,8 +110,7 @@ class CreateProposalFragment : Fragment() {
     private fun setupUserProfile() {
         profileViewModel.userLiveData.observe(viewLifecycleOwner) { user ->
             if (user != null) {
-                binding.textName.text = user.name
-
+                binding.textUsername.text = user.username
                 Glide.with(this)
                     .load(user.avatar)
                     .override(400, 400)
@@ -116,8 +121,30 @@ class CreateProposalFragment : Fragment() {
                     .transform(CircleCropTransformation())
                     .into(binding.imageProfile)
             } else {
-                binding.textName.text = getString(R.string.example_name)
+                binding.textUsername.text = getString(R.string.example_name)
                 binding.imageProfile.setImageResource(R.drawable.img_profile_placeholder)
+            }
+        }
+    }
+
+    private fun saveProposal(proposalText: String) {
+        profileViewModel.userLiveData.value?.let { user ->
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val userId = supabaseClient.auth.currentSessionOrNull()?.user?.id
+                    if (userId != null) {
+                        supabaseClient.from("proposals").insert(
+                            mapOf(
+                                "user_id" to userId,
+                                "user_name" to user.username,
+                                "user_avatar" to user.avatar,
+                                "content" to proposalText
+                            )
+                        )
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }

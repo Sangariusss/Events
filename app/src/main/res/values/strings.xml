@@ -181,4 +181,9 @@
     <string name="new_proposal">New proposal</string>
     <string name="button_close">ButtonClose</string>
     <string name="publish_proposal">Publish proposal</string>
+    <string name="like">Like</string>
+    <string name="share">Share</string>
+    <string name="_1_min">1m</string>
+    <string name="_0">0</string>
+    <string name="button_more">ButtonMore</string>
 </resources>

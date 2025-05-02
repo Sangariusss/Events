@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/neutral_100"
-    tools:context=".ui.fragments.ProposalsFragment">
+    tools:context=".ui.fragments.ProposalsFragmenеt">
 
     <TextView
         android:id="@+id/text_toolbar_title"
@@ -56,6 +56,16 @@
         app:layout_constraintTop_toTopOf="@+id/guideline2"
         app:layout_constraintWidth_percent="0.067" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_proposals"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/guideline5"
+        app:layout_constraintBottom_toTopOf="@id/button_write_proposal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/item_proposal" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/button_write_proposal"
         android:layout_width="0dp"
@@ -83,7 +93,7 @@
             app:layout_constraintWidth_percent="0.133" />
 
         <TextView
-            android:id="@+id/text_name"
+            android:id="@+id/text_username"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:autoSizeMaxTextSize="1000dp"
@@ -151,5 +161,12 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.159" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.188" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
