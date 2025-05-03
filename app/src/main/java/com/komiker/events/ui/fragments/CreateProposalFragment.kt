@@ -133,12 +133,13 @@ class CreateProposalFragment : Fragment() {
                 try {
                     val userId = supabaseClient.auth.currentSessionOrNull()?.user?.id
                     if (userId != null) {
+                        val trimmedText = proposalText.trimEnd()
                         supabaseClient.from("proposals").insert(
                             mapOf(
                                 "user_id" to userId,
                                 "user_name" to user.username,
                                 "user_avatar" to user.avatar,
-                                "content" to proposalText
+                                "content" to trimmedText
                             )
                         )
                     }

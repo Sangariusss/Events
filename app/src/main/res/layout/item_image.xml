@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/ItemImageContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    style="@style/ItemImageContainer"
     android:layout_marginBottom="0dp">
 
     <ImageView
@@ -31,6 +31,7 @@
         android:gravity="center|start"
         android:text="@string/image_example"
         android:textColor="@color/neutral_0"
+        android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.333"
@@ -41,7 +42,7 @@
 
     <TextView
         android:id="@+id/text_image_info"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:autoSizeMaxTextSize="1000dp"
         android:autoSizeMinTextSize="1dp"
@@ -56,8 +57,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@id/guideline1"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.733"
-        app:layout_constraintWidth_percent="0.229" />
+        app:layout_constraintVertical_bias="0.733" />
 
     <ImageButton
         android:id="@+id/button_delete"
