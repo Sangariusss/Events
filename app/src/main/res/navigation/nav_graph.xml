@@ -117,7 +117,9 @@
         tools:layout="@layout/fragment_filter" >
         <action
             android:id="@+id/action_FilterFragment_to_MainMenuFragment"
-            app:destination="@id/MainMenuFragment" />
+            app:destination="@id/MainMenuFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
         <action
             android:id="@+id/action_FilterFragment_to_TagsFragment"
             app:destination="@id/TagsFragment"

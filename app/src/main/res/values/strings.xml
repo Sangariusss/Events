@@ -65,7 +65,7 @@
     <string name="filter_button">FilterButton</string>
     <string name="filter">Filter</string>
     <string name="reset_all">Reset All</string>
-    <string name="set_the_date">Set the date</string>
+    <string name="set_the_date">Set the date*</string>
     <string name="category">Category</string>
     <string name="view_all">View All</string>
     <string name="apply">Apply</string>
@@ -80,7 +80,7 @@
     <string name="title">Title</string>
     <string name="name_of_the_event">Name of the event</string>
     <string name="description">Description</string>
-    <string name="description...">Description...</string>
+    <string name="description...">Description…</string>
     <string name="edit_profile_icon">Edit Profile Icon</string>
     <string name="change_email_icon">Change Email Icon</string>
     <string name="my_events">My events</string>
@@ -175,7 +175,7 @@
     <string name="add_tags">Add tags</string>
     <string name="proposals">Proposals</string>
     <string name="favorites">Favorites</string>
-    <string name="write_your_event_proposal">Write your event proposal...</string>
+    <string name="write_your_event_proposal">Write your event proposal…</string>
     <string name="proposals_fragment">ProposalsFragment</string>
     <string name="create_proposal_fragment">CreateProposalFragment</string>
     <string name="new_proposal">New proposal</string>
@@ -186,4 +186,6 @@
     <string name="_1_min">1m</string>
     <string name="_0">0</string>
     <string name="button_more">ButtonMore</string>
+    <string name="permission_denied">Permission denied</string>
+    <string name="location_not_available">Location not available</string>
 </resources>
