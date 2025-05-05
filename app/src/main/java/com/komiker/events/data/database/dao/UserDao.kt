@@ -1,6 +1,6 @@
-package com.komiker.events.data.database.dao.implementation
+package com.komiker.events.data.database.dao
 
-import com.komiker.events.data.database.entities.User
+import com.komiker.events.data.database.models.User
 import io.github.jan.supabase.postgrest.result.PostgrestResult
 
 interface UserDao {

@@ -15,7 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
-import com.komiker.events.data.database.dao.SupabaseUserDao
+import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
 import com.komiker.events.databinding.FragmentChangeEmailBinding
 import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory

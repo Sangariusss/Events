@@ -2,7 +2,7 @@ package com.komiker.events.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.komiker.events.data.database.dao.SupabaseUserDao
+import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
 
 class ProfileViewModelFactory(private val supabaseUserDao: SupabaseUserDao) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

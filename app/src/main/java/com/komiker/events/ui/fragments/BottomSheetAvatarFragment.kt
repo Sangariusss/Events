@@ -18,7 +18,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
-import com.komiker.events.data.database.dao.SupabaseUserDao
+import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
 import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.storage.storage

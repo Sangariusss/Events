@@ -141,6 +141,8 @@ class FilterFragment : Fragment() {
         val customFormatter = NumberPicker.Formatter { value -> value.toString() }
         yearPicker.formatter = customFormatter
 
+        setCurrentDateInPickers(monthPicker, dayPicker, yearPicker)
+
         monthPicker.setOnValueChangedListener { _, _, _ ->
             updateDayPickerMaxValue(monthPicker.value, yearPicker.value)
         }
@@ -162,6 +164,18 @@ class FilterFragment : Fragment() {
         picker.minValue = minValue
         picker.maxValue = maxValue
         values?.let { picker.displayedValues = it }
+    }
+
+    private fun setCurrentDateInPickers(monthPicker: NumberPicker, dayPicker: NumberPicker, yearPicker: NumberPicker) {
+        val calendar = Calendar.getInstance()
+        val currentYear = calendar.get(Calendar.YEAR)
+        val currentMonth = calendar.get(Calendar.MONTH)
+        val currentDay = calendar.get(Calendar.DAY_OF_MONTH)
+
+        yearPicker.value = currentYear
+        monthPicker.value = currentMonth
+        updateDayPickerMaxValue(currentMonth, currentYear)
+        dayPicker.value = currentDay
     }
 
     private fun updateDayPickerMaxValue(month: Int, year: Int) {

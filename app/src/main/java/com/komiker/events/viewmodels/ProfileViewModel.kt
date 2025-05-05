@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.komiker.events.data.database.dao.SupabaseUserDao
-import com.komiker.events.data.database.entities.User
+import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
+import com.komiker.events.data.database.models.User
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel() {

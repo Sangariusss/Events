@@ -1,4 +1,4 @@
-package com.komiker.events.data.database.entities
+package com.komiker.events.data.database.models
 
 import kotlinx.serialization.Serializable
 

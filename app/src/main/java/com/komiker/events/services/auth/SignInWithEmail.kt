@@ -2,8 +2,8 @@ package com.komiker.events.services.auth
 
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
-import com.komiker.events.data.database.dao.SupabaseUserDao
-import com.komiker.events.data.database.entities.User
+import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
+import com.komiker.events.data.database.models.User
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.OtpType
 import io.github.jan.supabase.gotrue.auth

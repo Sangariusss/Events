@@ -1,7 +1,7 @@
-package com.komiker.events.data.database.dao
+package com.komiker.events.data.database.dao.implementation
 
-import com.komiker.events.data.database.dao.implementation.UserDao
-import com.komiker.events.data.database.entities.User
+import com.komiker.events.data.database.dao.UserDao
+import com.komiker.events.data.database.models.User
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.exceptions.UnknownRestException
 import io.github.jan.supabase.gotrue.auth

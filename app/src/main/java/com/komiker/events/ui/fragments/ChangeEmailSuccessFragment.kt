@@ -9,7 +9,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
-import com.komiker.events.data.database.dao.SupabaseUserDao
+import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
 import com.komiker.events.databinding.FragmentChangeEmailSuccessBinding
 import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory

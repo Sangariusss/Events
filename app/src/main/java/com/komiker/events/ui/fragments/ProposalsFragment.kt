@@ -14,9 +14,9 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
-import com.komiker.events.data.database.dao.SupabaseUserDao
-import com.komiker.events.data.database.entities.Proposal
-import com.komiker.events.data.database.entities.ProposalResponse
+import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
+import com.komiker.events.data.database.models.Proposal
+import com.komiker.events.data.database.models.ProposalResponse
 import com.komiker.events.databinding.FragmentProposalsBinding
 import com.komiker.events.glide.CircleCropTransformation
 import com.komiker.events.ui.adapters.ProposalsAdapter

@@ -1,4 +1,4 @@
-package com.komiker.events.data.database.entities
+package com.komiker.events.data.database.converters
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind

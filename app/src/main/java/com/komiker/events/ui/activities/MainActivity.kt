@@ -9,7 +9,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
-import com.komiker.events.data.database.dao.SupabaseUserDao
+import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
 import com.komiker.events.databinding.ActivityMainBinding
 import com.komiker.events.services.auth.FacebookAuthManager
 import com.komiker.events.services.auth.TwitterAuthManager
@@ -18,10 +18,8 @@ import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.handleDeeplinks
 import io.github.jan.supabase.gotrue.user.UserSession
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 
 class MainActivity : AppCompatActivity() {

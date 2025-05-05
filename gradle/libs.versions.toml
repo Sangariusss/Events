@@ -28,6 +28,8 @@ lifecycleRuntimeKtx = "2.7.0"
 activityCompose = "1.8.2"
 composeBom = "2023.08.00"
 playServicesLocation = "21.3.0"
+roomKtx = "2.6.1"
+roomRuntime = "2.6.1"
 slf4jSimple = "1.7.30"
 storageKt = "2.5.1"
 uiToolingPreview = "1.0.5"
@@ -38,6 +40,9 @@ viewpager2 = "1.1.0"
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "materialVersion" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomKtx" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
 dotenv-kotlin = { module = "io.github.cdimascio:dotenv-kotlin", version.ref = "dotenvKotlin" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }

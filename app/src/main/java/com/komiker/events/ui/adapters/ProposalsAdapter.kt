@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.komiker.events.R
-import com.komiker.events.data.database.entities.Proposal
+import com.komiker.events.data.database.models.Proposal
 import com.komiker.events.databinding.ItemProposalBinding
 import com.komiker.events.glide.CircleCropTransformation
 import java.time.OffsetDateTime

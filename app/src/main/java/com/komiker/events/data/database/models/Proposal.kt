@@ -1,5 +1,6 @@
-package com.komiker.events.data.database.entities
+package com.komiker.events.data.database.models
 
+import com.komiker.events.data.database.converters.OffsetDateTimeSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.time.OffsetDateTime

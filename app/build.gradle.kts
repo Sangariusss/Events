@@ -117,4 +117,8 @@ dependencies {
     kapt (libs.glide.compiler)
 
     implementation(libs.dotenv.kotlin)
+
+    implementation (libs.androidx.room.runtime)
+    implementation (libs.androidx.room.ktx)
+    kapt (libs.androidx.room.compiler)
 }

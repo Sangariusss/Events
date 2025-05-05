@@ -3,15 +3,14 @@ package com.komiker.events.services.auth
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import android.widget.Button
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
-import com.komiker.events.data.database.dao.SupabaseUserDao
-import com.komiker.events.data.database.entities.User
+import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
+import com.komiker.events.data.database.models.User
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.Twitter
 import kotlinx.coroutines.launch
