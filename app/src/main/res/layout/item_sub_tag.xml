@@ -19,12 +19,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.354"
+        app:layout_constraintHorizontal_bias="0.182"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.911" />
+        app:layout_constraintWidth_percent="0.756" />
 
-    <CheckBox
-        android:id="@+id/checkbox_sub_tag"
+    <Button
+        android:id="@+id/button_sub_tag"
+        style="@style/ButtonSubTag"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"

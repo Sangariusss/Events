@@ -21,6 +21,7 @@ class TagRepository(private val database: AppDatabase) {
 
     private val supabaseClient = SupabaseClientProvider.client
     private lateinit var channel: RealtimeChannel
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     fun getTagCategories(): Flow<List<TagCategoryEntity>> {
         return database.tagCategoryDao().getAllTagCategories()
@@ -46,35 +47,23 @@ class TagRepository(private val database: AppDatabase) {
         }
     }
 
-    fun setupRealtimeUpdates() {
+    fun setupRealtimeUpdates(coroutineScope: CoroutineScope) {
         channel = supabaseClient.channel("tag-categories-channel")
 
         val changeFlow = channel.postgresChangeFlow<PostgresAction>(schema = "public") {
             table = "tag_categories"
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
+        coroutineScope.launch {
             changeFlow.collect { change ->
                 when (change) {
                     is PostgresAction.Insert -> {
-                        val record = change.record
-                        val newCategory = TagCategoryEntity(
-                            id = record["id"].toString(),
-                            name = record["name"].toString(),
-                            subTags = Json.decodeFromString<List<String>>(record["sub_tags"].toString()),
-                            updatedAt = record["updated_at"].toString()
-                        )
-                        database.tagCategoryDao().insertAll(listOf(newCategory))
+                        val category = createTagCategoryEntity(change.record)
+                        database.tagCategoryDao().insertAll(listOf(category))
                     }
                     is PostgresAction.Update -> {
-                        val record = change.record
-                        val updatedCategory = TagCategoryEntity(
-                            id = record["id"].toString(),
-                            name = record["name"].toString(),
-                            subTags = Json.decodeFromString<List<String>>(record["sub_tags"].toString()),
-                            updatedAt = record["updated_at"].toString()
-                        )
-                        database.tagCategoryDao().insertAll(listOf(updatedCategory))
+                        val category = createTagCategoryEntity(change.record)
+                        database.tagCategoryDao().insertAll(listOf(category))
                     }
                     is PostgresAction.Delete -> {
                         database.tagCategoryDao().deleteAll()
@@ -85,14 +74,23 @@ class TagRepository(private val database: AppDatabase) {
             }
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
+        coroutineScope.launch {
             channel.subscribe()
         }
     }
 
     fun cleanupRealtime() {
-        CoroutineScope(Dispatchers.IO).launch {
+        coroutineScope.launch {
             supabaseClient.realtime.removeChannel(channel)
         }
+    }
+
+    private fun createTagCategoryEntity(record: Map<String, Any?>): TagCategoryEntity {
+        return TagCategoryEntity(
+            id = record["id"].toString(),
+            name = record["name"].toString(),
+            subTags = Json.decodeFromString<List<String>>(record["sub_tags"].toString()),
+            updatedAt = record["updated_at"].toString()
+        )
     }
 }

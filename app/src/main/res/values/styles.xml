@@ -253,4 +253,10 @@
         <item name="android:textSize">18sp</item>
         <item name="android:enabled">false</item>
     </style>
+
+    <style name="ButtonSubTag" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/button_toggle_selector</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
 </resources>
