@@ -72,10 +72,10 @@
         android:textColor="@color/neutral_0"
         app:layout_constraintBottom_toTopOf="@+id/guideline7"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.549"
+        app:layout_constraintHorizontal_bias="0.857"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline6"
-        app:layout_constraintWidth_percent="0.514" />
+        app:layout_constraintWidth_percent="0.689" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraint_general_section_layout"

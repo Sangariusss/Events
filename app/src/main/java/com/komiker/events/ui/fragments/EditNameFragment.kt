@@ -157,7 +157,6 @@ class EditNameFragment : Fragment() {
                 }
             }
             val usersList = response.decodeList<User>()
-            Log.d("CheckName", "Response for '$name': $usersList")
             usersList.isNotEmpty()
         } catch (e: Exception) {
             Log.e("CheckName", "Error checking name availability: ${e.message}")

@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     kotlin("plugin.serialization") version "1.9.22"
-    kotlin("kapt")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -80,45 +80,44 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    annotationProcessor("com.github.bumptech.glide:compiler:4.11.0")
+    annotationProcessor(libs.glide.compiler)
 
-    implementation(platform("io.github.jan-tennert.supabase:bom:2.2.3"))
-    implementation("io.github.jan-tennert.supabase:postgrest-kt")
-    implementation("io.github.jan-tennert.supabase:storage-kt")
-    implementation("io.github.jan-tennert.supabase:realtime-kt")
-    implementation("androidx.core:core-ktx:1.10.1")
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.postgrest)
+    implementation(libs.supabase.storage)
+    implementation(libs.supabase.realtime)
+
+    implementation(libs.androidx.core.ktx)
 
     implementation(libs.ktor.client.cio)
     implementation(libs.slf4j.simple)
 
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
-    implementation (libs.googleid)
+    implementation(libs.googleid)
 
     implementation(libs.ui)
     implementation(libs.androidx.material)
     implementation(libs.ui.tooling.preview)
 
-    implementation (libs.java.jwt)
+    implementation(libs.java.jwt)
 
-    implementation (libs.lottie)
+    implementation(libs.lottie)
 
     implementation(libs.androidx.viewpager2)
 
-    implementation (libs.number.picker)
+    implementation(libs.number.picker)
 
-    implementation (libs.play.services.location)
+    implementation(libs.play.services.location)
 
-    implementation(libs.storage.kt)
+    implementation(libs.gson)
 
-    implementation (libs.gson)
-
-    implementation (libs.glide)
-    kapt (libs.glide.compiler)
+    implementation(libs.glide)
+    ksp(libs.glide.compiler)
 
     implementation(libs.dotenv.kotlin)
 
-    implementation (libs.androidx.room.runtime)
-    implementation (libs.androidx.room.ktx)
-    kapt (libs.androidx.room.compiler)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 }
