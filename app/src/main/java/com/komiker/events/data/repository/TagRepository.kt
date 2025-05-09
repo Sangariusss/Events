@@ -35,7 +35,7 @@ class TagRepository(private val database: AppDatabase) {
             val entities = tagCategories.map { category ->
                 TagCategoryEntity(
                     id = category.id,
-                    name = category.name,
+                    name = category.name.trim('\'', '"'),
                     subTags = category.subTags,
                     updatedAt = category.updatedAt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
                 )
@@ -86,9 +86,10 @@ class TagRepository(private val database: AppDatabase) {
     }
 
     private fun createTagCategoryEntity(record: Map<String, Any?>): TagCategoryEntity {
+        val name = record["name"]?.toString()?.trim('\'', '"') ?: ""
         return TagCategoryEntity(
             id = record["id"].toString(),
-            name = record["name"].toString(),
+            name = name,
             subTags = Json.decodeFromString<List<String>>(record["sub_tags"].toString()),
             updatedAt = record["updated_at"].toString()
         )
