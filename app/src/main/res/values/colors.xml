@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="neutral_0">#000000</color>
+    <color name="neutral_0_30_percent">#4D000000</color>
     <color name="neutral_10">#1A1C1E</color>
     <color name="neutral_20">#2F3033</color>
     <color name="neutral_30">#45474A</color>

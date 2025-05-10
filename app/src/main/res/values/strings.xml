@@ -188,4 +188,6 @@
     <string name="button_more">ButtonMore</string>
     <string name="permission_denied">Permission denied</string>
     <string name="location_not_available">Location not available</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
 </resources>
