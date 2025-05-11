@@ -110,10 +110,19 @@ class ProposalsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        proposalsAdapter = ProposalsAdapter()
-        binding.recyclerViewProposals.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = proposalsAdapter
+        profileViewModel.userLiveData.observe(viewLifecycleOwner) { user ->
+            val currentUserId = user?.user_id
+            proposalsAdapter = ProposalsAdapter(
+                currentUserId = currentUserId,
+                onDeleteClicked = { proposal ->
+                    deleteProposal(proposal)
+                }
+            )
+            binding.recyclerViewProposals.apply {
+                layoutManager = LinearLayoutManager(context)
+                adapter = proposalsAdapter
+            }
+            loadProposals()
         }
     }
 
@@ -133,6 +142,23 @@ class ProposalsFragment : Fragment() {
                     )
                 }.sortedByDescending { it.createdAt }
                 proposalsAdapter.submitList(proposals)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun deleteProposal(proposal: Proposal) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                supabaseClient.from("proposals").delete {
+                    filter { eq("id", proposal.id) }
+                }
+                withContext(Dispatchers.Main) {
+                    val currentList = proposalsAdapter.currentList.toMutableList()
+                    currentList.remove(proposal)
+                    proposalsAdapter.submitList(currentList)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }

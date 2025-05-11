@@ -19,7 +19,10 @@ import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import java.time.format.DateTimeFormatter
 
-class ProposalsAdapter : ListAdapter<Proposal, ProposalsAdapter.ProposalViewHolder>(ProposalDiffCallback()) {
+class ProposalsAdapter(
+    private val currentUserId: String?,
+    private val onDeleteClicked: (Proposal) -> Unit
+) : ListAdapter<Proposal, ProposalsAdapter.ProposalViewHolder>(ProposalDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProposalViewHolder {
         val binding = ItemProposalBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -30,7 +33,7 @@ class ProposalsAdapter : ListAdapter<Proposal, ProposalsAdapter.ProposalViewHold
         holder.bind(getItem(position))
     }
 
-    class ProposalViewHolder(private val binding: ItemProposalBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class ProposalViewHolder(private val binding: ItemProposalBinding) : RecyclerView.ViewHolder(binding.root) {
         private var popupWindow: PopupWindow? = null
         private var overlayView: View? = null
 
@@ -58,12 +61,16 @@ class ProposalsAdapter : ListAdapter<Proposal, ProposalsAdapter.ProposalViewHold
                 binding.root.context.startActivity(shareIntent)
             }
 
-            binding.buttonMore.setOnClickListener {
-                showPopupMenu()
+            if (currentUserId != null && proposal.userId == currentUserId) {
+                binding.buttonMore.setOnClickListener {
+                    showPopupMenu(proposal)
+                }
+            } else {
+                binding.buttonMore.setOnClickListener(null)
             }
         }
 
-        private fun showPopupMenu() {
+        private fun showPopupMenu(proposal: Proposal) {
             val popupBinding = PopupMenuBinding.inflate(LayoutInflater.from(binding.root.context))
             val popupView = popupBinding.root
 
@@ -118,9 +125,11 @@ class ProposalsAdapter : ListAdapter<Proposal, ProposalsAdapter.ProposalViewHold
 
             popupBinding.menuEdit.setOnClickListener {
                 dismissPopupMenu()
+                // TODO: Add edit logic
             }
 
             popupBinding.menuDelete.setOnClickListener {
+                onDeleteClicked(proposal)
                 dismissPopupMenu()
             }
 
