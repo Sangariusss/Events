@@ -31,7 +31,7 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
 
     override suspend fun getUserById(id: String): PostgrestResult {
         return withContext(Dispatchers.IO) {
-            supabase.from("users").select(columns = Columns.list("user_id", "name", "username", "email", "avatar")) {
+            supabase.from("users").select(columns = Columns.list("user_id", "name", "username", "email", "avatar", "telegram_link", "instagram_link")) {
                 filter {
                     eq("user_id", id)
                 }
@@ -49,6 +49,25 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
                 }
             } catch (e: Exception) {
                 println("Error updating user: ${e.message}")
+            }
+        }
+    }
+
+    suspend fun updateUserSocialLinks(userId: String, telegramLink: String?, instagramLink: String?) {
+        withContext(Dispatchers.IO) {
+            try {
+                supabase.from("users").update(
+                    mapOf(
+                        "telegram_link" to telegramLink,
+                        "instagram_link" to instagramLink
+                    )
+                ) {
+                    filter {
+                        eq("user_id", userId)
+                    }
+                }
+            } catch (e: Exception) {
+                println("Error updating social links: ${e.message}")
             }
         }
     }

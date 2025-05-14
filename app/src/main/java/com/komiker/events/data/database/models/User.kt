@@ -10,4 +10,6 @@ data class User(
     var username: String,
     var email: String,
     var avatar: String,
+    var telegram_link: String? = null,
+    var instagram_link: String? = null
 )

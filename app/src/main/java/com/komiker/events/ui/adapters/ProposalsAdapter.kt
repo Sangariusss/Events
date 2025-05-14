@@ -1,11 +1,13 @@
 package com.komiker.events.ui.adapters
 
 import android.content.Intent
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -21,7 +23,8 @@ import java.time.format.DateTimeFormatter
 
 class ProposalsAdapter(
     private val currentUserId: String?,
-    private val onDeleteClicked: (Proposal) -> Unit
+    private val onDeleteClicked: (Proposal) -> Unit,
+    private val navController: NavController
 ) : ListAdapter<Proposal, ProposalsAdapter.ProposalViewHolder>(ProposalDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProposalViewHolder {
@@ -42,8 +45,7 @@ class ProposalsAdapter(
             binding.textContent.text = proposal.content
             binding.textLikesCount.text = proposal.likesCount.toString()
 
-            val now = OffsetDateTime.now()
-            binding.textTime.text = formatTimeAgo(proposal.createdAt, now)
+            binding.textTime.text = formatTimeAgo(proposal.createdAt)
 
             Glide.with(binding.imageProfile.context)
                 .load(proposal.userAvatar)
@@ -62,11 +64,23 @@ class ProposalsAdapter(
             }
 
             if (currentUserId != null && proposal.userId == currentUserId) {
+                binding.textUserName.setTextColor(ContextCompat.getColor(binding.root.context, R.color.blue_60))
                 binding.buttonMore.setOnClickListener {
                     showPopupMenu(proposal)
                 }
             } else {
+                binding.textUserName.setTextColor(ContextCompat.getColor(binding.root.context, android.R.color.black))
                 binding.buttonMore.setOnClickListener(null)
+            }
+
+            binding.root.setOnClickListener {
+                val bundle = Bundle().apply {
+                    putParcelable("proposal", proposal)
+                }
+                navController.navigate(
+                    R.id.action_MainMenuFragment_to_ProposalDetailFragment,
+                    bundle
+                )
             }
         }
 
@@ -152,7 +166,8 @@ class ProposalsAdapter(
             popupWindow = null
         }
 
-        private fun formatTimeAgo(createdAt: OffsetDateTime, now: OffsetDateTime): String {
+        private fun formatTimeAgo(createdAt: OffsetDateTime): String {
+            val now = OffsetDateTime.now()
             val minutes = ChronoUnit.MINUTES.between(createdAt, now)
             val hours = ChronoUnit.HOURS.between(createdAt, now)
             val days = ChronoUnit.DAYS.between(createdAt, now)

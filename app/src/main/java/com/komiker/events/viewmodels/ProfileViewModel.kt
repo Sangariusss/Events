@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel() {
 
     val userLiveData = MutableLiveData<User?>()
+    val proposalAuthorLiveData = MutableLiveData<User?>()
 
     fun loadUser(userId: String) {
         viewModelScope.launch {
@@ -22,6 +23,20 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
                 userLiveData.value = if (!dataList.isNullOrEmpty()) dataList[0] else null
             } catch (e: Exception) {
                 userLiveData.value = null
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun loadProposalAuthor(userId: String) {
+        viewModelScope.launch {
+            try {
+                val result = supabaseUserDao.getUserById(userId)
+                val dataList = parseData(result.data)
+
+                proposalAuthorLiveData.value = if (!dataList.isNullOrEmpty()) dataList[0] else null
+            } catch (e: Exception) {
+                proposalAuthorLiveData.value = null
                 e.printStackTrace()
             }
         }
@@ -72,6 +87,14 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
                     e.printStackTrace()
                 }
             }
+        }
+    }
+
+    fun updateSocialLinks(telegramLink: String?, instagramLink: String?) {
+        viewModelScope.launch {
+            val userId = userLiveData.value?.user_id ?: return@launch
+            supabaseUserDao.updateUserSocialLinks(userId, telegramLink, instagramLink)
+            loadUser(userId)
         }
     }
 

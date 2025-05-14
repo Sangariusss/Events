@@ -44,14 +44,16 @@
         android:autoSizeMinTextSize="1dp"
         android:autoSizeTextType="uniform"
         android:fontFamily="@font/fixel_medium"
+        android:gravity="center|start"
         android:text="@string/_1_min"
         android:textColor="@color/neutral_60"
-        app:layout_constraintBottom_toBottomOf="@id/text_user_name"
+        app:layout_constraintBottom_toBottomOf="@id/image_profile"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@id/text_user_name"
-        app:layout_constraintTop_toTopOf="@id/text_user_name"
-        app:layout_constraintWidth_percent="0.1" />
+        app:layout_constraintTop_toTopOf="@id/image_profile"
+        app:layout_constraintWidth_percent="0.1"
+        app:layout_constraintHeight_percent="0.094" />
 
     <ImageButton
         android:id="@+id/button_more"
@@ -132,6 +134,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/share"
             android:src="@drawable/ic_share"
+            android:scaleType="fitCenter"
             app:layout_constraintBottom_toBottomOf="@id/image_like"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"

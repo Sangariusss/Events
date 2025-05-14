@@ -1,10 +1,13 @@
 package com.komiker.events.data.database.models
 
+import android.os.Parcelable
 import com.komiker.events.data.database.converters.OffsetDateTimeSerializer
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.time.OffsetDateTime
 
+@Parcelize
 @Serializable
 data class Proposal(
 
@@ -22,4 +25,4 @@ data class Proposal(
     @SerialName("likes_count")
     val likesCount: Int
     // val commentsCount: Int
-)
+) : Parcelable

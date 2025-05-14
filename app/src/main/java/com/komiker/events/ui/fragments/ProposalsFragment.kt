@@ -116,7 +116,8 @@ class ProposalsFragment : Fragment() {
                 currentUserId = currentUserId,
                 onDeleteClicked = { proposal ->
                     deleteProposal(proposal)
-                }
+                },
+                navController = findNavController()
             )
             binding.recyclerViewProposals.apply {
                 layoutManager = LinearLayoutManager(context)

@@ -109,6 +109,11 @@
             app:destination="@id/ChangeEmailFragment"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_MainMenuFragment_to_ProposalDetailFragment"
+            app:destination="@id/ProposalDetailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/FilterFragment"
@@ -331,4 +336,9 @@
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out" />
     </fragment>
+    <fragment
+        android:id="@+id/ProposalDetailFragment"
+        android:name="com.komiker.events.ui.fragments.ProposalDetailFragment"
+        android:label="ProposalDetailFragment"
+        tools:layout="@layout/fragment_proposal_detail" />
 </navigation>
