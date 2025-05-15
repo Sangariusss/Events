@@ -6,19 +6,34 @@ import android.text.Editable
 import android.text.SpannableString
 import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.komiker.events.R
+import com.komiker.events.data.database.SupabaseClientProvider
+import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
+import com.komiker.events.data.database.models.EventResponse
 import com.komiker.events.databinding.FragmentCreateEventOtherBinding
 import com.komiker.events.viewmodels.CreateEventViewModel
+import com.komiker.events.viewmodels.ProfileViewModel
+import com.komiker.events.viewmodels.ProfileViewModelFactory
+import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.postgrest.from
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.OffsetDateTime
 import java.util.Calendar
 import java.util.Locale
+import java.util.UUID
 
 class CreateEventOtherFragment : Fragment() {
 
@@ -28,6 +43,11 @@ class CreateEventOtherFragment : Fragment() {
     private val calendar = Calendar.getInstance()
     private val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.US)
     private val viewModel: CreateEventViewModel by viewModels({ requireParentFragment() })
+    private val supabaseClient = SupabaseClientProvider.client
+    private val supabaseUserDao = SupabaseUserDao(supabaseClient)
+    private val profileViewModel: ProfileViewModel by activityViewModels {
+        ProfileViewModelFactory(supabaseUserDao)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,6 +61,7 @@ class CreateEventOtherFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         restoreState()
         setupUi()
+        setupCreateEventButton()
     }
 
     override fun onDestroyView() {
@@ -72,6 +93,64 @@ class CreateEventOtherFragment : Fragment() {
         setupTimePicker()
         initButtonAddTags()
         initButtonLocation()
+    }
+
+    private fun setupCreateEventButton() {
+        binding.buttonCreateEvent.setOnClickListener {
+            saveEvent()
+            navigateToMainMenuWithHome()
+        }
+    }
+
+    private fun saveEvent() {
+        profileViewModel.userLiveData.value?.let { user ->
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val userId = supabaseClient.auth.currentSessionOrNull()?.user?.id
+                    if (userId != null && viewModel.title != null) {
+                        val eventTime = "${viewModel.hour}:${viewModel.minute} ${if (viewModel.isAmSelected) "AM" else "PM"}"
+                        val imageNames = viewModel.images.map { it.name }.takeIf { it.isNotEmpty() } ?: emptyList()
+                        val tagsList = viewModel.tags?.takeIf { it.isNotEmpty() } ?: emptyList()
+
+                        val event = EventResponse(
+                            id = UUID.randomUUID().toString(),
+                            userId = userId,
+                            username = user.username,
+                            userAvatar = user.avatar,
+                            title = viewModel.title!!,
+                            description = viewModel.description,
+                            startDate = viewModel.startDate,
+                            endDate = viewModel.endDate,
+                            eventTime = eventTime,
+                            tags = tagsList,
+                            location = viewModel.location,
+                            images = imageNames,
+                            createdAt = OffsetDateTime.now(),
+                            likesCount = 0
+                        )
+
+                        Log.d("EventData", "Saving event: $event")
+                        supabaseClient.from("events").insert(event)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    private fun navigateToMainMenuWithHome() {
+        val bundle = Bundle().apply {
+            putString("navigateTo", "home")
+        }
+        val navOptions = NavOptions.Builder()
+            .setPopUpTo(R.id.MainMenuFragment, false)
+            .build()
+        findNavController().navigate(
+            R.id.action_CreateEventFragment_to_MainMenuFragment,
+            bundle,
+            navOptions
+        )
     }
 
     private fun setupDatePickers() {

@@ -10,9 +10,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.komiker.events.databinding.FragmentCreateEventImagesBinding
 import com.komiker.events.ui.adapters.ImageAdapter
+import com.komiker.events.viewmodels.CreateEventViewModel
 import java.io.File
 import java.text.DecimalFormat
 
@@ -22,10 +24,10 @@ class CreateEventImagesFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var imageAdapter: ImageAdapter
-    private val imagesList = mutableListOf<ImageAdapter.ImageItem>()
+    private val viewModel: CreateEventViewModel by viewModels({ requireParentFragment() })
 
     private val pickImagesLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
-        val startPosition = imagesList.size
+        val startPosition = viewModel.images.size
         uris.forEach { uri ->
             val contentResolver: ContentResolver = requireContext().contentResolver
 
@@ -40,7 +42,7 @@ class CreateEventImagesFragment : Fragment() {
             val fileInfo = "$fileType | $fileSizeFormatted"
 
             val imageItem = ImageAdapter.ImageItem(File(fileName), fileName, fileInfo)
-            imagesList.add(imageItem)
+            viewModel.images.add(imageItem)
         }
         val itemCount = uris.size
         if (itemCount > 0) {
@@ -72,14 +74,14 @@ class CreateEventImagesFragment : Fragment() {
         binding.recyclerViewImages.post {
             val recyclerViewHeight = binding.recyclerViewImages.height
             imageAdapter = ImageAdapter(
-                imagesList,
+                viewModel.images,
                 { position ->
-                    if (position in 0 until imagesList.size) {
-                        imagesList.removeAt(position)
+                    if (position in 0 until viewModel.images.size) {
+                        viewModel.images.removeAt(position)
                         imageAdapter.notifyItemRemoved(position)
-                        imageAdapter.notifyItemRangeChanged(position, imagesList.size)
+                        imageAdapter.notifyItemRangeChanged(position, viewModel.images.size)
                     } else {
-                        Log.w("CreateEventImages", "Invalid position for removal: $position, size: ${imagesList.size}")
+                        Log.w("CreateEventImages", "Invalid position for removal: $position, size: ${viewModel.images.size}")
                     }
                 },
                 recyclerViewHeight,
@@ -99,8 +101,8 @@ class CreateEventImagesFragment : Fragment() {
 
     private fun setupRemoveAllButton() {
         binding.buttonRemoveAll.setOnClickListener {
-            val itemCount = imagesList.size
-            imagesList.clear()
+            val itemCount = viewModel.images.size
+            viewModel.images.clear()
             if (itemCount > 0) {
                 imageAdapter.notifyItemRangeRemoved(0, itemCount)
             }

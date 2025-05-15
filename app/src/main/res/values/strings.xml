@@ -192,4 +192,6 @@
     <string name="delete">Delete</string>
     <string name="telegram">Telegram</string>
     <string name="instagram">Instagram</string>
+    <string name="title_example_text">Hello! Is anyone from Ivano -Frankivsk?</string>
+    <string name="text_content_example_text">Hello! Is anyone from Ivano-Frankivsk? I love movies and discussing interesting films. I\'m looking for friends to go to premieres or just to exchange ideas. Write, I\'ll be glad to meet you!</string>
 </resources>

@@ -9,8 +9,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.komiker.events.R
 import com.komiker.events.databinding.FragmentCreateEventInfoBinding
+import com.komiker.events.viewmodels.CreateEventViewModel
 
 class CreateEventInfoFragment : Fragment() {
 
@@ -19,6 +21,7 @@ class CreateEventInfoFragment : Fragment() {
 
     private val maxTitleLength = 255
     private val maxDescriptionLength = 255
+    private val viewModel: CreateEventViewModel by viewModels({ requireParentFragment() })
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,6 +33,7 @@ class CreateEventInfoFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        restoreState()
         setupEditTextBackgroundChange()
         setupDescriptionEditTextBackgroundChange()
         setupTitleCharCounter()
@@ -37,8 +41,19 @@ class CreateEventInfoFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        saveState()
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun restoreState() {
+        viewModel.title?.let { binding.edittextNameOfTheEvent.setText(it) }
+        viewModel.description?.let { binding.edittextDescription.setText(it) }
+    }
+
+    private fun saveState() {
+        viewModel.title = binding.edittextNameOfTheEvent.text.toString().trim().takeIf { it.isNotEmpty() }
+        viewModel.description = binding.edittextDescription.text.toString().trim().takeIf { it.isNotEmpty() }
     }
 
     private fun setupEditTextBackgroundChange() {
