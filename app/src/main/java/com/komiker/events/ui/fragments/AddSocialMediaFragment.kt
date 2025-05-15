@@ -24,11 +24,8 @@ class AddSocialMediaFragment : Fragment() {
     private var _binding: FragmentAddSocialMediaBinding? = null
     private val binding get() = _binding!!
 
-    private val supabaseClient = SupabaseClientProvider.client
-    private val supabaseUserDao = SupabaseUserDao(supabaseClient)
-
     private val profileViewModel: ProfileViewModel by activityViewModels {
-        ProfileViewModelFactory(supabaseUserDao)
+        ProfileViewModelFactory(SupabaseUserDao(SupabaseClientProvider.client))
     }
 
     override fun onCreateView(
@@ -43,8 +40,7 @@ class AddSocialMediaFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupSystemBars()
-        initButtonBack()
-        setupOnBackPressedCallback()
+        setupNavigation()
         loadSavedLinks()
         setupEditTextListeners()
     }
@@ -55,91 +51,98 @@ class AddSocialMediaFragment : Fragment() {
     }
 
     private fun setupSystemBars() {
-        requireActivity().window.apply {
-            navigationBarColor = ContextCompat.getColor(requireContext(), R.color.neutral_100)
-        }
+        requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.neutral_100)
     }
 
-    private fun initButtonBack() {
-        binding.buttonBack.setOnClickListener {
-            saveSocialMediaLinks()
-            navigateToMainMenuWithProfile()
-        }
-    }
-
-    private fun setupOnBackPressedCallback() {
+    private fun setupNavigation() {
+        binding.buttonBack.setOnClickListener { navigateWithSave() }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                saveSocialMediaLinks()
-                navigateToMainMenuWithProfile()
+                navigateWithSave()
             }
         })
+    }
+
+    private fun navigateWithSave() {
+        saveSocialMediaLinks()
+        findNavController().navigate(
+            R.id.action_AddSocialMediaFragment_to_MainMenuFragment,
+            Bundle().apply { putString("navigateTo", "profile") }
+        )
     }
 
     private fun loadSavedLinks() {
         profileViewModel.userLiveData.observe(viewLifecycleOwner) { user ->
             user?.let {
-                binding.editSocialMedia1.setText(it.telegram_link ?: "")
-                binding.editSocialMedia2.setText(it.instagram_link ?: "")
+                binding.editSocialMedia1.apply {
+                    setText(it.telegram_link ?: "")
+                    updateValidationState(this, "telegram")
+                }
+                binding.editSocialMedia2.apply {
+                    setText(it.instagram_link ?: "")
+                    updateValidationState(this, "instagram")
+                }
             }
         }
     }
 
     private fun setupEditTextListeners() {
-        setupEditTextValidation(binding.editSocialMedia1, "telegram")
-        setupEditTextValidation(binding.editSocialMedia2, "instagram")
-    }
-
-    private fun setupEditTextValidation(editText: EditText, platform: String) {
-        editText.addTextChangedListener(object : TextWatcher {
+        val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                val text = s.toString().trim()
-                if (text.length >= 4) {
-                    if (isValidUrl(text, platform)) {
-                        editText.setTextColor(ContextCompat.getColor(requireContext(), R.color.neutral_0))
-                    } else {
-                        editText.setTextColor(ContextCompat.getColor(requireContext(), R.color.red_50))
-                    }
-                } else {
-                    editText.setTextColor(ContextCompat.getColor(requireContext(), R.color.neutral_0))
-                }
+                val editText = s?.let { editable ->
+                    binding.editSocialMedia1.takeIf { it.text === editable }
+                        ?: binding.editSocialMedia2.takeIf { it.text === editable }
+                } ?: return
+                val platform = if (editText == binding.editSocialMedia1) "telegram" else "instagram"
+                updateValidationState(editText, platform)
             }
-        })
+        }
+
+        binding.editSocialMedia1.addTextChangedListener(textWatcher)
+        binding.editSocialMedia2.addTextChangedListener(textWatcher)
+    }
+
+    private fun updateValidationState(editText: EditText, platform: String) {
+        val text = editText.text.toString().trim()
+
+        if (text.length >= 4 && isValidUrl(text, platform)) {
+            editText.setTextColor(ContextCompat.getColor(requireContext(), R.color.neutral_0))
+            editText.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_green, 0)
+        } else {
+            editText.setTextColor(ContextCompat.getColor(requireContext(), R.color.neutral_0))
+            editText.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+
+            if (text.length >= 4) {
+                editText.setTextColor(ContextCompat.getColor(requireContext(), R.color.red_50))
+            }
+        }
     }
 
     private fun isValidUrl(url: String, platform: String): Boolean {
         return when (platform) {
-            "telegram" -> url.matches(Regex("(https?://(www\\.)?)?t\\.me/[a-zA-Z0-9_]+"))
-            "instagram" -> url.matches(Regex("(https?://(www\\.)?)?instagram\\.com/[a-zA-Z0-9_./-]+"))
+            "telegram" -> url.matches(TELEGRAM_REGEX)
+            "instagram" -> url.matches(INSTAGRAM_REGEX)
             else -> false
         }
     }
 
     private fun saveSocialMediaLinks() {
-        var telegramLink = binding.editSocialMedia1.text.toString().trim()
-        var instagramLink = binding.editSocialMedia2.text.toString().trim()
+        val telegramLink = normalizeUrl(binding.editSocialMedia1.text.toString().trim(), "telegram")
+        val instagramLink = normalizeUrl(binding.editSocialMedia2.text.toString().trim(), "instagram")
 
-        if (telegramLink.isNotEmpty() && !telegramLink.startsWith("https://")) {
-            telegramLink = "https://$telegramLink"
-        }
-        if (instagramLink.isNotEmpty() && !instagramLink.startsWith("https://")) {
-            instagramLink = "https://$instagramLink"
-        }
-
-        profileViewModel.updateSocialLinks(
-            telegramLink.takeIf { isValidUrl(it, "telegram") || it.isEmpty() },
-            instagramLink.takeIf { isValidUrl(it, "instagram") || it.isEmpty() }
-        )
+        profileViewModel.updateSocialLinks(telegramLink, instagramLink)
     }
 
-    private fun navigateToMainMenuWithProfile() {
-        findNavController().navigate(
-            R.id.action_AddSocialMediaFragment_to_MainMenuFragment,
-            Bundle().apply {
-                putString("navigateTo", "profile")
-            }
-        )
+    private fun normalizeUrl(url: String, platform: String): String? {
+        if (url.isEmpty()) return null
+        val normalizedUrl = if (!url.startsWith("https://")) "https://$url" else url
+        return normalizedUrl.takeIf { isValidUrl(it, platform) }
+    }
+
+    companion object {
+        private val TELEGRAM_REGEX = Regex("(https?://(www\\.)?)?t\\.me/[a-zA-Z0-9_]+")
+        private val INSTAGRAM_REGEX = Regex("(https?://(www\\.)?)?instagram\\.com/[a-zA-Z0-9_./-]+")
     }
 }

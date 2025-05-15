@@ -76,40 +76,26 @@
             app:layout_constraintHeight_percent="0.5"
             app:layout_constraintVertical_bias="0">
 
-            <ImageView
-                android:id="@+id/icon_social_media_1"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:contentDescription="@string/social_media_icon"
-                android:src="@drawable/ic_link"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHeight_percent="0.343"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintWidth_percent="0.073" />
-
             <EditText
                 android:id="@+id/edit_social_media_1"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:background="@null"
-                android:fontFamily="@font/fixel_regular"
-                android:gravity="start|center_vertical"
+                android:drawablePadding="8dp"
                 android:hint="@string/telegram_com"
-                android:importantForAutofill="no"
-                android:inputType="textUri"
-                android:maxLines="1"
                 android:textColor="@color/neutral_0"
                 android:textColorHint="@color/neutral_60"
+                android:fontFamily="@font/fixel_regular"
+                android:gravity="start|center_vertical"
+                android:maxLines="1"
+                android:inputType="textUri"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHeight_percent="0.314"
-                app:layout_constraintHorizontal_bias="1"
-                app:layout_constraintStart_toEndOf="@+id/icon_social_media_1"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintWidth_percent="0.915" />
+                app:layout_constraintWidth_percent="1"
+                android:importantForAutofill="no"
+                tools:ignore="RtlSymmetry" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -125,40 +111,26 @@
             app:layout_constraintHeight_percent="0.5"
             app:layout_constraintVertical_bias="1">
 
-            <ImageView
-                android:id="@+id/icon_social_media_2"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:contentDescription="@string/social_media_icon"
-                android:src="@drawable/ic_link"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHeight_percent="0.343"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintWidth_percent="0.073" />
-
             <EditText
                 android:id="@+id/edit_social_media_2"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
+                android:background="@null"
+                android:drawablePadding="8dp"
                 android:hint="@string/instagram_com"
                 android:textColor="@color/neutral_0"
                 android:textColorHint="@color/neutral_60"
                 android:fontFamily="@font/fixel_regular"
                 android:gravity="start|center_vertical"
                 android:maxLines="1"
-                android:background="@null"
                 android:inputType="textUri"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHeight_percent="0.314"
-                app:layout_constraintHorizontal_bias="1"
-                app:layout_constraintStart_toEndOf="@+id/icon_social_media_2"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintWidth_percent="0.915"
-                android:importantForAutofill="no" />
+                app:layout_constraintWidth_percent="1"
+                android:importantForAutofill="no"
+                tools:ignore="RtlSymmetry" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
