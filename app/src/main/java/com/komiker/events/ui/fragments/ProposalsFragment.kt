@@ -175,7 +175,6 @@ class ProposalsFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             changeFlow.collect { change ->
-                println("Received Realtime update: $change")
                 val proposalResponse = change.decodeRecord<ProposalResponse>()
                 val newProposal = Proposal(
                     id = proposalResponse.id,

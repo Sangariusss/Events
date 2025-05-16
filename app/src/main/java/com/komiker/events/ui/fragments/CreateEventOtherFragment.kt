@@ -1,6 +1,8 @@
 package com.komiker.events.ui.fragments
 
 import android.app.DatePickerDialog
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.text.Editable
 import android.text.SpannableString
@@ -13,6 +15,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
@@ -20,15 +23,19 @@ import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
 import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
 import com.komiker.events.data.database.models.EventResponse
+import com.komiker.events.data.models.SelectedTags
 import com.komiker.events.databinding.FragmentCreateEventOtherBinding
+import com.komiker.events.ui.adapters.ImageAdapter
 import com.komiker.events.viewmodels.CreateEventViewModel
 import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.time.OffsetDateTime
 import java.util.Calendar
@@ -62,6 +69,7 @@ class CreateEventOtherFragment : Fragment() {
         restoreState()
         setupUi()
         setupCreateEventButton()
+        setupFragmentResults()
     }
 
     override fun onDestroyView() {
@@ -102,6 +110,48 @@ class CreateEventOtherFragment : Fragment() {
         }
     }
 
+    private suspend fun uploadImagesToStorage(images: List<ImageAdapter.ImageItem>): List<String> {
+        val uploadedImageNames = mutableListOf<String>()
+        val bucketName = "event-images"
+
+        images.forEach { imageItem ->
+            try {
+                val file = imageItem.file
+
+                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+
+                val maxWidth = 1000
+                val width = bitmap.width
+                val height = bitmap.height
+                val aspectRatio = width.toFloat() / height.toFloat()
+
+                val newWidth: Int
+                val newHeight: Int
+                if (width > maxWidth) {
+                    newWidth = maxWidth
+                    newHeight = (maxWidth / aspectRatio).toInt()
+                } else {
+                    newWidth = width
+                    newHeight = height
+                }
+
+                val scaledBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+
+                val outputStream = ByteArrayOutputStream()
+                scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+                val compressedByteArray = outputStream.toByteArray()
+
+                val fileName = "${UUID.randomUUID()}_${file.name}"
+                supabaseClient.storage.from(bucketName).upload(fileName, compressedByteArray, upsert = true)
+                uploadedImageNames.add(fileName)
+            } catch (e: Exception) {
+                Log.e("CreateEventOtherFragment", "Error uploading image ${imageItem.name}: ${e.message}", e)
+            }
+        }
+
+        return uploadedImageNames
+    }
+
     private fun saveEvent() {
         profileViewModel.userLiveData.value?.let { user ->
             CoroutineScope(Dispatchers.IO).launch {
@@ -109,8 +159,12 @@ class CreateEventOtherFragment : Fragment() {
                     val userId = supabaseClient.auth.currentSessionOrNull()?.user?.id
                     if (userId != null && viewModel.title != null) {
                         val eventTime = "${viewModel.hour}:${viewModel.minute} ${if (viewModel.isAmSelected) "AM" else "PM"}"
-                        val imageNames = viewModel.images.map { it.name }.takeIf { it.isNotEmpty() } ?: emptyList()
-                        val tagsList = viewModel.tags?.takeIf { it.isNotEmpty() } ?: emptyList()
+
+                        val imageNames = if (viewModel.images.isNotEmpty()) {
+                            uploadImagesToStorage(viewModel.images)
+                        } else {
+                            emptyList()
+                        }
 
                         val event = EventResponse(
                             id = UUID.randomUUID().toString(),
@@ -122,18 +176,17 @@ class CreateEventOtherFragment : Fragment() {
                             startDate = viewModel.startDate,
                             endDate = viewModel.endDate,
                             eventTime = eventTime,
-                            tags = tagsList,
+                            tags = viewModel.tags,
                             location = viewModel.location,
                             images = imageNames,
                             createdAt = OffsetDateTime.now(),
                             likesCount = 0
                         )
 
-                        Log.d("EventData", "Saving event: $event")
                         supabaseClient.from("events").insert(event)
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e("CreateEventOtherFragment", "Error saving event: ${e.message}", e)
                 }
             }
         }
@@ -294,6 +347,18 @@ class CreateEventOtherFragment : Fragment() {
         binding.constraintLocationButtonLayout.setOnClickListener {
             val bundle = Bundle().apply { putInt("sourceFragmentId", R.id.CreateEventFragment) }
             findNavController().navigate(R.id.action_CreateEventFragment_to_LocationFragment, bundle)
+        }
+    }
+
+    private fun setupFragmentResults() {
+        setFragmentResultListener("locationResult") { _, bundle ->
+            val selectedAddress = bundle.getString("selectedAddress")
+            viewModel.location = selectedAddress
+        }
+
+        setFragmentResultListener("tagsResult") { _, bundle ->
+            @Suppress("DEPRECATION") val selectedTags = bundle.getSerializable("selectedTags") as? SelectedTags
+            viewModel.tags = selectedTags?.tags ?: emptyList()
         }
     }
 }

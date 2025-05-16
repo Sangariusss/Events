@@ -76,7 +76,7 @@
         android:fontFamily="@font/fixel_semibold"
         android:gravity="top|start"
         android:lineSpacingMultiplier="1.4"
-        android:maxLines="10"
+        android:maxLines="2"
         android:text="@string/title_example_text"
         android:textColor="@color/neutral_0"
         android:textSize="18sp"

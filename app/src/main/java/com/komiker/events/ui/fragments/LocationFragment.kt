@@ -3,6 +3,7 @@ package com.komiker.events.ui.fragments
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -100,6 +101,7 @@ class LocationFragment : Fragment() {
             val bundle = Bundle().apply {
                 putString("selectedAddress", selectedLocation.address)
             }
+            Log.d("LocationFragment", "Setting result for location: ${selectedLocation.address}")
             setFragmentResult("locationResult", bundle)
             val sourceFragmentId = arguments?.getInt("sourceFragmentId") ?: R.id.FilterFragment
             if (sourceFragmentId == R.id.CreateEventFragment) {

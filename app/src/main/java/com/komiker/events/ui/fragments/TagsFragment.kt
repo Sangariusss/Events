@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -70,6 +71,7 @@ class TagsFragment : Fragment() {
             val sourceFragmentId = arguments?.getInt("sourceFragmentId") ?: R.id.FilterFragment
             val selectedTags = SelectedTags(tagsAdapter.getSelectedTags())
             val bundle = Bundle().apply { putSerializable("selectedTags", selectedTags) }
+            setFragmentResult("tagsResult", bundle)
             when (sourceFragmentId) {
                 R.id.CreateEventFragment -> findNavController().popBackStack(R.id.CreateEventFragment, false)
                 else -> findNavController().navigate(R.id.action_TagsFragment_to_FilterFragment, bundle)

@@ -16,6 +16,7 @@ import com.komiker.events.databinding.FragmentCreateEventImagesBinding
 import com.komiker.events.ui.adapters.ImageAdapter
 import com.komiker.events.viewmodels.CreateEventViewModel
 import java.io.File
+import java.io.FileOutputStream
 import java.text.DecimalFormat
 
 class CreateEventImagesFragment : Fragment() {
@@ -30,19 +31,19 @@ class CreateEventImagesFragment : Fragment() {
         val startPosition = viewModel.images.size
         uris.forEach { uri ->
             val contentResolver: ContentResolver = requireContext().contentResolver
-
             val fileName = getFileName(uri, contentResolver) ?: "image_${System.currentTimeMillis()}"
-
             val fileSizeBytes = getFileSize(uri, contentResolver)
-
             val fileSizeFormatted = formatFileSize(fileSizeBytes)
-
             val fileType = getFileType(uri, contentResolver, fileName).uppercase()
-
             val fileInfo = "$fileType | $fileSizeFormatted"
 
-            val imageItem = ImageAdapter.ImageItem(File(fileName), fileName, fileInfo)
-            viewModel.images.add(imageItem)
+            val tempFile = uriToTempFile(uri, fileName)
+            if (tempFile != null) {
+                val imageItem = ImageAdapter.ImageItem(tempFile, fileName, fileInfo)
+                viewModel.images.add(imageItem)
+            } else {
+                Log.e("CreateEventImages", "Failed to create temp file for $fileName")
+            }
         }
         val itemCount = uris.size
         if (itemCount > 0) {
@@ -129,13 +130,8 @@ class CreateEventImagesFragment : Fragment() {
                 }
             }
         }
-
         val lastPathSegment = uri.lastPathSegment
-        if (lastPathSegment != null && lastPathSegment.contains("/")) {
-            return lastPathSegment.substringAfterLast("/")
-        }
-
-        return lastPathSegment
+        return lastPathSegment?.substringAfterLast("/") ?: "image_${System.currentTimeMillis()}"
     }
 
     private fun getFileSize(uri: Uri, contentResolver: ContentResolver): Long {
@@ -159,7 +155,30 @@ class CreateEventImagesFragment : Fragment() {
                 mimeType.contains("webp") -> return "WEBP"
             }
         }
-
         return fileName.substringAfterLast(".", "UNKNOWN").uppercase()
+    }
+
+    private fun uriToTempFile(uri: Uri, fileName: String): File? {
+        return try {
+            val inputStream = requireContext().contentResolver.openInputStream(uri)
+            if (inputStream != null) {
+                val tempFile = File.createTempFile(
+                    "temp_image_${System.currentTimeMillis()}",
+                    ".${fileName.substringAfterLast(".")}",
+                    requireContext().cacheDir
+                )
+                inputStream.use { input ->
+                    FileOutputStream(tempFile).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                tempFile
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("CreateEventImages", "Error converting URI to temp file: ${e.message}")
+            null
+        }
     }
 }

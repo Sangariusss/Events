@@ -194,4 +194,14 @@
     <string name="instagram">Instagram</string>
     <string name="title_example_text">Hello! Is anyone from Ivano -Frankivsk?</string>
     <string name="text_content_example_text">Hello! Is anyone from Ivano-Frankivsk? I love movies and discussing interesting films. I\'m looking for friends to go to premieres or just to exchange ideas. Write, I\'ll be glad to meet you!</string>
+    <string name="event_images">EventImages</string>
+    <string name="event_date_range">%1$s - %2$s</string>
+    <string name="tags_content_example">News, Streaming, Marathon, IT</string>
+    <string name="status_active">Status: Active</string>
+    <string name="start_08_00_am">Start 08:00 AM</string>
+    <string name="_14_02_2025_16_02_2025">14.02.2025 - 16.02.2025</string>
+    <string name="address">Address</string>
+    <string name="address_content_example">2984 Hollow Creek Rd, Springfield, IL 62704, United States</string>
+    <string name="check_location">Check location</string>
+    <string name="start_time_format">Start %s</string>
 </resources>

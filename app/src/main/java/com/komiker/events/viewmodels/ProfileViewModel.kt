@@ -13,6 +13,7 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
 
     val userLiveData = MutableLiveData<User?>()
     val proposalAuthorLiveData = MutableLiveData<User?>()
+    val eventAuthorLiveData = MutableLiveData<User?>()
 
     fun loadUser(userId: String) {
         viewModelScope.launch {
@@ -37,6 +38,20 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
                 proposalAuthorLiveData.value = if (!dataList.isNullOrEmpty()) dataList[0] else null
             } catch (e: Exception) {
                 proposalAuthorLiveData.value = null
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun loadEventAuthor(userId: String) {
+        viewModelScope.launch {
+            try {
+                val result = supabaseUserDao.getUserById(userId)
+                val dataList = parseData(result.data)
+
+                eventAuthorLiveData.value = if (!dataList.isNullOrEmpty()) dataList[0] else null
+            } catch (e: Exception) {
+                eventAuthorLiveData.value = null
                 e.printStackTrace()
             }
         }

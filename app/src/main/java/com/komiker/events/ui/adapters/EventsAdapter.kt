@@ -74,7 +74,10 @@ class EventsAdapter(
             }
 
             binding.root.setOnClickListener {
-                //
+                val bundle = Bundle().apply {
+                    putParcelable("event", event)
+                }
+                navController.navigate(R.id.action_MainMenuFragment_to_EventDetailFragment, bundle)
             }
         }
 

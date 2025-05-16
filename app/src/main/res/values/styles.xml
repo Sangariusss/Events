@@ -272,4 +272,15 @@
         <item name="android:windowEnterAnimation">@anim/fade_in</item>
         <item name="android:windowExitAnimation">@anim/fade_out</item>
     </style>
+
+    <style name="ButtonCheckLocation" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_button_publish</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:fontFamily">@font/fixel_semibold</item>
+        <item name="android:text">@string/check_location</item>
+        <item name="android:textColor">@color/neutral_100</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">18sp</item>
+    </style>
 </resources>
