@@ -4,13 +4,12 @@ import android.content.ContentResolver
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.komiker.events.databinding.FragmentCreateEventImagesBinding
 import com.komiker.events.ui.adapters.ImageAdapter
@@ -25,29 +24,25 @@ class CreateEventImagesFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var imageAdapter: ImageAdapter
-    private val viewModel: CreateEventViewModel by viewModels({ requireParentFragment() })
+    private val viewModel: CreateEventViewModel by activityViewModels()
 
     private val pickImagesLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
         val startPosition = viewModel.images.size
         uris.forEach { uri ->
-            val contentResolver: ContentResolver = requireContext().contentResolver
+            val contentResolver = requireContext().contentResolver
             val fileName = getFileName(uri, contentResolver) ?: "image_${System.currentTimeMillis()}"
-            val fileSizeBytes = getFileSize(uri, contentResolver)
-            val fileSizeFormatted = formatFileSize(fileSizeBytes)
-            val fileType = getFileType(uri, contentResolver, fileName).uppercase()
-            val fileInfo = "$fileType | $fileSizeFormatted"
-
             val tempFile = uriToTempFile(uri, fileName)
             if (tempFile != null) {
-                val imageItem = ImageAdapter.ImageItem(tempFile, fileName, fileInfo)
+                val imageItem = ImageAdapter.ImageItem(
+                    tempFile,
+                    fileName,
+                    "${getFileType(uri, contentResolver, fileName).uppercase()} | ${formatFileSize(getFileSize(uri, contentResolver))}"
+                )
                 viewModel.images.add(imageItem)
-            } else {
-                Log.e("CreateEventImages", "Failed to create temp file for $fileName")
             }
         }
-        val itemCount = uris.size
-        if (itemCount > 0) {
-            imageAdapter.notifyItemRangeInserted(startPosition, itemCount)
+        if (uris.isNotEmpty()) {
+            imageAdapter.notifyItemRangeInserted(startPosition, uris.size)
         }
     }
 
@@ -77,12 +72,10 @@ class CreateEventImagesFragment : Fragment() {
             imageAdapter = ImageAdapter(
                 viewModel.images,
                 { position ->
-                    if (position in 0 until viewModel.images.size) {
+                    if (position in viewModel.images.indices) {
                         viewModel.images.removeAt(position)
                         imageAdapter.notifyItemRemoved(position)
                         imageAdapter.notifyItemRangeChanged(position, viewModel.images.size)
-                    } else {
-                        Log.w("CreateEventImages", "Invalid position for removal: $position, size: ${viewModel.images.size}")
                     }
                 },
                 recyclerViewHeight,
@@ -103,8 +96,8 @@ class CreateEventImagesFragment : Fragment() {
     private fun setupRemoveAllButton() {
         binding.buttonRemoveAll.setOnClickListener {
             val itemCount = viewModel.images.size
-            viewModel.images.clear()
             if (itemCount > 0) {
+                viewModel.images.clear()
                 imageAdapter.notifyItemRangeRemoved(0, itemCount)
             }
         }
@@ -113,34 +106,24 @@ class CreateEventImagesFragment : Fragment() {
     private fun formatFileSize(sizeBytes: Long): String {
         val kb = sizeBytes / 1000.0
         val df = DecimalFormat("#0.00")
-        return if (kb < 1000) {
-            "${df.format(kb)} kB"
-        } else {
-            val mb = kb / 1000.0
-            "${df.format(mb)} MB"
-        }
+        return if (kb < 1000) "${df.format(kb)} kB" else "${df.format(kb / 1000)} MB"
     }
 
     private fun getFileName(uri: Uri, contentResolver: ContentResolver): String? {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val fileNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                if (fileNameIndex != -1) {
-                    return cursor.getString(fileNameIndex)
-                }
+                if (fileNameIndex != -1) return cursor.getString(fileNameIndex)
             }
         }
-        val lastPathSegment = uri.lastPathSegment
-        return lastPathSegment?.substringAfterLast("/") ?: "image_${System.currentTimeMillis()}"
+        return uri.lastPathSegment?.substringAfterLast("/") ?: "image_${System.currentTimeMillis()}"
     }
 
     private fun getFileSize(uri: Uri, contentResolver: ContentResolver): Long {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val fileSizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-                if (fileSizeIndex != -1) {
-                    return cursor.getLong(fileSizeIndex)
-                }
+                if (fileSizeIndex != -1) return cursor.getLong(fileSizeIndex)
             }
         }
         return 0L
@@ -148,36 +131,26 @@ class CreateEventImagesFragment : Fragment() {
 
     private fun getFileType(uri: Uri, contentResolver: ContentResolver, fileName: String): String {
         val mimeType = contentResolver.getType(uri)
-        if (mimeType != null) {
-            when {
-                mimeType.contains("jpeg") || mimeType.contains("jpg") -> return "JPG"
-                mimeType.contains("png") -> return "PNG"
-                mimeType.contains("webp") -> return "WEBP"
-            }
+        return when {
+            mimeType?.contains("jpeg") == true || mimeType?.contains("jpg") == true -> "JPG"
+            mimeType?.contains("png") == true -> "PNG"
+            mimeType?.contains("webp") == true -> "WEBP"
+            else -> fileName.substringAfterLast(".", "UNKNOWN").uppercase()
         }
-        return fileName.substringAfterLast(".", "UNKNOWN").uppercase()
     }
 
     private fun uriToTempFile(uri: Uri, fileName: String): File? {
         return try {
-            val inputStream = requireContext().contentResolver.openInputStream(uri)
-            if (inputStream != null) {
-                val tempFile = File.createTempFile(
+            requireContext().contentResolver.openInputStream(uri)?.use { input ->
+                File.createTempFile(
                     "temp_image_${System.currentTimeMillis()}",
                     ".${fileName.substringAfterLast(".")}",
                     requireContext().cacheDir
-                )
-                inputStream.use { input ->
-                    FileOutputStream(tempFile).use { output ->
-                        input.copyTo(output)
-                    }
+                ).apply {
+                    FileOutputStream(this).use { output -> input.copyTo(output) }
                 }
-                tempFile
-            } else {
-                null
             }
         } catch (e: Exception) {
-            Log.e("CreateEventImages", "Error converting URI to temp file: ${e.message}")
             null
         }
     }

@@ -1,6 +1,5 @@
 package com.komiker.events.ui.fragments
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -10,18 +9,18 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.komiker.events.R
 import com.komiker.events.data.database.AppDatabase
 import com.komiker.events.data.database.entities.TagCategoryEntity
-import com.komiker.events.data.models.SelectedTags
 import com.komiker.events.data.models.TagItem
 import com.komiker.events.data.repository.TagRepository
 import com.komiker.events.databinding.FragmentTagsBinding
 import com.komiker.events.ui.adapters.TagsAdapter
+import com.komiker.events.viewmodels.CreateEventViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -31,16 +30,8 @@ class TagsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var tagsAdapter: TagsAdapter
-    private val tagRepository: TagRepository by lazy {
-        TagRepository(AppDatabase.getDatabase(requireContext()))
-    }
-
-    private val emptyDrawable: Drawable? by lazy {
-        ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_empty)
-    }
-    private val filledDrawable: Drawable? by lazy {
-        ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_filled)
-    }
+    private val tagRepository: TagRepository by lazy { TagRepository(AppDatabase.getDatabase(requireContext())) }
+    private val viewModel: CreateEventViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,62 +43,54 @@ class TagsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        setupButtonBack()
-        setupEditTextBackgroundChange()
         setupRecyclerView()
+        setupSearchField()
+        setupButtonBack()
         loadTags()
         tagRepository.setupRealtimeUpdates(viewLifecycleOwner.lifecycleScope)
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         tagRepository.cleanupRealtime()
+        super.onDestroyView()
         _binding = null
     }
 
     private fun setupButtonBack() {
         binding.buttonBack.setOnClickListener {
+            viewModel.setTags(tagsAdapter.getSelectedTags())
             val sourceFragmentId = arguments?.getInt("sourceFragmentId") ?: R.id.FilterFragment
-            val selectedTags = SelectedTags(tagsAdapter.getSelectedTags())
-            val bundle = Bundle().apply { putSerializable("selectedTags", selectedTags) }
-            setFragmentResult("tagsResult", bundle)
-            when (sourceFragmentId) {
-                R.id.CreateEventFragment -> findNavController().popBackStack(R.id.CreateEventFragment, false)
-                else -> findNavController().navigate(R.id.action_TagsFragment_to_FilterFragment, bundle)
+            if (sourceFragmentId == R.id.CreateEventFragment) {
+                findNavController().popBackStack(R.id.CreateEventFragment, false)
+            } else {
+                findNavController().navigate(R.id.action_TagsFragment_to_FilterFragment)
             }
         }
     }
 
-    private fun setupEditTextBackgroundChange() {
-        val editText = binding.editTextFindLocation
-
-        editText.addTextChangedListener(object : TextWatcher {
+    private fun setupSearchField() {
+        val emptyDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_empty)
+        val filledDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_filled)
+        binding.editTextFindLocation.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                editText.background = if (s.isNullOrEmpty()) emptyDrawable else filledDrawable
+                binding.editTextFindLocation.background = if (s.isNullOrEmpty()) emptyDrawable else filledDrawable
                 if (s.isNullOrEmpty()) loadTags() else filterTags(s.toString())
             }
-
             override fun afterTextChanged(s: Editable?) {}
         })
     }
 
     private fun setupRecyclerView() {
         tagsAdapter = TagsAdapter {}
-
         binding.recyclerViewTags.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = tagsAdapter
-
             doOnLayout {
                 val recyclerHeight = height
                 if (recyclerHeight > 0) {
-                    val headerHeight = (recyclerHeight * 0.054).toInt()
-                    val subTagHeight = (recyclerHeight * 0.081).toInt()
-                    tagsAdapter.setHeaderHeight(headerHeight)
-                    tagsAdapter.setSubTagHeight(subTagHeight)
+                    tagsAdapter.setHeaderHeight((recyclerHeight * 0.054).toInt())
+                    tagsAdapter.setSubTagHeight((recyclerHeight * 0.081).toInt())
                 }
             }
         }
@@ -123,9 +106,7 @@ class TagsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             tagRepository.getTagCategories().collectLatest { categories ->
                 if (categories.isEmpty()) {
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        tagRepository.syncTagCategories()
-                    }
+                    viewLifecycleOwner.lifecycleScope.launch { tagRepository.syncTagCategories() }
                 } else {
                     tagsAdapter.submitList(prepareTagItems(categories))
                 }
@@ -138,11 +119,7 @@ class TagsFragment : Fragment() {
             tagRepository.getTagCategories().collectLatest { categories ->
                 val filteredItems = categories.flatMap { category ->
                     val filteredSubTags = category.subTags.filter { it.contains(query, ignoreCase = true) }
-                    if (filteredSubTags.isNotEmpty()) {
-                        prepareTagItems(listOf(category.copy(subTags = filteredSubTags)))
-                    } else {
-                        emptyList()
-                    }
+                    if (filteredSubTags.isNotEmpty()) prepareTagItems(listOf(category.copy(subTags = filteredSubTags))) else emptyList()
                 }
                 tagsAdapter.submitList(filteredItems)
             }
