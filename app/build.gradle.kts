@@ -123,4 +123,6 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     implementation(libs.kotlin.parcelize.runtime)
+
+    implementation(libs.shimmer)
 }

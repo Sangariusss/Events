@@ -165,7 +165,6 @@
                 app:layout_constraintTop_toTopOf="@id/image_like"
                 app:layout_constraintWidth_percent="0.067" />
 
-            <!-- Event Title -->
             <TextView
                 android:id="@+id/text_title"
                 android:layout_width="0dp"
@@ -202,13 +201,33 @@
                 android:id="@+id/imageEventPager"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
+                android:layout_marginTop="32dp"
                 android:background="@drawable/bg_view_pager_image_event"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.327"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_content"
+                app:layout_constraintWidth_percent="0.911" />
+
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/shimmerLayout"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
                 app:layout_constraintTop_toBottomOf="@id/text_content"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHeight_percent="0.327"
                 app:layout_constraintWidth_percent="0.911"
-                android:layout_marginTop="32dp" />
+                android:layout_marginTop="32dp"
+                android:background="@drawable/bg_view_pager_image_event">
+
+                <View
+                    android:id="@+id/skeletonView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_skeleton_placeholder" />
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
 
             <TextView
                 android:id="@+id/title_tags"
