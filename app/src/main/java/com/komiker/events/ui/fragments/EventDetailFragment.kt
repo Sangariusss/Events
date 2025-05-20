@@ -19,16 +19,16 @@ import com.komiker.events.data.database.models.Event
 import com.komiker.events.databinding.FragmentEventDetailBinding
 import com.komiker.events.glide.CircleCropTransformation
 import com.komiker.events.ui.adapters.EventImageAdapter
-import java.time.OffsetDateTime
-import java.time.temporal.ChronoUnit
-import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import androidx.lifecycle.lifecycleScope
-import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import androidx.lifecycle.lifecycleScope
+import io.github.jan.supabase.storage.storage
 
 class EventDetailFragment : Fragment() {
 
@@ -36,14 +36,16 @@ class EventDetailFragment : Fragment() {
     private val binding get() = _binding!!
     private val supabaseClientProvider = SupabaseClientProvider
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
-        FragmentEventDetailBinding.inflate(inflater, container, false).also { _binding = it }.root
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        _binding = FragmentEventDetailBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         BundleCompat.getParcelable(requireArguments(), "event", Event::class.java)?.let { event ->
             setupSystemBars()
-            lifecycleScope.launch { setupUI(event) }
+            viewLifecycleOwner.lifecycleScope.launch { setupUI(event) }
             initButtonBack()
             setupOnBackPressedCallback()
         }
@@ -55,28 +57,27 @@ class EventDetailFragment : Fragment() {
     }
 
     private fun setupSystemBars() {
-        requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.neutral_100)
+        requireActivity().window.navigationBarColor =
+            ContextCompat.getColor(requireContext(), R.color.neutral_100)
     }
 
-    private fun setupUI(event: Event) {
+    private suspend fun setupUI(event: Event) {
         setTextFields(event)
         styleStatusText()
         loadUserAvatar(event)
         setupImagePager(event)
     }
 
-    private fun setTextFields(event: Event) {
-        with(binding) {
-            textUserName.text = event.username
-            textTime.text = formatTimeAgo(event.createdAt)
-            textTitle.text = event.title
-            textContent.text = event.description
-            titleStartDateContent.text = getString(R.string.event_date_range, event.startDate, event.endDate)
-            titleStartDate.text = getString(R.string.start_time_format, event.eventTime ?: "Not specified")
-            titleAddressContent.text = event.location ?: "Not specified"
-            titleTagsContent.text = event.tags?.joinToString(", ") ?: "No tags"
-            textLikesCount.text = event.likesCount.toString()
-        }
+    private fun setTextFields(event: Event) = with(binding) {
+        textUserName.text = event.username
+        textTime.text = formatTimeAgo(event.createdAt)
+        textTitle.text = event.title
+        textContent.text = event.description
+        titleStartDateContent.text = getString(R.string.event_date_range, event.startDate, event.endDate)
+        titleStartDate.text = getString(R.string.start_time_format, event.eventTime ?: "Not specified")
+        titleAddressContent.text = event.location ?: "Not specified"
+        titleTagsContent.text = event.tags?.joinToString(", ") ?: "No tags"
+        textLikesCount.text = event.likesCount.toString()
     }
 
     private fun styleStatusText() {
@@ -101,43 +102,45 @@ class EventDetailFragment : Fragment() {
             .into(binding.imageProfile)
     }
 
-    private fun setupImagePager(event: Event) {
-        if (event.images.isNullOrEmpty()) {
-            binding.imageEventPager.visibility = View.GONE
-            binding.shimmerLayout.visibility = View.GONE
+    private suspend fun setupImagePager(event: Event) {
+        if (!isAdded || event.images.isNullOrEmpty()) {
             return
         }
-        binding.imageEventPager.visibility = View.VISIBLE
-        binding.shimmerLayout.visibility = View.VISIBLE
-        binding.shimmerLayout.startShimmer()
-        binding.imageEventPager.elevation = 0f
-        binding.shimmerLayout.elevation = 0f
-        val radius = (20 * resources.displayMetrics.density).roundToInt()
-        listOf(binding.imageEventPager, binding.shimmerLayout).forEach { view ->
-            view.outlineProvider = object : ViewOutlineProvider() {
-                override fun getOutline(view: View, outline: android.graphics.Outline) {
-                    outline.setRoundRect(0, 0, view.width, view.height, radius.toFloat())
-                }
+
+        val urls = withContext(Dispatchers.IO) {
+            event.images.map {
+                supabaseClientProvider.client.storage
+                    .from("event-images")
+                    .createSignedUrl(it, 60.seconds)
             }
-            view.clipToOutline = true
         }
 
-        lifecycleScope.launch {
-            val signedUrls = event.images.map { imageName ->
-                withContext(Dispatchers.IO) {
-                    supabaseClientProvider.client.storage.from("event-images").createSignedUrl(imageName, 60.seconds)
+        if (!isAdded || _binding == null) return
+
+        binding.apply {
+            imageEventPager.visibility = View.VISIBLE
+            shimmerLayout.visibility = View.VISIBLE
+            shimmerLayout.startShimmer()
+
+            val radius = (20 * resources.displayMetrics.density).roundToInt()
+            listOf(imageEventPager, shimmerLayout).forEach { view ->
+                view.outlineProvider = object : ViewOutlineProvider() {
+                    override fun getOutline(view: View, outline: android.graphics.Outline) {
+                        outline.setRoundRect(0, 0, view.width, view.height, radius.toFloat())
+                    }
                 }
+                view.clipToOutline = true
             }
-            val adapter = EventImageAdapter(signedUrls) { _ ->
-                if (binding.imageEventPager.adapter?.itemCount == signedUrls.size) {
-                    binding.shimmerLayout.post {
-                        binding.shimmerLayout.stopShimmer()
-                        binding.shimmerLayout.visibility = View.GONE
+
+            imageEventPager.adapter = EventImageAdapter(urls) {
+                if (isAdded && _binding != null) {
+                    shimmerLayout.post {
+                        shimmerLayout.stopShimmer()
+                        shimmerLayout.visibility = View.GONE
                     }
                 }
             }
-            binding.imageEventPager.adapter = adapter
-            binding.imageEventPager.offscreenPageLimit = signedUrls.size
+            imageEventPager.offscreenPageLimit = urls.size
         }
     }
 
@@ -152,7 +155,10 @@ class EventDetailFragment : Fragment() {
     }
 
     private fun navigateBackToMainMenu() {
-        findNavController().navigate(R.id.MainMenuFragment, Bundle().apply { putString("navigateTo", "events") })
+        findNavController().navigate(
+            R.id.MainMenuFragment,
+            Bundle().apply { putString("navigateTo", "events") }
+        )
     }
 
     private fun formatTimeAgo(createdAt: OffsetDateTime?) = createdAt?.let {
