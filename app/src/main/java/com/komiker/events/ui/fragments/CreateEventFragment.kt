@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
+import com.airbnb.lottie.LottieAnimationView
 import com.komiker.events.R
 import com.komiker.events.databinding.FragmentCreateEventBinding
 import com.komiker.events.ui.adapters.CreateEventViewPagerAdapter
@@ -17,9 +18,10 @@ class CreateEventFragment : Fragment() {
 
     private var _binding: FragmentCreateEventBinding? = null
     private val binding get() = _binding!!
-
     private lateinit var pagerAdapter: CreateEventViewPagerAdapter
     private var currentStep = 1
+    private lateinit var darkOverlay: View
+    private lateinit var progressBar: LottieAnimationView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,6 +33,8 @@ class CreateEventFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        darkOverlay = binding.viewDarkOverlay
+        progressBar = binding.lottieProgressBar
         restoreCurrentStep(savedInstanceState)
         setupUi()
     }
@@ -107,6 +111,7 @@ class CreateEventFragment : Fragment() {
     }
 
     private fun setupSystemBars() {
+        requireActivity().window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.neutral_100)
         requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.neutral_100)
     }
 
@@ -121,5 +126,27 @@ class CreateEventFragment : Fragment() {
 
     private fun navigateToMainMenu() {
         findNavController().navigate(R.id.action_CreateEventFragment_to_MainMenuFragment)
+    }
+
+    fun startLottieAnimation() {
+        requireActivity().window.apply {
+            statusBarColor = ContextCompat.getColor(requireContext(), R.color.neutral_0_30_percent)
+            navigationBarColor = ContextCompat.getColor(requireContext(), R.color.neutral_0_30_percent)
+        }
+        progressBar.apply {
+            visibility = View.VISIBLE
+            setAnimation(R.raw.progress_bar)
+            playAnimation()
+        }
+        darkOverlay.visibility = View.VISIBLE
+    }
+
+    fun stopLottieAnimation() {
+        progressBar.apply {
+            visibility = View.GONE
+            cancelAnimation()
+        }
+        darkOverlay.visibility = View.GONE
+        setupSystemBars()
     }
 }

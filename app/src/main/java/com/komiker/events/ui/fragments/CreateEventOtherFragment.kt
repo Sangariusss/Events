@@ -43,7 +43,6 @@ class CreateEventOtherFragment : Fragment() {
 
     private var _binding: FragmentCreateEventOtherBinding? = null
     private val binding get() = _binding!!
-
     private val calendar = Calendar.getInstance()
     private val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.US)
     private val viewModel: CreateEventViewModel by activityViewModels()
@@ -54,12 +53,8 @@ class CreateEventOtherFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentCreateEventOtherBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View = FragmentCreateEventOtherBinding.inflate(inflater, container, false).also { _binding = it }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -71,25 +66,29 @@ class CreateEventOtherFragment : Fragment() {
 
     override fun onDestroyView() {
         saveState()
-        super.onDestroyView()
         _binding = null
+        super.onDestroyView()
     }
 
     private fun restoreState() {
-        viewModel.startDate?.let { binding.textStartDate.text = it }
-        viewModel.endDate?.let { binding.textEndDate.text = it }
-        viewModel.hour?.let { binding.editTextInputHour.setText(it) } ?: binding.editTextInputHour.setText(R.string._08)
-        viewModel.minute?.let { binding.editTextInputMinute.setText(it) } ?: binding.editTextInputMinute.setText(R.string._00)
-        binding.buttonAm.isSelected = viewModel.isAmSelected
-        binding.buttonPm.isSelected = !viewModel.isAmSelected
+        with(binding) {
+            textStartDate.text = viewModel.startDate ?: ""
+            textEndDate.text = viewModel.endDate ?: ""
+            editTextInputHour.setText(viewModel.hour ?: getString(R.string._08))
+            editTextInputMinute.setText(viewModel.minute ?: getString(R.string._00))
+            buttonAm.isSelected = viewModel.isAmSelected
+            buttonPm.isSelected = !viewModel.isAmSelected
+        }
     }
 
     private fun saveState() {
-        viewModel.startDate = binding.textStartDate.text.toString()
-        viewModel.endDate = binding.textEndDate.text.toString()
-        viewModel.hour = binding.editTextInputHour.text.toString()
-        viewModel.minute = binding.editTextInputMinute.text.toString()
-        viewModel.isAmSelected = binding.buttonAm.isSelected
+        with(viewModel) {
+            startDate = binding.textStartDate.text.toString()
+            endDate = binding.textEndDate.text.toString()
+            hour = binding.editTextInputHour.text.toString()
+            minute = binding.editTextInputMinute.text.toString()
+            isAmSelected = binding.buttonAm.isSelected
+        }
     }
 
     private fun setupUi() {
@@ -102,33 +101,32 @@ class CreateEventOtherFragment : Fragment() {
 
     private fun setupCreateEventButton() {
         binding.buttonCreateEvent.setOnClickListener {
-            saveState()
             if (supabaseClient.auth.currentSessionOrNull() == null) return@setOnClickListener
+            saveState()
+            (parentFragment as? CreateEventFragment)?.startLottieAnimation()
             saveEvent()
         }
     }
 
     private suspend fun uploadImagesToStorage(images: List<ImageAdapter.ImageItem>): List<String> {
-        val uploadedImageNames = mutableListOf<String>()
         val bucketName = "event-images"
-
-        images.forEach { imageItem ->
+        return images.mapNotNull { imageItem ->
             try {
-                val file = imageItem.file
-                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                val bitmap = BitmapFactory.decodeFile(imageItem.file.absolutePath)
                 val maxWidth = 1000
                 val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
                 val newWidth = if (bitmap.width > maxWidth) maxWidth else bitmap.width
-                val newHeight = if (bitmap.width > maxWidth) (maxWidth / aspectRatio).toInt() else bitmap.height
+                val newHeight = (newWidth / aspectRatio).toInt()
                 val scaledBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
                 val outputStream = ByteArrayOutputStream()
                 scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
-                val fileName = "${UUID.randomUUID()}_${file.name}"
+                val fileName = "${UUID.randomUUID()}_${imageItem.file.name}"
                 supabaseClient.storage.from(bucketName).upload(fileName, outputStream.toByteArray(), upsert = true)
-                uploadedImageNames.add(fileName)
-            } catch (_: Exception) {}
+                fileName
+            } catch (_: Exception) {
+                null
+            }
         }
-        return uploadedImageNames
     }
 
     private fun saveEvent() {
@@ -158,9 +156,16 @@ class CreateEventOtherFragment : Fragment() {
                         supabaseClient.from("events").insert(event)
                         viewModel.images.forEach { it.file.delete() }
                         viewModel.images.clear()
-                        withContext(Dispatchers.Main) { navigateToMainMenuWithHome() }
+                        withContext(Dispatchers.Main) {
+                            (parentFragment as? CreateEventFragment)?.stopLottieAnimation()
+                            navigateToMainMenuWithHome()
+                        }
                     }
-                } catch (_: Exception) {}
+                } catch (_: Exception) {
+                    withContext(Dispatchers.Main) {
+                        (parentFragment as? CreateEventFragment)?.stopLottieAnimation()
+                    }
+                }
             }
         }
     }
@@ -172,8 +177,8 @@ class CreateEventOtherFragment : Fragment() {
     }
 
     private fun setupDatePickers() {
-        binding.textStartDate.setOnClickListener { showDatePicker { binding.textStartDate.text = it; viewModel.startDate = it } }
-        binding.textEndDate.setOnClickListener { showDatePicker { binding.textEndDate.text = it; viewModel.endDate = it } }
+        binding.textStartDate.setOnClickListener { showDatePicker { date -> binding.textStartDate.text = date; viewModel.startDate = date } }
+        binding.textEndDate.setOnClickListener { showDatePicker { date -> binding.textEndDate.text = date; viewModel.endDate = date } }
     }
 
     private fun showDatePicker(onDateSet: (String) -> Unit) {
@@ -191,10 +196,9 @@ class CreateEventOtherFragment : Fragment() {
 
     private fun setupNotNecessaryText() {
         val text = getString(R.string.not_necessary)
-        val spannable = SpannableString(text).apply {
+        binding.textNotNecessary.text = SpannableString(text).apply {
             setSpan(ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.red_50)), text.length - 1, text.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
-        binding.textNotNecessary.text = spannable
     }
 
     private fun setupTimePicker() {
@@ -207,7 +211,9 @@ class CreateEventOtherFragment : Fragment() {
         binding.editTextInputHour.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) = validateHour(s.toString())
+            override fun afterTextChanged(s: Editable?) {
+                validateHour(s.toString())
+            }
         })
         binding.editTextInputHour.setOnFocusChangeListener { _, hasFocus -> if (!hasFocus) formatHourInput() }
     }
@@ -220,10 +226,8 @@ class CreateEventOtherFragment : Fragment() {
     }
 
     private fun formatHourInput() {
-        val hourStr = binding.editTextInputHour.text.toString()
-        val hour = hourStr.toIntOrNull() ?: 1
-        val correctedHour = hour.coerceIn(1, 12)
-        binding.editTextInputHour.setText(String.format("%02d", correctedHour))
+        val hour = binding.editTextInputHour.text.toString().toIntOrNull() ?: 1
+        binding.editTextInputHour.setText(String.format("%02d", hour.coerceIn(1, 12)))
         binding.editTextInputHour.setTextColor(ContextCompat.getColor(requireContext(), R.color.neutral_0))
     }
 
@@ -231,7 +235,9 @@ class CreateEventOtherFragment : Fragment() {
         binding.editTextInputMinute.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) = validateMinute(s.toString())
+            override fun afterTextChanged(s: Editable?) {
+                validateMinute(s.toString())
+            }
         })
         binding.editTextInputMinute.setOnFocusChangeListener { _, hasFocus -> if (!hasFocus) formatMinuteInput() }
     }
@@ -244,10 +250,8 @@ class CreateEventOtherFragment : Fragment() {
     }
 
     private fun formatMinuteInput() {
-        val minuteStr = binding.editTextInputMinute.text.toString()
-        val minute = minuteStr.toIntOrNull() ?: 0
-        val correctedMinute = minute.coerceIn(0, 59)
-        binding.editTextInputMinute.setText(String.format("%02d", correctedMinute))
+        val minute = binding.editTextInputMinute.text.toString().toIntOrNull() ?: 0
+        binding.editTextInputMinute.setText(String.format("%02d", minute.coerceIn(0, 59)))
         binding.editTextInputMinute.setTextColor(ContextCompat.getColor(requireContext(), R.color.neutral_0))
     }
 
@@ -268,18 +272,24 @@ class CreateEventOtherFragment : Fragment() {
 
     private fun initButtonAddTags() {
         binding.constraintAddTagsButtonLayout.setOnClickListener {
-            findNavController().navigate(R.id.action_CreateEventFragment_to_TagsFragment, Bundle().apply { putInt("sourceFragmentId", R.id.CreateEventFragment) })
+            findNavController().navigate(
+                R.id.action_CreateEventFragment_to_TagsFragment,
+                Bundle().apply { putInt("sourceFragmentId", R.id.CreateEventFragment) }
+            )
         }
     }
 
     private fun initButtonLocation() {
         binding.constraintLocationButtonLayout.setOnClickListener {
-            findNavController().navigate(R.id.action_CreateEventFragment_to_LocationFragment, Bundle().apply { putInt("sourceFragmentId", R.id.CreateEventFragment) })
+            findNavController().navigate(
+                R.id.action_CreateEventFragment_to_LocationFragment,
+                Bundle().apply { putInt("sourceFragmentId", R.id.CreateEventFragment) }
+            )
         }
     }
 
     private fun observeViewModel() {
-        viewModel.location.observe(viewLifecycleOwner) { }
-        viewModel.tags.observe(viewLifecycleOwner) { }
+        viewModel.location.observe(viewLifecycleOwner) {}
+        viewModel.tags.observe(viewLifecycleOwner) {}
     }
 }
