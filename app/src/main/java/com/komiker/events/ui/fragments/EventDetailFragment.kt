@@ -1,5 +1,7 @@
 package com.komiker.events.ui.fragments
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
@@ -11,6 +13,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.komiker.events.R
@@ -19,16 +22,15 @@ import com.komiker.events.data.database.models.Event
 import com.komiker.events.databinding.FragmentEventDetailBinding
 import com.komiker.events.glide.CircleCropTransformation
 import com.komiker.events.ui.adapters.EventImageAdapter
+import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import androidx.lifecycle.lifecycleScope
-import io.github.jan.supabase.storage.storage
 
 class EventDetailFragment : Fragment() {
 
@@ -48,6 +50,7 @@ class EventDetailFragment : Fragment() {
             viewLifecycleOwner.lifecycleScope.launch { setupUI(event) }
             initButtonBack()
             setupOnBackPressedCallback()
+            setupButtonCheckLocation()
         }
     }
 
@@ -171,4 +174,25 @@ class EventDetailFragment : Fragment() {
             else -> it.format(DateTimeFormatter.ofPattern("MM/dd"))
         }
     } ?: "Unknown"
+
+    private fun setupButtonCheckLocation() {
+        binding.buttonCheckLocation.setOnClickListener {
+            openLocationInMaps(binding.titleAddressContent.text.toString())
+        }
+    }
+
+    private fun openLocationInMaps(address: String) {
+        if (address.isBlank() || address == "Not specified") return
+
+        val uri = "geo:0,0?q=${Uri.encode(address)}"
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+        intent.setPackage("com.google.android.apps.maps")
+
+        if (intent.resolveActivity(requireActivity().packageManager) != null) {
+            startActivity(intent)
+        } else {
+            val fallbackUri = Uri.parse("https://www.google.com/maps/search/?api=1&query=${Uri.encode(address)}")
+            startActivity(Intent(Intent.ACTION_VIEW, fallbackUri))
+        }
+    }
 }
