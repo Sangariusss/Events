@@ -1,6 +1,8 @@
 package com.komiker.events.data.database.dao.implementation
 
+import com.komiker.events.data.database.SupabaseClientProvider.client
 import com.komiker.events.data.database.dao.UserDao
+import com.komiker.events.data.database.models.Event
 import com.komiker.events.data.database.models.User
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.exceptions.UnknownRestException
@@ -89,6 +91,17 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
                 println("Error updating email: ${e.message}")
                 throw e
             }
+        }
+    }
+
+    suspend fun getEventById(eventId: String): Event? {
+        return try {
+            client.from("events").select {
+                filter { eq("id", eventId) }
+            }.decodeSingleOrNull<Event>()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 }

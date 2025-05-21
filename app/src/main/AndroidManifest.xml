@@ -48,6 +48,12 @@
                     android:scheme="com.events"
                     android:host="login-callback" />
             </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="excito.netlify.app" android:pathPattern="/.*" />
+            </intent-filter>
         </activity>
 
         <meta-data

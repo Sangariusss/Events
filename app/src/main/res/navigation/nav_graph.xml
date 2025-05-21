@@ -350,5 +350,15 @@
         android:id="@+id/EventDetailFragment"
         android:name="com.komiker.events.ui.fragments.EventDetailFragment"
         android:label="EventDetailFragment"
-        tools:layout="@layout/fragment_event_detail" />
+        tools:layout="@layout/fragment_event_detail">
+        <deepLink
+            android:id="@+id/deep_link_event"
+            app:uri="https://excito.netlify.app/@{username}/event/{eventId}" />
+        <argument
+            android:name="eventId"
+            app:argType="string" />
+        <argument
+            android:name="username"
+            app:argType="string" />
+    </fragment>
 </navigation>

@@ -30,108 +30,115 @@ class MainActivity : AppCompatActivity() {
     private val supabaseUserDao = SupabaseUserDao(supabaseClient)
     private val facebookAuthManager = FacebookAuthManager()
     private val twitterAuthManager = TwitterAuthManager()
-
-    private val profileViewModel: ProfileViewModel by viewModels {
-        ProfileViewModelFactory(supabaseUserDao)
-    }
+    private val profileViewModel: ProfileViewModel by viewModels { ProfileViewModelFactory(supabaseUserDao) }
 
     companion object {
-        private const val MIN_TIME_BEFORE_EXPIRY = 1800
+        private const val MIN_TIME_BEFORE_EXPIRY = 1800L
+        private const val MAX_AUTH_ATTEMPTS = 5
+        private const val AUTH_CHECK_DELAY_MS = 500L
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.fragment_nav_host_content_main) as NavHostFragment
-        navController = navHostFragment.navController
-
-        lifecycleScope.launch {
-            handleAuthFlow(intent)
-        }
+        initializeBindingAndNavigation()
+        lifecycleScope.launch { handleInitialFlow(intent) }
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         setIntent(intent)
-        lifecycleScope.launch {
-            handleAuthFlow(intent)
-        }
+        lifecycleScope.launch { handleInitialFlow(intent) }
     }
 
-    private suspend fun handleAuthFlow(intent: Intent?) {
+    private fun initializeBindingAndNavigation() {
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragment_nav_host_content_main) as NavHostFragment
+        navController = navHostFragment.navController
+    }
+
+    private suspend fun handleInitialFlow(intent: Intent?) {
         if (isUserAuthenticated()) {
-            val userId = supabaseClient.auth.currentSessionOrNull()?.user?.id
-            userId?.let { profileViewModel.loadUser(it) }
-            navController.navigate(R.id.MainMenuFragment)
-            return
-        }
-
-        intent?.let {
-            val uri = it.data
-            if (uri != null && uri.toString().contains("type=email_change")) {
-                supabaseClient.handleDeeplinks(it)
-                navController.navigate(R.id.ChangeEmailSuccessFragment)
-                return
-            } else {
-                supabaseClient.handleDeeplinks(it)
-            }
-        }
-
-        var attempts = 0
-        while (attempts < 5 && !isUserAuthenticated()) {
-            delay(500)
-            attempts++
-        }
-
-        if (isUserAuthenticated()) {
-            val session = supabaseClient.auth.currentSessionOrNull()
-            val provider = session?.accessToken?.let { token ->
-                if (token.contains("twitter", ignoreCase = true)) "twitter" else "facebook"
-            } ?: "unknown"
-
-            when (provider) {
-                "twitter" -> twitterAuthManager.handleTwitterSignInResult(navController)
-                "facebook" -> facebookAuthManager.handleFacebookSignInResult(navController)
-                else -> {
-                    //
-                }
-            }
-
-            val userId = supabaseClient.auth.currentSessionOrNull()?.user?.id
-            userId?.let { profileViewModel.loadUser(it) }
-            navController.navigate(R.id.MainMenuFragment)
+            handleAuthenticatedUser()
         } else {
-            val currentDestination = navController.currentDestination?.id
-            if (currentDestination != R.id.WelcomeFragment &&
-                currentDestination != R.id.RegistrationFragment) {
-                navController.navigate(R.id.WelcomeFragment)
+            waitForAuthentication()
+            if (isUserAuthenticated()) {
+                handleSocialProviderAuthentication()
+                handleAuthenticatedUser()
+            } else {
+                navigateToWelcomeIfNeeded()
             }
         }
+        processDeepLinks(intent)
     }
 
     private suspend fun isUserAuthenticated(): Boolean {
-        val session = supabaseClient.auth.currentSessionOrNull()
-        if (session != null) {
-            if (shouldRefreshToken(session)) {
-                try {
-                    supabaseClient.auth.refreshCurrentSession()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    return false
-                }
+        val session = supabaseClient.auth.currentSessionOrNull() ?: return false
+        if (shouldRefreshToken(session)) {
+            try {
+                supabaseClient.auth.refreshCurrentSession()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return false
             }
-            return true
         }
-        return false
+        return true
     }
 
     private fun shouldRefreshToken(session: UserSession): Boolean {
         val currentTime = Clock.System.now()
-        val expiryTime = session.expiresAt
-        return (expiryTime - currentTime).inWholeSeconds < MIN_TIME_BEFORE_EXPIRY
+        return (session.expiresAt - currentTime).inWholeSeconds < MIN_TIME_BEFORE_EXPIRY
+    }
+
+    private fun processDeepLinks(intent: Intent?) {
+        intent?.data?.let { uri ->
+            if (uri.scheme == "https" && uri.host == "excito.netlify.app" && uri.path?.startsWith("/@") == true) {
+                val segments = uri.pathSegments
+                if (segments.size >= 3 && segments[1] == "event") {
+                    val bundle = Bundle().apply {
+                        putString("eventId", segments[2])
+                        putString("username", segments[0].removePrefix("@"))
+                    }
+                    navController.navigate(R.id.EventDetailFragment, bundle)
+                }
+            } else {
+                supabaseClient.handleDeeplinks(intent)
+            }
+        }
+    }
+
+    private suspend fun waitForAuthentication() {
+        repeat(MAX_AUTH_ATTEMPTS) {
+            if (isUserAuthenticated()) return
+            delay(AUTH_CHECK_DELAY_MS)
+        }
+    }
+
+    private fun handleAuthenticatedUser() {
+        supabaseClient.auth.currentSessionOrNull()?.user?.id?.let { profileViewModel.loadUser(it) }
+        navController.navigate(R.id.MainMenuFragment)
+    }
+
+    private suspend fun handleSocialProviderAuthentication() {
+        val session = supabaseClient.auth.currentSessionOrNull() ?: return
+        val provider = session.accessToken.let { token ->
+            when {
+                token.contains("twitter", ignoreCase = true) -> "twitter"
+                token.contains("facebook", ignoreCase = true) -> "facebook"
+
+                else -> "unknown"
+            }
+        }
+
+        when (provider) {
+            "twitter" -> twitterAuthManager.handleTwitterSignInResult(navController)
+            "facebook" -> facebookAuthManager.handleFacebookSignInResult(navController)
+        }
+    }
+
+    private fun navigateToWelcomeIfNeeded() {
+        if (navController.currentDestination?.id !in setOf(R.id.WelcomeFragment, R.id.RegistrationFragment)) {
+            navController.navigate(R.id.WelcomeFragment)
+        }
     }
 }

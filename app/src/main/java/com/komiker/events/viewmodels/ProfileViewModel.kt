@@ -1,11 +1,13 @@
 package com.komiker.events.viewmodels
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
+import com.komiker.events.data.database.models.Event
 import com.komiker.events.data.database.models.User
 import kotlinx.coroutines.launch
 
@@ -13,82 +15,51 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
 
     val userLiveData = MutableLiveData<User?>()
     val proposalAuthorLiveData = MutableLiveData<User?>()
-    val eventAuthorLiveData = MutableLiveData<User?>()
+    private val eventLiveData = MutableLiveData<Event?>()
 
-    fun loadUser(userId: String) {
+    private fun loadUserInternal(userId: String, liveData: MutableLiveData<User?>) {
         viewModelScope.launch {
             try {
                 val result = supabaseUserDao.getUserById(userId)
                 val dataList = parseData(result.data)
-
-                userLiveData.value = if (!dataList.isNullOrEmpty()) dataList[0] else null
+                liveData.value = dataList?.firstOrNull()
             } catch (e: Exception) {
-                userLiveData.value = null
+                liveData.value = null
                 e.printStackTrace()
             }
         }
     }
 
-    fun loadProposalAuthor(userId: String) {
+    fun loadUser(userId: String) = loadUserInternal(userId, userLiveData)
+    fun loadProposalAuthor(userId: String) = loadUserInternal(userId, proposalAuthorLiveData)
+
+    fun loadEventById(eventId: String): LiveData<Event?> {
         viewModelScope.launch {
             try {
-                val result = supabaseUserDao.getUserById(userId)
-                val dataList = parseData(result.data)
-
-                proposalAuthorLiveData.value = if (!dataList.isNullOrEmpty()) dataList[0] else null
+                val event = supabaseUserDao.getEventById(eventId)
+                eventLiveData.postValue(event)
             } catch (e: Exception) {
-                proposalAuthorLiveData.value = null
+                eventLiveData.postValue(null)
                 e.printStackTrace()
             }
         }
+        return eventLiveData
     }
 
-    fun loadEventAuthor(userId: String) {
-        viewModelScope.launch {
-            try {
-                val result = supabaseUserDao.getUserById(userId)
-                val dataList = parseData(result.data)
-
-                eventAuthorLiveData.value = if (!dataList.isNullOrEmpty()) dataList[0] else null
-            } catch (e: Exception) {
-                eventAuthorLiveData.value = null
-                e.printStackTrace()
-            }
-        }
-    }
-
-    fun updateName(newName: String) {
+    private fun updateUserField(updateAction: User.() -> Unit) {
         viewModelScope.launch {
             val user = userLiveData.value
             if (user != null) {
-                user.name = newName
+                user.updateAction()
                 supabaseUserDao.updateUser(user)
                 userLiveData.value = user
             }
         }
     }
 
-    fun updateUsername(newUsername: String) {
-        viewModelScope.launch {
-            val user = userLiveData.value
-            if (user != null) {
-                user.username = newUsername
-                supabaseUserDao.updateUser(user)
-                userLiveData.value = user
-            }
-        }
-    }
-
-    fun updateUserAvatar(newAvatarUrl: String) {
-        viewModelScope.launch {
-            val user = userLiveData.value
-            if (user != null) {
-                user.avatar = newAvatarUrl
-                supabaseUserDao.updateUser(user)
-                userLiveData.value = user
-            }
-        }
-    }
+    fun updateName(newName: String) = updateUserField { name = newName }
+    fun updateUsername(newUsername: String) = updateUserField { username = newUsername }
+    fun updateUserAvatar(newAvatarUrl: String) = updateUserField { avatar = newAvatarUrl }
 
     fun updateEmail(newEmail: String) {
         viewModelScope.launch {
@@ -113,18 +84,12 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
         }
     }
 
-    private fun parseData(jsonString: String?): List<User>? {
-        return try {
-            val gson = Gson()
-            val userType = object : TypeToken<List<User>>() {}.type
-            gson.fromJson(jsonString, userType)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+    private fun parseData(jsonString: String?): List<User>? = try {
+        Gson().fromJson(jsonString, object : TypeToken<List<User>>() {}.type)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 
-    fun getUserId(): String {
-        return userLiveData.value?.user_id ?: ""
-    }
+    fun getUserId(): String = userLiveData.value?.user_id ?: ""
 }

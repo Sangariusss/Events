@@ -13,30 +13,38 @@ import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
+import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
 import com.komiker.events.data.database.models.Event
 import com.komiker.events.databinding.FragmentEventDetailBinding
 import com.komiker.events.glide.CircleCropTransformation
 import com.komiker.events.ui.adapters.EventImageAdapter
+import com.komiker.events.viewmodels.ProfileViewModel
+import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.seconds
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.seconds
 
 class EventDetailFragment : Fragment() {
 
     private var _binding: FragmentEventDetailBinding? = null
     private val binding get() = _binding!!
     private val supabaseClientProvider = SupabaseClientProvider
+    private val supabaseUserDao = SupabaseUserDao(supabaseClientProvider.client)
+    private val profileViewModel: ProfileViewModel by activityViewModels {
+        ProfileViewModelFactory(supabaseUserDao)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentEventDetailBinding.inflate(inflater, container, false)
@@ -45,13 +53,11 @@ class EventDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        BundleCompat.getParcelable(requireArguments(), "event", Event::class.java)?.let { event ->
-            setupSystemBars()
-            viewLifecycleOwner.lifecycleScope.launch { setupUI(event) }
-            initButtonBack()
-            setupOnBackPressedCallback()
-            setupButtonCheckLocation()
-        }
+        setupSystemBars()
+        handleArguments()
+        initButtonBack()
+        setupOnBackPressedCallback()
+        setupButtonCheckLocation()
     }
 
     override fun onDestroyView() {
@@ -62,6 +68,29 @@ class EventDetailFragment : Fragment() {
     private fun setupSystemBars() {
         requireActivity().window.navigationBarColor =
             ContextCompat.getColor(requireContext(), R.color.neutral_100)
+    }
+
+    private fun handleArguments() {
+        val event = BundleCompat.getParcelable(requireArguments(), "event", Event::class.java)
+        val eventId = arguments?.getString("eventId")
+
+        if (event != null) {
+            viewLifecycleOwner.lifecycleScope.launch { setupUI(event) }
+        } else if (eventId != null) {
+            loadEventById(eventId)
+        }
+    }
+
+    private fun loadEventById(eventId: String) {
+        profileViewModel.loadEventById(eventId).observe(viewLifecycleOwner) { event ->
+            event?.let {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    setupUI(it)
+                }
+            } ?: run {
+                findNavController().navigate(R.id.MainMenuFragment)
+            }
+        }
     }
 
     private suspend fun setupUI(event: Event) {
