@@ -204,4 +204,5 @@
     <string name="address_content_example">2984 Hollow Creek Rd, Springfield, IL 62704, United States</string>
     <string name="check_location">Check location</string>
     <string name="start_time_format">Start %s</string>
+    <string name="button_copy_address">ButtonCopyAddress</string>
 </resources>

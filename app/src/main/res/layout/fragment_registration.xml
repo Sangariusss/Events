@@ -16,20 +16,21 @@
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.051"
+        app:layout_constraintHorizontal_bias="0.013"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline1"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_percent="0.133" />
 
     <ImageView
         android:id="@+id/button_back_image"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_gravity="start"
         android:contentDescription="@string/button_back_image"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_back_arrow"
         app:layout_constraintBottom_toBottomOf="@id/button_back"
-        app:layout_constraintDimensionRatio="0.626:1"
+        app:layout_constraintDimensionRatio="0.5:1"
         app:layout_constraintEnd_toEndOf="@id/button_back"
         app:layout_constraintStart_toStartOf="@id/button_back"
         app:layout_constraintTop_toTopOf="@id/button_back" />

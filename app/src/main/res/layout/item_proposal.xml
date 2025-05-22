@@ -38,22 +38,19 @@
     <TextView
         android:id="@+id/text_time"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:autoSizeMaxTextSize="1000dp"
-        android:autoSizeMinTextSize="1dp"
-        android:autoSizeTextType="uniform"
         android:fontFamily="@font/fixel_medium"
         android:gravity="center|start"
         android:text="@string/_1_min"
+        android:textSize="16sp"
         android:textColor="@color/neutral_60"
         app:layout_constraintBottom_toBottomOf="@id/image_profile"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@id/text_user_name"
         app:layout_constraintTop_toTopOf="@id/image_profile"
-        app:layout_constraintWidth_percent="0.1"
-        app:layout_constraintHeight_percent="0.094" />
+        app:layout_constraintWidth_percent="0.11" />
 
     <ImageButton
         android:id="@+id/button_more"

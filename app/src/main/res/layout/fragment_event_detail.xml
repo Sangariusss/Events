@@ -191,6 +191,7 @@
                 android:textColor="@color/neutral_0"
                 android:textSize="16sp"
                 android:layout_marginTop="16dp"
+                android:fontFamily="@font/fixel_regular"
                 app:layout_constraintTop_toBottomOf="@id/text_title"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -264,7 +265,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintWidth_percent="0.911"
-                app:layout_constraintHeight_percent="0.027" />
+                app:layout_constraintHeight_percent="0.020" />
 
             <TextView
                 android:id="@+id/title_status"
@@ -346,13 +347,12 @@
                 android:id="@+id/title_address_content"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:autoSizeMaxTextSize="1000dp"
-                android:autoSizeMinTextSize="1dp"
-                android:autoSizeTextType="uniform"
                 android:lineSpacingMultiplier="1.4"
+                android:maxLines="2"
                 android:layout_marginTop="8dp"
                 android:text="@string/address_content_example"
                 android:textColor="@color/neutral_60"
+                android:textSize="18sp"
                 android:fontFamily="@font/fixel_medium"
                 android:gravity="top|start"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -361,6 +361,21 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/title_address"
                 app:layout_constraintWidth_percent="0.822" />
+
+            <ImageButton
+                android:id="@+id/button_copy_address"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/button_copy_address"
+                android:src="@drawable/ic_copy"
+                android:scaleType="fitCenter"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.952"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/title_address_content"
+                app:layout_constraintWidth_percent="0.067" />
 
             <Button
                 android:id="@+id/button_check_location"

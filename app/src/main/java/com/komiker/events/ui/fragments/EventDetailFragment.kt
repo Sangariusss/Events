@@ -1,5 +1,8 @@
 package com.komiker.events.ui.fragments
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -9,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.core.os.BundleCompat
@@ -45,6 +49,7 @@ class EventDetailFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by activityViewModels {
         ProfileViewModelFactory(supabaseUserDao)
     }
+    private var currentEvent: Event? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentEventDetailBinding.inflate(inflater, container, false)
@@ -58,6 +63,8 @@ class EventDetailFragment : Fragment() {
         initButtonBack()
         setupOnBackPressedCallback()
         setupButtonCheckLocation()
+        setupCopyAddressButton()
+        setupShareButton()
     }
 
     override fun onDestroyView() {
@@ -75,6 +82,7 @@ class EventDetailFragment : Fragment() {
         val eventId = arguments?.getString("eventId")
 
         if (event != null) {
+            currentEvent = event
             viewLifecycleOwner.lifecycleScope.launch { setupUI(event) }
         } else if (eventId != null) {
             loadEventById(eventId)
@@ -84,6 +92,7 @@ class EventDetailFragment : Fragment() {
     private fun loadEventById(eventId: String) {
         profileViewModel.loadEventById(eventId).observe(viewLifecycleOwner) { event ->
             event?.let {
+                currentEvent = it
                 viewLifecycleOwner.lifecycleScope.launch {
                     setupUI(it)
                 }
@@ -208,6 +217,38 @@ class EventDetailFragment : Fragment() {
         binding.buttonCheckLocation.setOnClickListener {
             openLocationInMaps(binding.titleAddressContent.text.toString())
         }
+    }
+
+    private fun setupCopyAddressButton() {
+        binding.buttonCopyAddress.setOnClickListener {
+            val address = binding.titleAddressContent.text.toString()
+            val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Address", address)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(requireContext(), "Address copied to clipboard", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun setupShareButton() {
+        binding.buttonShare.setOnClickListener {
+            currentEvent?.let { event ->
+                shareEvent(event)
+            } ?: run {
+                Toast.makeText(requireContext(), "Event data not available", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun shareEvent(event: Event) {
+        val username = event.username.replace(" ", "_")
+        val deepLink = "https://excito.netlify.app/@$username/event/${event.id}"
+        val sendIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, deepLink)
+            type = "text/plain"
+        }
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        startActivity(shareIntent)
     }
 
     private fun openLocationInMaps(address: String) {
