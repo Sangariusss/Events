@@ -139,7 +139,13 @@ class ProposalsAdapter(
 
             popupBinding.menuEdit.setOnClickListener {
                 dismissPopupMenu()
-                // TODO: Add edit logic
+                val bundle = Bundle().apply {
+                    putParcelable("proposal", proposal)
+                }
+                navController.navigate(
+                    R.id.action_MainMenuFragment_to_EditProposalFragment,
+                    bundle
+                )
             }
 
             popupBinding.menuDelete.setOnClickListener {

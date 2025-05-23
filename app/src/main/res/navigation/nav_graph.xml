@@ -119,6 +119,11 @@
             app:destination="@id/EventDetailFragment"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_MainMenuFragment_to_EditProposalFragment"
+            app:destination="@id/EditProposalFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/FilterFragment"
@@ -337,6 +342,17 @@
         tools:layout="@layout/fragment_create_proposal" >
         <action
             android:id="@+id/action_CreateProposalFragment_to_MainMenuFragment"
+            app:destination="@id/MainMenuFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/EditProposalFragment"
+        android:name="com.komiker.events.ui.fragments.EditProposalFragment"
+        android:label="@string/create_proposal_fragment"
+        tools:layout="@layout/fragment_create_proposal" >
+        <action
+            android:id="@+id/action_EditProposalFragment_to_MainMenuFragment"
             app:destination="@id/MainMenuFragment"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out" />

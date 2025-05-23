@@ -205,4 +205,5 @@
     <string name="check_location">Check location</string>
     <string name="start_time_format">Start %s</string>
     <string name="button_copy_address">ButtonCopyAddress</string>
+    <string name="edit_proposal">Edit proposal</string>
 </resources>
