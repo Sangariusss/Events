@@ -20,11 +20,15 @@ import com.komiker.events.glide.CircleCropTransformation
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class ProposalsAdapter(
     private val currentUserId: String?,
     private val onDeleteClicked: (Proposal) -> Unit,
-    private val navController: NavController
+    private val navController: NavController,
+    private val likeCache: MutableMap<String, Boolean>,
+    private val likesCountCache: MutableMap<String, Int>,
+    private val onLikeClicked: (String, Boolean, (Boolean, Int) -> Unit) -> Unit
 ) : ListAdapter<Proposal, ProposalsAdapter.ProposalViewHolder>(ProposalDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProposalViewHolder {
@@ -36,14 +40,26 @@ class ProposalsAdapter(
         holder.bind(getItem(position))
     }
 
+    override fun onBindViewHolder(holder: ProposalViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isNotEmpty()) {
+            val payload = payloads[0] as? Int
+            payload?.let {
+                holder.updateLikesCount(it)
+            }
+        } else {
+            holder.bind(getItem(position))
+        }
+    }
+
     inner class ProposalViewHolder(private val binding: ItemProposalBinding) : RecyclerView.ViewHolder(binding.root) {
         private var popupWindow: PopupWindow? = null
         private var overlayView: View? = null
+        private var isProcessingLike = false
 
         fun bind(proposal: Proposal) {
             binding.textUserName.text = proposal.username
             binding.textContent.text = proposal.content
-            binding.textLikesCount.text = proposal.likesCount.toString()
+            binding.textLikesCount.text = formatLikesCount(likesCountCache[proposal.id] ?: proposal.likesCount)
 
             binding.textTime.text = formatTimeAgo(proposal.createdAt)
 
@@ -65,9 +81,7 @@ class ProposalsAdapter(
 
             if (currentUserId != null && proposal.userId == currentUserId) {
                 binding.textUserName.setTextColor(ContextCompat.getColor(binding.root.context, R.color.blue_60))
-                binding.buttonMore.setOnClickListener {
-                    showPopupMenu(proposal)
-                }
+                binding.buttonMore.setOnClickListener { showPopupMenu(proposal) }
             } else {
                 binding.textUserName.setTextColor(ContextCompat.getColor(binding.root.context, android.R.color.black))
                 binding.buttonMore.setOnClickListener(null)
@@ -77,11 +91,76 @@ class ProposalsAdapter(
                 val bundle = Bundle().apply {
                     putParcelable("proposal", proposal)
                 }
-                navController.navigate(
-                    R.id.action_MainMenuFragment_to_ProposalDetailFragment,
-                    bundle
-                )
+                navController.navigate(R.id.action_MainMenuFragment_to_ProposalDetailFragment, bundle)
             }
+
+            setupLikeButton(proposal)
+        }
+
+        fun updateLikesCount(likesCount: Int) {
+            binding.textLikesCount.text = formatLikesCount(likesCount)
+            val position = getBindingAdapterPosition()
+            if (position != RecyclerView.NO_POSITION) {
+                likesCountCache[getItem(position).id] = likesCount
+            }
+        }
+
+        private fun setupLikeButton(proposal: Proposal) {
+            binding.imageLike.setOnClickListener {
+                if (currentUserId != null && !isProcessingLike) {
+                    isProcessingLike = true
+                    binding.imageLike.isEnabled = false
+                    binding.imageLike.alpha = 0.5f
+
+                    val isCurrentlyLiked = likeCache[proposal.id] ?: false
+                    val currentLikesCount = likesCountCache[proposal.id] ?: proposal.likesCount
+
+                    if (isCurrentlyLiked) {
+                        val newLikesCount = currentLikesCount - 1
+                        binding.textLikesCount.text = formatLikesCount(newLikesCount.coerceAtLeast(0))
+                        binding.imageLike.setImageResource(R.drawable.ic_heart_outline)
+                        likeCache[proposal.id] = false
+                        likesCountCache[proposal.id] = newLikesCount
+                        onLikeClicked(proposal.id, false) { success, serverLikesCount ->
+                            isProcessingLike = false
+                            binding.imageLike.isEnabled = true
+                            binding.imageLike.alpha = 1.0f
+                            if (!success) {
+                                binding.textLikesCount.text = formatLikesCount(currentLikesCount)
+                                binding.imageLike.setImageResource(R.drawable.ic_heart)
+                                likeCache[proposal.id] = true
+                                likesCountCache[proposal.id] = currentLikesCount
+                            } else {
+                                likesCountCache[proposal.id] = serverLikesCount
+                                binding.textLikesCount.text = formatLikesCount(serverLikesCount)
+                            }
+                        }
+                    } else {
+                        val newLikesCount = currentLikesCount + 1
+                        binding.textLikesCount.text = formatLikesCount(newLikesCount)
+                        binding.imageLike.setImageResource(R.drawable.ic_heart)
+                        likeCache[proposal.id] = true
+                        likesCountCache[proposal.id] = newLikesCount
+                        onLikeClicked(proposal.id, true) { success, serverLikesCount ->
+                            isProcessingLike = false
+                            binding.imageLike.isEnabled = true
+                            binding.imageLike.alpha = 1.0f
+                            if (!success) {
+                                binding.textLikesCount.text = formatLikesCount(currentLikesCount)
+                                binding.imageLike.setImageResource(R.drawable.ic_heart_outline)
+                                likeCache[proposal.id] = false
+                                likesCountCache[proposal.id] = currentLikesCount
+                            } else {
+                                likesCountCache[proposal.id] = serverLikesCount
+                                binding.textLikesCount.text = formatLikesCount(serverLikesCount)
+                            }
+                        }
+                    }
+                }
+            }
+            binding.imageLike.setImageResource(
+                if (likeCache[proposal.id] == true) R.drawable.ic_heart else R.drawable.ic_heart_outline
+            )
         }
 
         private fun showPopupMenu(proposal: Proposal) {
@@ -92,12 +171,7 @@ class ProposalsAdapter(
             val width = (rootView.width * 0.278).toInt()
             val height = (rootView.height * 0.110).toInt()
 
-            popupWindow = PopupWindow(
-                popupView,
-                width,
-                height,
-                true
-            ).apply {
+            popupWindow = PopupWindow(popupView, width, height, true).apply {
                 isOutsideTouchable = true
                 isFocusable = true
                 setBackgroundDrawable(ContextCompat.getDrawable(binding.root.context, R.drawable.bg_popup_menu))
@@ -105,10 +179,7 @@ class ProposalsAdapter(
             }
 
             overlayView = View(binding.root.context).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
+                layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
                 setBackgroundColor(ContextCompat.getColor(binding.root.context, R.color.neutral_0_30_percent))
                 alpha = 0f
                 setOnClickListener { dismissPopupMenu() }
@@ -130,22 +201,14 @@ class ProposalsAdapter(
 
             val menuX = buttonX + buttonWidth - width
 
-            popupWindow?.showAtLocation(
-                binding.root,
-                android.view.Gravity.NO_GRAVITY,
-                menuX,
-                buttonY
-            )
+            popupWindow?.showAtLocation(binding.root, android.view.Gravity.NO_GRAVITY, menuX, buttonY)
 
             popupBinding.menuEdit.setOnClickListener {
                 dismissPopupMenu()
                 val bundle = Bundle().apply {
                     putParcelable("proposal", proposal)
                 }
-                navController.navigate(
-                    R.id.action_MainMenuFragment_to_EditProposalFragment,
-                    bundle
-                )
+                navController.navigate(R.id.action_MainMenuFragment_to_EditProposalFragment, bundle)
             }
 
             popupBinding.menuDelete.setOnClickListener {
@@ -183,21 +246,34 @@ class ProposalsAdapter(
                 minutes < 60 -> "${minutes}m"
                 hours < 24 -> "${hours}h"
                 days < 7 -> "${days}d"
-                else -> {
-                    val formatter = DateTimeFormatter.ofPattern("MM/dd")
-                    createdAt.format(formatter)
+                else -> DateTimeFormatter.ofPattern("MM/dd").format(createdAt)
+            }
+        }
+
+        private fun formatLikesCount(count: Int): String {
+            return when {
+                count >= 1_000_000_000 -> {
+                    val billions = count / 1_000_000_000.0
+                    String.format(Locale.US, "%.1fB", billions)
                 }
+                count >= 1_000_000 -> {
+                    val millions = count / 1_000_000.0
+                    String.format(Locale.US, "%.1fM", millions)
+                }
+                count >= 1_000 -> {
+                    val thousands = count / 1_000.0
+                    String.format(Locale.US, "%.1fK", thousands)
+                }
+                else -> count.toString()
             }
         }
     }
 
     class ProposalDiffCallback : DiffUtil.ItemCallback<Proposal>() {
-        override fun areItemsTheSame(oldItem: Proposal, newItem: Proposal): Boolean {
-            return oldItem.id == newItem.id
-        }
-
-        override fun areContentsTheSame(oldItem: Proposal, newItem: Proposal): Boolean {
-            return oldItem == newItem
+        override fun areItemsTheSame(oldItem: Proposal, newItem: Proposal) = oldItem.id == newItem.id
+        override fun areContentsTheSame(oldItem: Proposal, newItem: Proposal) = oldItem == newItem
+        override fun getChangePayload(oldItem: Proposal, newItem: Proposal): Any? {
+            return if (oldItem.likesCount != newItem.likesCount) newItem.likesCount else null
         }
     }
 }
