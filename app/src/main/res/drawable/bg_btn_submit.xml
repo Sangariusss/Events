@@ -2,19 +2,19 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/neutral_10" />
+            <solid android:color="@color/red_60" />
             <corners android:radius="@dimen/button_dialog_delete_account_corner_radius" />
         </shape>
     </item>
     <item android:state_hovered="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/neutral_10" />
+            <solid android:color="@color/red_60" />
             <corners android:radius="@dimen/button_dialog_delete_account_corner_radius" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="@color/neutral_0" />
+            <solid android:color="@color/red_50" />
             <corners android:radius="@dimen/button_dialog_delete_account_corner_radius" />
         </shape>
     </item>

@@ -3,6 +3,8 @@ package com.komiker.events.ui.fragments
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -10,7 +12,6 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
@@ -26,8 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
+import java.io.ByteArrayOutputStream
 
 class BottomSheetAvatarFragment : BottomSheetDialogFragment() {
 
@@ -37,24 +37,16 @@ class BottomSheetAvatarFragment : BottomSheetDialogFragment() {
         ProfileViewModelFactory(supabaseUserDao)
     }
 
-    private val requestPermissionLauncher: ActivityResultLauncher<String> =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            if (isGranted) {
-                openImagePicker()
-            } else {
-                Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
-            }
+    private val requestPermissionLauncher: androidx.activity.result.ActivityResultLauncher<String> =
+        registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) openImagePicker()
         }
 
-    private val imagePickerLauncher: ActivityResultLauncher<Intent> =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private val imagePickerLauncher: androidx.activity.result.ActivityResultLauncher<Intent> =
+        registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val uri: Uri? = result.data?.data
-                uri?.let {
-                    uploadAvatarToServer(it)
-                } ?: run {
-                    Toast.makeText(requireContext(), "Failed to get image", Toast.LENGTH_SHORT).show()
-                }
+                uri?.let { uploadAvatarToServer(it) }
             }
         }
 
@@ -100,33 +92,22 @@ class BottomSheetAvatarFragment : BottomSheetDialogFragment() {
         val removeAvatarButton = view.findViewById<ConstraintLayout>(R.id.constraint_button_remove_avatar)
         val changeAvatarButton = view.findViewById<ConstraintLayout>(R.id.constraint_button_change_avatar)
 
-        removeAvatarButton.setOnClickListener {
-            dismiss()
-        }
-
-        changeAvatarButton.setOnClickListener {
-            checkPermissionsAndOpenPicker()
-        }
+        removeAvatarButton.setOnClickListener { dismiss() }
+        changeAvatarButton.setOnClickListener { checkPermissionsAndOpenPicker() }
     }
 
     private fun checkPermissionsAndOpenPicker() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            when {
-                ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED -> {
-                    openImagePicker()
-                }
-                else -> {
-                    requestPermissionLauncher.launch(android.Manifest.permission.READ_MEDIA_IMAGES)
-                }
+            if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED) {
+                openImagePicker()
+            } else {
+                requestPermissionLauncher.launch(android.Manifest.permission.READ_MEDIA_IMAGES)
             }
         } else {
-            when {
-                ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
-                    openImagePicker()
-                }
-                else -> {
-                    requestPermissionLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
-                }
+            if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                openImagePicker()
+            } else {
+                requestPermissionLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
             }
         }
     }
@@ -138,37 +119,60 @@ class BottomSheetAvatarFragment : BottomSheetDialogFragment() {
 
     private fun uploadAvatarToServer(uri: Uri) {
         CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val inputStream = requireContext().contentResolver.openInputStream(uri)
-                if (inputStream != null) {
-                    val avatarPath = "avatars/${profileViewModel.getUserId()}.jpg"
-                    val bucket = supabaseClient.storage.from("avatars")
-                    val byteArray = inputStream.readBytes()
-                    val result = bucket.upload(avatarPath, byteArray, upsert = true)
+            val inputStream = requireContext().contentResolver.openInputStream(uri)
+            if (inputStream != null) {
+                val compressedByteArray = compressImage(inputStream, uri)
 
-                    if (result.isNotEmpty()) {
-                        val publicUrl = getPublicUrl(avatarPath)
-                        withContext(Dispatchers.Main) {
-                            profileViewModel.updateUserAvatar(publicUrl)
+                val avatarPath = "avatars/${profileViewModel.getUserId()}.jpg"
+                val bucket = supabaseClient.storage.from("avatars")
+                val result = bucket.upload(avatarPath, compressedByteArray, upsert = true)
 
-                            dismiss()
-                        }
-                    } else {
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(requireContext(), "Upload failed", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                } else {
+                if (result.isNotEmpty()) {
+                    val publicUrl = getPublicUrl(avatarPath)
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(requireContext(), "Failed to open input stream", Toast.LENGTH_SHORT).show()
+                        profileViewModel.updateUserAvatar(publicUrl)
+                        dismiss()
                     }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "Exception: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+    }
+
+    private fun compressImage(inputStream: java.io.InputStream, uri: Uri): ByteArray {
+        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeStream(inputStream, null, options)
+        inputStream.close()
+
+        val newInputStream = requireContext().contentResolver.openInputStream(uri)!!
+
+        options.inJustDecodeBounds = false
+        options.inSampleSize = calculateInSampleSize(options, 1080, 1080)
+        val bitmap = BitmapFactory.decodeStream(newInputStream, null, options)!!
+
+        val outputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+
+        bitmap.recycle()
+        newInputStream.close()
+
+        return outputStream.toByteArray()
+    }
+
+    @Suppress("SameParameterValue")
+    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        val height = options.outHeight
+        val width = options.outWidth
+        var inSampleSize = 1
+
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight = height / 2
+            val halfWidth = width / 2
+
+            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+        return inSampleSize
     }
 
     private fun getPublicUrl(path: String): String {

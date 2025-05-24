@@ -191,7 +191,7 @@ class ProfileFragment : Fragment() {
         window?.let {
             val displayMetrics = resources.displayMetrics
             val dialogWidth = (displayMetrics.widthPixels * 0.867).toInt()
-            val dialogHeight = (displayMetrics.heightPixels * 0.331).toInt()
+            val dialogHeight = (displayMetrics.heightPixels * 0.359).toInt()
 
             it.setLayout(dialogWidth, dialogHeight)
 

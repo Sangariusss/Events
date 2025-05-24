@@ -35,6 +35,33 @@
         app:layout_constraintTop_toTopOf="@id/button_back" />
 
     <ImageButton
+        android:id="@+id/button_share"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_toolbar_button"
+        android:contentDescription="@string/button_share"
+        app:layout_constraintBottom_toBottomOf="@+id/guideline1"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/button_overflow_menu"
+        app:layout_constraintHorizontal_bias="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.133"/>
+
+    <ImageView
+        android:id="@+id/button_share_image"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="@string/image_overflow_menu"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_share"
+        app:layout_constraintBottom_toBottomOf="@id/button_share"
+        app:layout_constraintDimensionRatio="0.5:1"
+        app:layout_constraintEnd_toEndOf="@id/button_share"
+        app:layout_constraintStart_toStartOf="@id/button_share"
+        app:layout_constraintTop_toTopOf="@id/button_share" />
+
+    <ImageButton
         android:id="@+id/button_overflow_menu"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -119,51 +146,6 @@
                 app:layout_constraintStart_toEndOf="@id/text_user_name"
                 app:layout_constraintTop_toTopOf="@id/text_user_name"
                 app:layout_constraintWidth_percent="0.1" />
-
-            <ImageView
-                android:id="@+id/image_like"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:src="@drawable/ic_heart_outline"
-                android:contentDescription="@string/like"
-                app:layout_constraintDimensionRatio="1:1"
-                app:layout_constraintBottom_toBottomOf="@id/text_time"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.774"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@id/text_time"
-                app:layout_constraintWidth_percent="0.067" />
-
-            <TextView
-                android:id="@+id/text_likes_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center|start"
-                android:fontFamily="@font/fixel_medium"
-                android:text="@string/_0"
-                android:textColor="@color/neutral_50"
-                app:layout_constraintDimensionRatio="1:1"
-                app:layout_constraintBottom_toBottomOf="@id/image_like"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="@id/guideline4"
-                app:layout_constraintTop_toTopOf="@id/image_like" />
-
-            <ImageButton
-                android:id="@+id/button_share"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/share"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_share"
-                app:layout_constraintBottom_toBottomOf="@id/image_like"
-                app:layout_constraintDimensionRatio="1:1"
-                app:layout_constraintEnd_toEndOf="@id/text_title"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toEndOf="@id/text_likes_count"
-                app:layout_constraintTop_toTopOf="@id/image_like"
-                app:layout_constraintWidth_percent="0.067" />
 
             <TextView
                 android:id="@+id/text_title"
@@ -387,7 +369,7 @@
                 android:text="@string/check_location"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHeight_percent="0.069"
+                app:layout_constraintHeight_percent="0.06"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/title_address_content"
                 app:layout_constraintWidth_percent="0.911" />

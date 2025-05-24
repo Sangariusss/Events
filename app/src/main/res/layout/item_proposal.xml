@@ -130,7 +130,7 @@
             android:layout_marginStart="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/share"
-            android:src="@drawable/ic_share"
+            android:src="@drawable/ic_send"
             android:scaleType="fitCenter"
             app:layout_constraintBottom_toBottomOf="@id/image_like"
             app:layout_constraintDimensionRatio="1:1"

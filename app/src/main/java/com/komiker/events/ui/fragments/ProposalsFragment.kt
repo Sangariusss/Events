@@ -93,7 +93,7 @@ class ProposalsFragment : Fragment() {
                 Glide.with(this)
                     .load(user.avatar)
                     .override(400, 400)
-                    .signature(ObjectKey(user.avatar.hashCode().toString()))
+                    .signature(ObjectKey(System.currentTimeMillis().toString()))
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .skipMemoryCache(false)
                     .placeholder(R.drawable.img_profile_placeholder)

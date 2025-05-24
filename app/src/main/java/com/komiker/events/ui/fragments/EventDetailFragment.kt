@@ -118,7 +118,6 @@ class EventDetailFragment : Fragment() {
         titleStartDate.text = getString(R.string.start_time_format, event.eventTime ?: "Not specified")
         titleAddressContent.text = event.location ?: "Not specified"
         titleTagsContent.text = event.tags?.joinToString(", ") ?: "No tags"
-        textLikesCount.text = event.likesCount.toString()
     }
 
     private fun styleStatusText() {
@@ -225,7 +224,6 @@ class EventDetailFragment : Fragment() {
             val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Address", address)
             clipboard.setPrimaryClip(clip)
-            Toast.makeText(requireContext(), "Address copied to clipboard", Toast.LENGTH_SHORT).show()
         }
     }
 

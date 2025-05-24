@@ -16,7 +16,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.119"
+        app:layout_constraintVertical_bias="0.109"
         app:layout_constraintWidth_percent="0.128" />
 
     <TextView
@@ -33,10 +33,10 @@
         android:textColor="@color/red_50"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.104"
+        app:layout_constraintHeight_percent="0.096"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.333"
+        app:layout_constraintVertical_bias="0.305"
         app:layout_constraintWidth_percent="0.471" />
 
     <TextView
@@ -49,16 +49,16 @@
         android:fontFamily="@font/fixel_regular"
         android:gravity="center"
         android:lineSpacingMultiplier="1.4"
-        android:maxLines="2"
+        android:maxLines="3"
         android:text="@string/delete_account_dialog_message"
-        android:textColor="@color/neutral_35"
+        android:textColor="@color/neutral_0"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.562"
-        app:layout_constraintWidth_percent="0.846"
-        app:layout_constraintHeight_percent="0.166" />
+        app:layout_constraintWidth_percent="0.872"
+        app:layout_constraintHeight_percent="0.230" />
 
     <Button
         android:id="@+id/button_cancel"
@@ -68,11 +68,11 @@
         android:text="@string/cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.166"
+        app:layout_constraintHeight_percent="0.153"
         app:layout_constraintHorizontal_bias="0.128"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.881"
+        app:layout_constraintVertical_bias="0.891"
         app:layout_constraintWidth_percent="0.397" />
 
     <Button
@@ -83,12 +83,12 @@
         android:text="@string/submit"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.166"
+        app:layout_constraintHeight_percent="0.153"
         app:layout_constraintHorizontal_bias="0.872"
         app:layout_constraintStart_toEndOf="@id/button_cancel"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.881"
+        app:layout_constraintVertical_bias="0.891"
         app:layout_constraintWidth_percent="0.397" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
