@@ -103,12 +103,13 @@
         android:gravity="center|start"
         android:text="@string/_1_min"
         android:textColor="@color/neutral_60"
+        android:maxLines="1"
         app:layout_constraintBottom_toBottomOf="@id/image_profile"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@id/text_user_name"
         app:layout_constraintTop_toTopOf="@id/image_profile"
-        app:layout_constraintWidth_percent="0.1"
+        app:layout_constraintWidth_percent="0.12"
         app:layout_constraintHeight_percent="0.027" />
 
     <TextView

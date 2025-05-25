@@ -17,10 +17,7 @@ import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.handleDeeplinks
-import io.github.jan.supabase.gotrue.user.UserSession
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,22 +29,16 @@ class MainActivity : AppCompatActivity() {
     private val twitterAuthManager = TwitterAuthManager()
     private val profileViewModel: ProfileViewModel by viewModels { ProfileViewModelFactory(supabaseUserDao) }
 
-    companion object {
-        private const val MIN_TIME_BEFORE_EXPIRY = 1800L
-        private const val MAX_AUTH_ATTEMPTS = 5
-        private const val AUTH_CHECK_DELAY_MS = 500L
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeBindingAndNavigation()
-        lifecycleScope.launch { handleInitialFlow(intent) }
+        lifecycleScope.launch { handleInitialFlow() }
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         setIntent(intent)
-        lifecycleScope.launch { handleInitialFlow(intent) }
+        lifecycleScope.launch { processDeepLinks(intent) }
     }
 
     private fun initializeBindingAndNavigation() {
@@ -57,37 +48,17 @@ class MainActivity : AppCompatActivity() {
         navController = navHostFragment.navController
     }
 
-    private suspend fun handleInitialFlow(intent: Intent?) {
-        if (isUserAuthenticated()) {
+    private suspend fun handleInitialFlow() {
+        val isAuthenticated = intent.getBooleanExtra("isAuthenticated", false)
+
+        if (isAuthenticated) {
+            handleSocialProviderAuthentication()
             handleAuthenticatedUser()
         } else {
-            waitForAuthentication()
-            if (isUserAuthenticated()) {
-                handleSocialProviderAuthentication()
-                handleAuthenticatedUser()
-            } else {
-                navigateToWelcomeIfNeeded()
-            }
+            navigateToWelcomeIfNeeded()
         }
+
         processDeepLinks(intent)
-    }
-
-    private suspend fun isUserAuthenticated(): Boolean {
-        val session = supabaseClient.auth.currentSessionOrNull() ?: return false
-        if (shouldRefreshToken(session)) {
-            try {
-                supabaseClient.auth.refreshCurrentSession()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                return false
-            }
-        }
-        return true
-    }
-
-    private fun shouldRefreshToken(session: UserSession): Boolean {
-        val currentTime = Clock.System.now()
-        return (session.expiresAt - currentTime).inWholeSeconds < MIN_TIME_BEFORE_EXPIRY
     }
 
     private fun processDeepLinks(intent: Intent?) {
@@ -107,13 +78,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun waitForAuthentication() {
-        repeat(MAX_AUTH_ATTEMPTS) {
-            if (isUserAuthenticated()) return
-            delay(AUTH_CHECK_DELAY_MS)
-        }
-    }
-
     private fun handleAuthenticatedUser() {
         supabaseClient.auth.currentSessionOrNull()?.user?.id?.let { profileViewModel.loadUser(it) }
         navController.navigate(R.id.MainMenuFragment)
@@ -121,11 +85,11 @@ class MainActivity : AppCompatActivity() {
 
     private suspend fun handleSocialProviderAuthentication() {
         val session = supabaseClient.auth.currentSessionOrNull() ?: return
+
         val provider = session.accessToken.let { token ->
             when {
                 token.contains("twitter", ignoreCase = true) -> "twitter"
                 token.contains("facebook", ignoreCase = true) -> "facebook"
-
                 else -> "unknown"
             }
         }
