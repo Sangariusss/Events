@@ -105,7 +105,6 @@ class WelcomeFragment : Fragment() {
             requireContext(),
             facebookSignInButton,
             viewLifecycleOwner.lifecycleScope,
-            findNavController()
         )
     }
 
@@ -114,8 +113,7 @@ class WelcomeFragment : Fragment() {
         twitterAuthManager.setupTwitterSignInButton(
             requireContext(),
             twitterSignInButton,
-            viewLifecycleOwner.lifecycleScope,
-            findNavController()
+            viewLifecycleOwner.lifecycleScope
         )
     }
 

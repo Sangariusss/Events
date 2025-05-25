@@ -24,60 +24,53 @@ class TwitterAuthManager {
         context: Context,
         button: Button,
         lifecycleScope: LifecycleCoroutineScope,
-        navController: NavController
     ) {
         button.setOnClickListener {
             lifecycleScope.launch {
-                startTwitterSignIn(context, navController)
+                startTwitterSignIn(context)
             }
         }
     }
 
-    private suspend fun startTwitterSignIn(context: Context, navController: NavController) {
+    private suspend fun startTwitterSignIn(context: Context) {
         try {
             val authUrl = supabaseClient.auth.signInWith(Twitter) {}
-
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(authUrl.toString()))
             context.startActivity(intent)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        } catch (_: Exception) {}
     }
 
     suspend fun handleTwitterSignInResult(navController: NavController) {
         try {
-            val session = supabaseClient.auth.currentSessionOrNull()
-            if (session != null) {
-                val userId = session.user?.id
-                val email = session.user?.email ?: generateEmailFallback()
-                val username = session.user?.userMetadata?.get("preferred_username")?.toString() ?: generateUsername()
-                val avatar = session.user?.userMetadata?.get("avatar_url")?.toString()
-                    ?: R.drawable.img_profile_placeholder.toString()
+            val session = supabaseClient.auth.currentSessionOrNull() ?: return
+            val userId = session.user?.id ?: return
+            val email = session.user?.email ?: generateEmailFallback()
+            val pictureUrl = session.user?.userMetadata?.get("picture")?.toString()
+                ?.replace("\"", "")
+                ?: R.drawable.img_profile_placeholder.toString()
 
-                val user = User(
-                    user_id = userId.toString(),
-                    name = username,
-                    username = username,
-                    email = email,
-                    avatar = avatar
-                )
-                userDao.insertUser(user)
+            val user = User(
+                user_id = userId,
+                name = generateUsername(),
+                username = generateUsername(),
+                email = email,
+                avatar = pictureUrl
+            )
+            userDao.insertUser(user)
 
-                val fadeOutAnimation = R.anim.fade_out
-                val fadeInAnimation = R.anim.fade_in
+            val fadeOutAnimation = R.anim.fade_out
+            val fadeInAnimation = R.anim.fade_in
 
-                navController.navigate(
-                    R.id.action_WelcomeFragment_to_RegistrationSuccessFragment,
-                    null,
-                    NavOptions.Builder()
-                        .setEnterAnim(fadeInAnimation)
-                        .setExitAnim(fadeOutAnimation)
-                        .build()
-                )
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+            navController.navigate(
+                R.id.RegistrationSuccessFragment,
+                null,
+                NavOptions.Builder()
+                    .setEnterAnim(fadeInAnimation)
+                    .setExitAnim(fadeOutAnimation)
+                    .setPopUpTo(R.id.WelcomeFragment, true)
+                    .build()
+            )
+        } catch (_: Exception) {}
     }
 
     private fun generateEmailFallback(): String {

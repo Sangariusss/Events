@@ -17,7 +17,13 @@ import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.handleDeeplinks
+import io.github.jan.supabase.gotrue.user.UserSession
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,17 +34,18 @@ class MainActivity : AppCompatActivity() {
     private val facebookAuthManager = FacebookAuthManager()
     private val twitterAuthManager = TwitterAuthManager()
     private val profileViewModel: ProfileViewModel by viewModels { ProfileViewModelFactory(supabaseUserDao) }
+    private var isSocialAuthHandled = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeBindingAndNavigation()
-        lifecycleScope.launch { handleInitialFlow() }
+        lifecycleScope.launch { handleAppStartup() }
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         setIntent(intent)
-        lifecycleScope.launch { processDeepLinks(intent) }
+        lifecycleScope.launch { handleAppStartup() }
     }
 
     private fun initializeBindingAndNavigation() {
@@ -48,20 +55,32 @@ class MainActivity : AppCompatActivity() {
         navController = navHostFragment.navController
     }
 
-    private suspend fun handleInitialFlow() {
-        val isAuthenticated = intent.getBooleanExtra("isAuthenticated", false)
+    private suspend fun handleAppStartup() {
+        isSocialAuthHandled = false
+        val isSocialAuthIntent = processDeepLinks(intent)
 
-        if (isAuthenticated) {
-            handleSocialProviderAuthentication()
-            handleAuthenticatedUser()
+        val session = withTimeoutOrNull(1000) {
+            var currentSession = supabaseClient.auth.currentSessionOrNull()
+            while (currentSession == null && isSocialAuthIntent) {
+                delay(50)
+                currentSession = supabaseClient.auth.currentSessionOrNull()
+            }
+            currentSession
+        } ?: supabaseClient.auth.currentSessionOrNull()
+
+        if (session?.user != null) {
+            if (isSocialAuthIntent) {
+                handleSocialProviderAuthentication(session)
+            }
+            if (!isSocialAuthHandled) {
+                handleAuthenticatedUser()
+            }
         } else {
             navigateToWelcomeIfNeeded()
         }
-
-        processDeepLinks(intent)
     }
 
-    private fun processDeepLinks(intent: Intent?) {
+    private fun processDeepLinks(intent: Intent?): Boolean {
         intent?.data?.let { uri ->
             if (uri.scheme == "https" && uri.host == "excito.netlify.app" && uri.path?.startsWith("/@") == true) {
                 val segments = uri.pathSegments
@@ -71,11 +90,14 @@ class MainActivity : AppCompatActivity() {
                         putString("username", segments[0].removePrefix("@"))
                     }
                     navController.navigate(R.id.EventDetailFragment, bundle)
+                    return false
                 }
-            } else {
+            } else if (uri.scheme == "com.events" && uri.host == "login-callback") {
                 supabaseClient.handleDeeplinks(intent)
+                return true
             }
         }
+        return false
     }
 
     private fun handleAuthenticatedUser() {
@@ -83,20 +105,37 @@ class MainActivity : AppCompatActivity() {
         navController.navigate(R.id.MainMenuFragment)
     }
 
-    private suspend fun handleSocialProviderAuthentication() {
-        val session = supabaseClient.auth.currentSessionOrNull() ?: return
+    private suspend fun handleSocialProviderAuthentication(session: UserSession) {
+        if (session.user == null) return
 
-        val provider = session.accessToken.let { token ->
-            when {
-                token.contains("twitter", ignoreCase = true) -> "twitter"
-                token.contains("facebook", ignoreCase = true) -> "facebook"
-                else -> "unknown"
-            }
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
         }
 
-        when (provider) {
-            "twitter" -> twitterAuthManager.handleTwitterSignInResult(navController)
-            "facebook" -> facebookAuthManager.handleFacebookSignInResult(navController)
+        val lastIdentity = session.user?.identities?.maxByOrNull {
+            try {
+                val lastSignInAt = it.lastSignInAt
+                if (lastSignInAt != null) {
+                    dateFormat.parse(lastSignInAt)?.time ?: 0L
+                } else {
+                    0L
+                }
+            } catch (e: Exception) {
+                0L
+            }
+        }
+        val lastProvider = lastIdentity?.provider
+
+        when (lastProvider?.lowercase()) {
+            "twitter" -> {
+                twitterAuthManager.handleTwitterSignInResult(navController)
+                isSocialAuthHandled = true
+            }
+            "facebook" -> {
+                facebookAuthManager.handleFacebookSignInResult(navController)
+                isSocialAuthHandled = true
+            }
+            else -> handleAuthenticatedUser()
         }
     }
 

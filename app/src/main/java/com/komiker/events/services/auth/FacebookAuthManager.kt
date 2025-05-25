@@ -23,8 +23,7 @@ class FacebookAuthManager {
     fun setupFacebookSignInButton(
         context: Context,
         button: Button,
-        lifecycleScope: LifecycleCoroutineScope,
-        navController: NavController
+        lifecycleScope: LifecycleCoroutineScope
     ) {
         button.setOnClickListener {
             lifecycleScope.launch {
@@ -36,14 +35,11 @@ class FacebookAuthManager {
     private suspend fun startFacebookSignIn(context: Context) {
         try {
             val authUrl = supabaseClient.auth.signInWith(Facebook) {}
-
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(authUrl.toString()))
             context.startActivity(intent)
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        } catch (_: Exception) {}
     }
+
     suspend fun handleFacebookSignInResult(navController: NavController) {
         try {
             val session = supabaseClient.auth.currentSessionOrNull()
@@ -67,17 +63,16 @@ class FacebookAuthManager {
                 val fadeInAnimation = R.anim.fade_in
 
                 navController.navigate(
-                    R.id.action_WelcomeFragment_to_RegistrationSuccessFragment,
+                    R.id.RegistrationSuccessFragment,
                     null,
                     NavOptions.Builder()
                         .setEnterAnim(fadeInAnimation)
                         .setExitAnim(fadeOutAnimation)
+                        .setPopUpTo(R.id.WelcomeFragment, true)
                         .build()
                 )
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        } catch (_: Exception) {}
     }
 
     private fun generateEmailFallback(): String {
