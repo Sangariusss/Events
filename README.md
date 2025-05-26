@@ -30,11 +30,11 @@ Events is designed to streamline the process of event creation and management. I
 ## Features
 
 - **User Authentication:**
-    - Login using Google or Facebook.
+    - Login using Google, Facebook or X (Twitter).
     - Email verification with a unique code.
 
 - **Event Creation:**
-    - Create events by adding a name, description, time, color, and location.
+    - Create events by adding a name, description, time, tags, and location.
     - Option to add images to events.
 
 - **Event Management:**
