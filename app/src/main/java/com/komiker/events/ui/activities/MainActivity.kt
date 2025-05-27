@@ -2,11 +2,14 @@ package com.komiker.events.ui.activities
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.navOptions
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
 import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
@@ -36,16 +39,26 @@ class MainActivity : AppCompatActivity() {
     private val profileViewModel: ProfileViewModel by viewModels { ProfileViewModelFactory(supabaseUserDao) }
     private var isSocialAuthHandled = false
 
+    companion object {
+        private val UTC_DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+        private const val SESSION_WAIT_TIMEOUT = 1000L
+        private const val SESSION_ATTEMPT_DELAY = 50L
+        private const val MAX_SESSION_ATTEMPTS = 10
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeBindingAndNavigation()
-        lifecycleScope.launch { handleAppStartup() }
+        setupCustomBackButtonHandler()
+        startApplicationFlow(intent)
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         setIntent(intent)
-        lifecycleScope.launch { handleAppStartup() }
+        startApplicationFlow(intent)
     }
 
     private fun initializeBindingAndNavigation() {
@@ -55,33 +68,79 @@ class MainActivity : AppCompatActivity() {
         navController = navHostFragment.navController
     }
 
-    private suspend fun handleAppStartup() {
-        isSocialAuthHandled = false
-        val isSocialAuthIntent = processDeepLinks(intent)
+    private fun startApplicationFlow(currentIntent: Intent?) {
+        lifecycleScope.launch { handleAppStartup(currentIntent) }
+    }
 
-        val session = withTimeoutOrNull(1000) {
+    private fun setupCustomBackButtonHandler() {
+        onBackPressedDispatcher.addCallback(this, true) {
+            val isAuthenticated = supabaseClient.auth.currentSessionOrNull() != null
+            val currentId = navController.currentDestination?.id
+            val welcomeScreens = setOf(R.id.WelcomeFragment, R.id.RegistrationFragment)
+            val mainMenuId = R.id.MainMenuFragment
+
+            val navOptionsToRoot = navOptions {
+                popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                launchSingleTop = true
+            }
+
+            if (isAuthenticated) {
+                if (currentId != mainMenuId) {
+                    navController.navigate(mainMenuId, null, navOptionsToRoot)
+                } else {
+                    finish()
+                }
+            } else {
+                if (currentId !in welcomeScreens) {
+                    navController.navigate(R.id.WelcomeFragment, null, navOptionsToRoot)
+                } else {
+                    finish()
+                }
+            }
+        }
+    }
+
+    private suspend fun handleAppStartup(currentIntent: Intent?) {
+        isSocialAuthHandled = false
+        val linkType = processDeepLinks(currentIntent)
+
+        val isContentLink = (linkType == 1)
+        val isSocialAuthIntent = (linkType == 2)
+
+        val session = withTimeoutOrNull(SESSION_WAIT_TIMEOUT) {
             var currentSession = supabaseClient.auth.currentSessionOrNull()
-            while (currentSession == null && isSocialAuthIntent) {
-                delay(50)
+            var attempts = 0
+            while (currentSession == null && (isSocialAuthIntent || attempts < MAX_SESSION_ATTEMPTS)) {
+                delay(SESSION_ATTEMPT_DELAY)
                 currentSession = supabaseClient.auth.currentSessionOrNull()
+                if (!isSocialAuthIntent) attempts++
             }
             currentSession
         } ?: supabaseClient.auth.currentSessionOrNull()
+
+        session?.user?.id?.let { profileViewModel.loadUser(it) }
 
         if (session?.user != null) {
             if (isSocialAuthIntent) {
                 handleSocialProviderAuthentication(session)
             }
-            if (!isSocialAuthHandled) {
-                handleAuthenticatedUser()
+
+            if (!isContentLink && !isSocialAuthHandled) {
+                val currentId = navController.currentDestination?.id
+                val welcomeScreens = setOf(R.id.WelcomeFragment, R.id.RegistrationFragment)
+                if (currentId != R.id.MainMenuFragment && currentId !in welcomeScreens) {
+                    navController.navigate(R.id.MainMenuFragment)
+                }
             }
         } else {
-            navigateToWelcomeIfNeeded()
+            if (!isContentLink) {
+                navigateToWelcomeIfNeeded()
+            }
         }
     }
 
-    private fun processDeepLinks(intent: Intent?): Boolean {
-        intent?.data?.let { uri ->
+    private fun processDeepLinks(intentToProcess: Intent?): Int {
+        intentToProcess?.data?.let { uri ->
             if (uri.scheme == "https" && uri.host == "excito.netlify.app" && uri.path?.startsWith("/@") == true) {
                 val segments = uri.pathSegments
                 if (segments.size >= 3 && segments[1] == "event") {
@@ -89,58 +148,43 @@ class MainActivity : AppCompatActivity() {
                         putString("eventId", segments[2])
                         putString("username", segments[0].removePrefix("@"))
                     }
-                    navController.navigate(R.id.EventDetailFragment, bundle)
-                    return false
+                    if (navController.currentDestination?.id != R.id.EventDetailFragment) {
+                        navController.navigate(R.id.EventDetailFragment, bundle)
+                    }
+                    return 1
                 }
             } else if (uri.scheme == "com.events" && uri.host == "login-callback") {
-                supabaseClient.handleDeeplinks(intent)
-                return true
+                supabaseClient.handleDeeplinks(intentToProcess)
+                return 2
             }
         }
-        return false
-    }
-
-    private fun handleAuthenticatedUser() {
-        supabaseClient.auth.currentSessionOrNull()?.user?.id?.let { profileViewModel.loadUser(it) }
-        navController.navigate(R.id.MainMenuFragment)
+        return 0
     }
 
     private suspend fun handleSocialProviderAuthentication(session: UserSession) {
-        if (session.user == null) return
-
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'", Locale.US).apply {
-            timeZone = TimeZone.getTimeZone("UTC")
-        }
-
-        val lastIdentity = session.user?.identities?.maxByOrNull {
+        session.user?.identities?.maxByOrNull {
             try {
-                val lastSignInAt = it.lastSignInAt
-                if (lastSignInAt != null) {
-                    dateFormat.parse(lastSignInAt)?.time ?: 0L
-                } else {
-                    0L
-                }
+                it.lastSignInAt?.let { date -> UTC_DATE_FORMAT.parse(date)?.time } ?: 0L
             } catch (e: Exception) {
                 0L
             }
-        }
-        val lastProvider = lastIdentity?.provider
-
-        when (lastProvider?.lowercase()) {
-            "twitter" -> {
-                twitterAuthManager.handleTwitterSignInResult(navController)
-                isSocialAuthHandled = true
+        }?.provider?.let { lastProvider ->
+            when (lastProvider.lowercase()) {
+                "twitter" -> {
+                    twitterAuthManager.handleTwitterSignInResult(navController)
+                    isSocialAuthHandled = true
+                }
+                "facebook" -> {
+                    facebookAuthManager.handleFacebookSignInResult(navController)
+                    isSocialAuthHandled = true
+                }
             }
-            "facebook" -> {
-                facebookAuthManager.handleFacebookSignInResult(navController)
-                isSocialAuthHandled = true
-            }
-            else -> handleAuthenticatedUser()
         }
     }
 
     private fun navigateToWelcomeIfNeeded() {
-        if (navController.currentDestination?.id !in setOf(R.id.WelcomeFragment, R.id.RegistrationFragment)) {
+        val welcomeScreens = setOf(R.id.WelcomeFragment, R.id.RegistrationFragment)
+        if (navController.currentDestination?.id !in welcomeScreens) {
             navController.navigate(R.id.WelcomeFragment)
         }
     }

@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
@@ -61,7 +60,6 @@ class EventDetailFragment : Fragment() {
         setupSystemBars()
         handleArguments()
         initButtonBack()
-        setupOnBackPressedCallback()
         setupButtonCheckLocation()
         setupCopyAddressButton()
         setupShareButton()
@@ -185,20 +183,9 @@ class EventDetailFragment : Fragment() {
     }
 
     private fun initButtonBack() {
-        binding.buttonBack.setOnClickListener { navigateBackToMainMenu() }
-    }
-
-    private fun setupOnBackPressedCallback() {
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() = navigateBackToMainMenu()
-        })
-    }
-
-    private fun navigateBackToMainMenu() {
-        findNavController().navigate(
-            R.id.MainMenuFragment,
-            Bundle().apply { putString("navigateTo", "events") }
-        )
+        binding.buttonBack.setOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
     }
 
     private fun formatTimeAgo(createdAt: OffsetDateTime?) = createdAt?.let {
