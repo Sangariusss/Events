@@ -21,6 +21,7 @@ import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.handleDeeplinks
 import io.github.jan.supabase.gotrue.user.UserSession
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -38,14 +39,15 @@ class MainActivity : AppCompatActivity() {
     private val twitterAuthManager = TwitterAuthManager()
     private val profileViewModel: ProfileViewModel by viewModels { ProfileViewModelFactory(supabaseUserDao) }
     private var isSocialAuthHandled = false
+    private var startupJob: Job? = null
 
     companion object {
         private val UTC_DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'", Locale.US).apply {
             timeZone = TimeZone.getTimeZone("UTC")
         }
-        private const val SESSION_WAIT_TIMEOUT = 1000L
+        private const val SESSION_WAIT_TIMEOUT = 1500L
         private const val SESSION_ATTEMPT_DELAY = 50L
-        private const val MAX_SESSION_ATTEMPTS = 10
+        private const val MAX_SESSION_ATTEMPTS = 20
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,7 +71,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startApplicationFlow(currentIntent: Intent?) {
-        lifecycleScope.launch { handleAppStartup(currentIntent) }
+        startupJob?.cancel()
+        startupJob = lifecycleScope.launch { handleAppStartup(currentIntent) }
     }
 
     private fun setupCustomBackButtonHandler() {
@@ -127,8 +130,7 @@ class MainActivity : AppCompatActivity() {
 
             if (!isContentLink && !isSocialAuthHandled) {
                 val currentId = navController.currentDestination?.id
-                val welcomeScreens = setOf(R.id.WelcomeFragment, R.id.RegistrationFragment)
-                if (currentId != R.id.MainMenuFragment && currentId !in welcomeScreens) {
+                if (currentId != R.id.MainMenuFragment) {
                     navController.navigate(R.id.MainMenuFragment)
                 }
             }
