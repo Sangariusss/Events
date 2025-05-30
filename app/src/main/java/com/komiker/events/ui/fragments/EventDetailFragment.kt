@@ -13,12 +13,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.bumptech.glide.Glide
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
@@ -29,6 +32,7 @@ import com.komiker.events.glide.CircleCropTransformation
 import com.komiker.events.ui.adapters.EventImageAdapter
 import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory
+import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,6 +64,7 @@ class EventDetailFragment : Fragment() {
         setupSystemBars()
         handleArguments()
         initButtonBack()
+        setupCustomOnBackPressed()
         setupButtonCheckLocation()
         setupCopyAddressButton()
         setupShareButton()
@@ -95,7 +100,9 @@ class EventDetailFragment : Fragment() {
                     setupUI(it)
                 }
             } ?: run {
-                findNavController().navigate(R.id.MainMenuFragment)
+                if (isAdded) {
+                    findNavController().navigate(R.id.MainMenuFragment)
+                }
             }
         }
     }
@@ -188,6 +195,24 @@ class EventDetailFragment : Fragment() {
         }
     }
 
+    private fun setupCustomOnBackPressed() {
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
+            val isAuthenticated = SupabaseClientProvider.client.auth.currentSessionOrNull() != null
+            val navController = findNavController()
+
+            val navOptionsToRoot = navOptions {
+                popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                launchSingleTop = true
+            }
+
+            if (isAuthenticated) {
+                navController.navigate(R.id.MainMenuFragment, null, navOptionsToRoot)
+            } else {
+                navController.navigate(R.id.WelcomeFragment, null, navOptionsToRoot)
+            }
+        }
+    }
+
     private fun formatTimeAgo(createdAt: OffsetDateTime?) = createdAt?.let {
         val now = OffsetDateTime.now()
         when {
@@ -246,8 +271,13 @@ class EventDetailFragment : Fragment() {
         if (intent.resolveActivity(requireActivity().packageManager) != null) {
             startActivity(intent)
         } else {
-            val fallbackUri = Uri.parse("https://www.google.com/maps/search/?api=1&query=${Uri.encode(address)}")
-            startActivity(Intent(Intent.ACTION_VIEW, fallbackUri))
+            val fallbackUri = Uri.parse("geo:0,0?q=${Uri.encode(address)}")
+            val mapIntent = Intent(Intent.ACTION_VIEW, fallbackUri)
+            if (mapIntent.resolveActivity(requireActivity().packageManager) != null) {
+                startActivity(mapIntent)
+            } else {
+                Toast.makeText(requireContext(), "No map application found", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

@@ -2,14 +2,11 @@ package com.komiker.events.ui.activities
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.navOptions
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
 import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
@@ -53,7 +50,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeBindingAndNavigation()
-        setupCustomBackButtonHandler()
         startApplicationFlow(intent)
     }
 
@@ -73,34 +69,6 @@ class MainActivity : AppCompatActivity() {
     private fun startApplicationFlow(currentIntent: Intent?) {
         startupJob?.cancel()
         startupJob = lifecycleScope.launch { handleAppStartup(currentIntent) }
-    }
-
-    private fun setupCustomBackButtonHandler() {
-        onBackPressedDispatcher.addCallback(this, true) {
-            val isAuthenticated = supabaseClient.auth.currentSessionOrNull() != null
-            val currentId = navController.currentDestination?.id
-            val welcomeScreens = setOf(R.id.WelcomeFragment, R.id.RegistrationFragment)
-            val mainMenuId = R.id.MainMenuFragment
-
-            val navOptionsToRoot = navOptions {
-                popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
-                launchSingleTop = true
-            }
-
-            if (isAuthenticated) {
-                if (currentId != mainMenuId) {
-                    navController.navigate(mainMenuId, null, navOptionsToRoot)
-                } else {
-                    finish()
-                }
-            } else {
-                if (currentId !in welcomeScreens) {
-                    navController.navigate(R.id.WelcomeFragment, null, navOptionsToRoot)
-                } else {
-                    finish()
-                }
-            }
-        }
     }
 
     private suspend fun handleAppStartup(currentIntent: Intent?) {
