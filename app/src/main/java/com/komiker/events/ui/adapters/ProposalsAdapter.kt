@@ -60,7 +60,6 @@ class ProposalsAdapter(
             binding.textUserName.text = proposal.username
             binding.textContent.text = proposal.content
             binding.textLikesCount.text = formatLikesCount(likesCountCache[proposal.id] ?: proposal.likesCount)
-
             binding.textTime.text = formatTimeAgo(proposal.createdAt)
 
             Glide.with(binding.imageProfile.context)
@@ -70,13 +69,7 @@ class ProposalsAdapter(
                 .into(binding.imageProfile)
 
             binding.buttonShare.setOnClickListener {
-                val sendIntent: Intent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, proposal.content)
-                    type = "text/plain"
-                }
-                val shareIntent = Intent.createChooser(sendIntent, null)
-                binding.root.context.startActivity(shareIntent)
+                shareProposal(proposal)
             }
 
             if (currentUserId != null && proposal.userId == currentUserId) {
@@ -99,10 +92,22 @@ class ProposalsAdapter(
 
         fun updateLikesCount(likesCount: Int) {
             binding.textLikesCount.text = formatLikesCount(likesCount)
-            val position = getBindingAdapterPosition()
+            val position = bindingAdapterPosition
             if (position != RecyclerView.NO_POSITION) {
                 likesCountCache[getItem(position).id] = likesCount
             }
+        }
+
+        private fun shareProposal(proposal: Proposal) {
+            val username = proposal.username.replace(" ", "_")
+            val deepLink = "https://excito.netlify.app/@$username/proposal/${proposal.id}"
+            val sendIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, deepLink)
+                type = "text/plain"
+            }
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            binding.root.context.startActivity(shareIntent)
         }
 
         private fun setupLikeButton(proposal: Proposal) {

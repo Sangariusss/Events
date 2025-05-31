@@ -3,6 +3,7 @@ package com.komiker.events.data.database.dao.implementation
 import com.komiker.events.data.database.SupabaseClientProvider.client
 import com.komiker.events.data.database.dao.UserDao
 import com.komiker.events.data.database.models.Event
+import com.komiker.events.data.database.models.Proposal
 import com.komiker.events.data.database.models.User
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.exceptions.UnknownRestException
@@ -99,6 +100,17 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
             client.from("events").select {
                 filter { eq("id", eventId) }
             }.decodeSingleOrNull<Event>()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    suspend fun getProposalById(proposalId: String): Proposal? {
+        return try {
+            client.from("proposals").select {
+                filter { eq("id", proposalId) }
+            }.decodeSingleOrNull<Proposal>()
         } catch (e: Exception) {
             e.printStackTrace()
             null

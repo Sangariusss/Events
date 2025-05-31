@@ -114,19 +114,25 @@ class MainActivity : AppCompatActivity() {
         intentToProcess?.data?.let { uri ->
             if (uri.scheme == "https" && uri.host == "excito.netlify.app" && uri.path?.startsWith("/@") == true) {
                 val segments = uri.pathSegments
-                if (segments.size >= 3 && segments[1] == "event") {
-                    val newEventId = segments[2]
+                if (segments.size >= 3) {
+                    val username = segments[0].removePrefix("@")
+                    val contentType = segments[1]
+                    val contentId = segments[2]
                     val bundle = Bundle().apply {
-                        putString("eventId", segments[2])
-                        putString("username", segments[0].removePrefix("@"))
+                        when (contentType) {
+                            "event" -> putString("eventId", contentId)
+                            "proposal" -> putString("proposalId", contentId)
+                        }
+                        putString("username", username)
                     }
                     val currentArgs = navController.currentBackStackEntry?.arguments
-                    val currentEventId = currentArgs?.getString("eventId")
-                    if (navController.currentDestination?.id != R.id.EventDetailFragment || currentEventId != newEventId) {
+                    val currentContentId = currentArgs?.getString(if (contentType == "event") "eventId" else "proposalId")
+                    val destinationId = if (contentType == "event") R.id.EventDetailFragment else R.id.ProposalDetailFragment
+                    if (navController.currentDestination?.id != destinationId || currentContentId != contentId) {
                         val navOptions = NavOptions.Builder()
-                            .setPopUpTo(R.id.EventDetailFragment, true)
+                            .setPopUpTo(destinationId, true)
                             .build()
-                        navController.navigate(R.id.EventDetailFragment, bundle, navOptions)
+                        navController.navigate(destinationId, bundle, navOptions)
                     }
                     return 1
                 }

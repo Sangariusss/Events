@@ -144,7 +144,8 @@
     <string name="telegram_com">https://t.me/username</string>
     <string name="instagram_com">https://www.instagram.com/username</string>
     <string name="create_event">Create event</string>
-    <string name="_0_255">0/255</string>
+    <string name="_0_100">0/100</string>
+    <string name="_0_500">0/500</string>
     <string name="char_counter_format">%1$d/%2$d</string>
     <string name="click_to_choose_the_image_files">Click to choose the image files</string>
     <string name="max_size_10mb">Max size: 10MB</string>
@@ -199,7 +200,7 @@
     <string name="tags_content_example">News, Streaming, Marathon, IT</string>
     <string name="status_active">Status: Active</string>
     <string name="start_08_00_am">Start 08:00 AM</string>
-    <string name="_14_02_2025_16_02_2025">14.02.2025 - 16.02.2025</string>
+    <string name="_14_02_2025_16_02_2025">14.02.2025 – 16.02.2025</string>
     <string name="address">Address</string>
     <string name="address_content_example">2984 Hollow Creek Rd, Springfield, IL 62704, United States</string>
     <string name="check_location">Check location</string>

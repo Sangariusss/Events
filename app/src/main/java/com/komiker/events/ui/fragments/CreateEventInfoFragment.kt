@@ -18,8 +18,8 @@ class CreateEventInfoFragment : Fragment() {
     private var _binding: FragmentCreateEventInfoBinding? = null
     private val binding get() = _binding!!
 
-    private val maxTitleLength = 255
-    private val maxDescriptionLength = 255
+    private val maxTitleLength = 100
+    private val maxDescriptionLength = 500
     private val viewModel: CreateEventViewModel by activityViewModels()
 
     override fun onCreateView(

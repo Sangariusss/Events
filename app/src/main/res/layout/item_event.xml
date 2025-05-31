@@ -92,7 +92,7 @@
         android:fontFamily="@font/fixel_regular"
         android:gravity="top|start"
         android:lineSpacingMultiplier="1.4"
-        android:maxLines="10"
+        android:maxLines="4"
         android:text="@string/text_content_example_text"
         android:textColor="@color/neutral_0"
         android:textSize="16sp"
