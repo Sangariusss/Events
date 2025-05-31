@@ -6,6 +6,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
@@ -114,12 +115,18 @@ class MainActivity : AppCompatActivity() {
             if (uri.scheme == "https" && uri.host == "excito.netlify.app" && uri.path?.startsWith("/@") == true) {
                 val segments = uri.pathSegments
                 if (segments.size >= 3 && segments[1] == "event") {
+                    val newEventId = segments[2]
                     val bundle = Bundle().apply {
                         putString("eventId", segments[2])
                         putString("username", segments[0].removePrefix("@"))
                     }
-                    if (navController.currentDestination?.id != R.id.EventDetailFragment) {
-                        navController.navigate(R.id.EventDetailFragment, bundle)
+                    val currentArgs = navController.currentBackStackEntry?.arguments
+                    val currentEventId = currentArgs?.getString("eventId")
+                    if (navController.currentDestination?.id != R.id.EventDetailFragment || currentEventId != newEventId) {
+                        val navOptions = NavOptions.Builder()
+                            .setPopUpTo(R.id.EventDetailFragment, true)
+                            .build()
+                        navController.navigate(R.id.EventDetailFragment, bundle, navOptions)
                     }
                     return 1
                 }

@@ -70,6 +70,12 @@ class EventDetailFragment : Fragment() {
         setupShareButton()
     }
 
+    override fun onStop() {
+        super.onStop()
+        _binding?.shimmerLayout?.stopShimmer()
+        _binding?.shimmerLayout?.visibility = View.GONE
+    }
+
     override fun onDestroyView() {
         _binding = null
         super.onDestroyView()
