@@ -58,6 +58,7 @@ class CreateEventOtherFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel.resetCleared()
         restoreState()
         setupUi()
         setupCreateEventButton()
@@ -82,12 +83,14 @@ class CreateEventOtherFragment : Fragment() {
     }
 
     private fun saveState() {
-        with(viewModel) {
-            startDate = binding.textStartDate.text.toString()
-            endDate = binding.textEndDate.text.toString()
-            hour = binding.editTextInputHour.text.toString()
-            minute = binding.editTextInputMinute.text.toString()
-            isAmSelected = binding.buttonAm.isSelected
+        if (!viewModel.isCleared()) {
+            with(viewModel) {
+                startDate = binding.textStartDate.text.toString().takeIf { it.isNotEmpty() }
+                endDate = binding.textEndDate.text.toString().takeIf { it.isNotEmpty() }
+                hour = binding.editTextInputHour.text.toString().takeIf { it.isNotEmpty() }
+                minute = binding.editTextInputMinute.text.toString().takeIf { it.isNotEmpty() }
+                isAmSelected = binding.buttonAm.isSelected
+            }
         }
     }
 
@@ -102,7 +105,6 @@ class CreateEventOtherFragment : Fragment() {
     private fun setupCreateEventButton() {
         binding.buttonCreateEvent.setOnClickListener {
             if (supabaseClient.auth.currentSessionOrNull() == null) return@setOnClickListener
-            saveState()
             (parentFragment as? CreateEventFragment)?.startLottieAnimation()
             saveEvent()
         }
@@ -135,6 +137,7 @@ class CreateEventOtherFragment : Fragment() {
                 try {
                     val userId = supabaseClient.auth.currentSessionOrNull()?.user?.id
                     if (userId != null && viewModel.title != null) {
+                        saveState()
                         val eventTime = "${viewModel.hour}:${viewModel.minute} ${if (viewModel.isAmSelected) "AM" else "PM"}"
                         val imageNames = if (viewModel.images.isNotEmpty()) uploadImagesToStorage(viewModel.images) else emptyList()
                         val event = EventResponse(
@@ -155,9 +158,9 @@ class CreateEventOtherFragment : Fragment() {
                         )
                         supabaseClient.from("events").insert(event)
                         viewModel.images.forEach { it.file.delete() }
-                        viewModel.images.clear()
                         withContext(Dispatchers.Main) {
                             (parentFragment as? CreateEventFragment)?.stopLottieAnimation()
+                            viewModel.clear()
                             navigateToMainMenuWithHome()
                         }
                     }

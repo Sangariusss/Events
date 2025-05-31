@@ -15,6 +15,7 @@ class CreateEventViewModel : ViewModel() {
     var hour: String? = null
     var minute: String? = null
     var isAmSelected: Boolean = true
+    private var isCleared: Boolean = false
 
     private val _location = MutableLiveData<String?>()
     val location: LiveData<String?> = _location
@@ -28,5 +29,25 @@ class CreateEventViewModel : ViewModel() {
 
     fun setTags(newTags: List<String>?) {
         _tags.value = newTags
+    }
+
+    fun clear() {
+        title = null
+        description = null
+        images.clear()
+        startDate = null
+        endDate = null
+        hour = null
+        minute = null
+        isAmSelected = true
+        setLocation(null)
+        setTags(null)
+        isCleared = true
+    }
+
+    fun isCleared(): Boolean = isCleared
+
+    fun resetCleared() {
+        isCleared = false
     }
 }

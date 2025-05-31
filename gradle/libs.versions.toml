@@ -24,6 +24,7 @@ materialVersion = "1.0.5"
 navigationFragmentKtx = "2.6.0"
 navigationUiKtx = "2.6.0"
 numberPicker = "2.4.13"
+places = "4.1.0"
 playServicesAuth = "19.2.0"
 lifecycleRuntimeKtx = "2.7.0"
 activityCompose = "1.8.2"
@@ -65,6 +66,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 number-picker = { module = "io.github.ShawnLin013:number-picker", version.ref = "numberPicker" }
+places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }

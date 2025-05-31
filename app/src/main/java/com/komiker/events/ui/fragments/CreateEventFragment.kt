@@ -7,12 +7,14 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.airbnb.lottie.LottieAnimationView
 import com.komiker.events.R
 import com.komiker.events.databinding.FragmentCreateEventBinding
 import com.komiker.events.ui.adapters.CreateEventViewPagerAdapter
+import com.komiker.events.viewmodels.CreateEventViewModel
 
 class CreateEventFragment : Fragment() {
 
@@ -22,6 +24,7 @@ class CreateEventFragment : Fragment() {
     private var currentStep = 1
     private lateinit var darkOverlay: View
     private lateinit var progressBar: LottieAnimationView
+    private val viewModel: CreateEventViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,6 +39,7 @@ class CreateEventFragment : Fragment() {
         darkOverlay = binding.viewDarkOverlay
         progressBar = binding.lottieProgressBar
         restoreCurrentStep(savedInstanceState)
+        viewModel.resetCleared()
         setupUi()
     }
 
@@ -125,6 +129,8 @@ class CreateEventFragment : Fragment() {
     }
 
     private fun navigateToMainMenu() {
+        viewModel.images.forEach { it.file.delete() }
+        viewModel.clear()
         findNavController().navigate(R.id.action_CreateEventFragment_to_MainMenuFragment)
     }
 
