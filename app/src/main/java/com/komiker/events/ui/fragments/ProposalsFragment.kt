@@ -152,7 +152,7 @@ class ProposalsFragment : Fragment() {
         val currentUserId = profileViewModel.userLiveData.value?.user_id ?: return
         proposals.forEach { proposal ->
             if (!likeCache.containsKey(proposal.id)) {
-                val isLiked = supabaseClient.from("likes")
+                val isLiked = supabaseClient.from("proposal_likes")
                     .select { filter { eq("proposal_id", proposal.id); eq("user_id", currentUserId) } }
                     .decodeList<Like>()
                     .isNotEmpty()
@@ -166,11 +166,11 @@ class ProposalsFragment : Fragment() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 if (isLiked) {
-                    supabaseClient.from("likes").insert(
+                    supabaseClient.from("proposal_likes").insert(
                         mapOf("proposal_id" to proposalId, "user_id" to profileViewModel.userLiveData.value?.user_id)
                     )
                 } else {
-                    supabaseClient.from("likes").delete {
+                    supabaseClient.from("proposal_likes").delete {
                         filter { eq("proposal_id", proposalId); eq("user_id", profileViewModel.userLiveData.value?.user_id!!) }
                     }
                 }

@@ -61,6 +61,32 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
         return proposalLiveData
     }
 
+    fun likeProposal(proposalId: String, userId: String, callback: (Boolean, Int) -> Unit) {
+        viewModelScope.launch {
+            try {
+                supabaseUserDao.insertLike(proposalId, userId)
+                val likesCount = supabaseUserDao.getLikesCount(proposalId)
+                callback(true, likesCount)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                callback(false, 0)
+            }
+        }
+    }
+
+    fun unlikeProposal(proposalId: String, userId: String, callback: (Boolean, Int) -> Unit) {
+        viewModelScope.launch {
+            try {
+                supabaseUserDao.deleteLike(proposalId, userId)
+                val likesCount = supabaseUserDao.getLikesCount(proposalId)
+                callback(true, likesCount)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                callback(false, 0)
+            }
+        }
+    }
+
     private fun updateUserField(updateAction: User.() -> Unit) {
         viewModelScope.launch {
             val user = userLiveData.value

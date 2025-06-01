@@ -83,6 +83,8 @@ class ProposalsAdapter(
             binding.root.setOnClickListener {
                 val bundle = Bundle().apply {
                     putParcelable("proposal", proposal)
+                    putBoolean("isLiked", likeCache[proposal.id] ?: false)
+                    putInt("likesCount", likesCountCache[proposal.id] ?: proposal.likesCount)
                 }
                 navController.navigate(R.id.action_MainMenuFragment_to_ProposalDetailFragment, bundle)
             }
@@ -257,11 +259,11 @@ class ProposalsAdapter(
 
         private fun formatLikesCount(count: Int): String {
             return when {
-                count >= 1_000_000_000 -> {
+                count >= 999_999_950 -> {
                     val billions = count / 1_000_000_000.0
                     String.format(Locale.US, "%.1fB", billions)
                 }
-                count >= 1_000_000 -> {
+                count >= 999_950 -> {
                     val millions = count / 1_000_000.0
                     String.format(Locale.US, "%.1fM", millions)
                 }

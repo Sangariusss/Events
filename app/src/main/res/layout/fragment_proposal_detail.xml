@@ -172,6 +172,7 @@
             android:id="@+id/button_share"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:layout_marginStart="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/share"
             android:src="@drawable/ic_send"
@@ -179,8 +180,8 @@
             app:layout_constraintBottom_toBottomOf="@id/image_like"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.197"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@id/text_likes_count"
             app:layout_constraintTop_toTopOf="@id/image_like"
             app:layout_constraintWidth_percent="0.073" />
 

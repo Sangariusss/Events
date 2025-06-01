@@ -25,9 +25,13 @@ import com.komiker.events.glide.CircleCropTransformation
 import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.gotrue.auth
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class ProposalDetailFragment : Fragment() {
 
@@ -39,6 +43,10 @@ class ProposalDetailFragment : Fragment() {
         ProfileViewModelFactory(supabaseUserDao)
     }
     private var currentProposal: Proposal? = null
+    private val likeCache = mutableMapOf<String, Boolean>()
+    private val likesCountCache = mutableMapOf<String, Int>()
+    private var isProcessingLike = false
+    private var likeJob: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,8 +66,10 @@ class ProposalDetailFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
+        likeJob?.cancel()
+        likeJob = null
         _binding = null
+        super.onDestroyView()
     }
 
     private fun setupSystemBars() {
@@ -71,12 +81,20 @@ class ProposalDetailFragment : Fragment() {
     private fun handleArguments() {
         val proposal = BundleCompat.getParcelable(requireArguments(), "proposal", Proposal::class.java)
         val proposalId = arguments?.getString("proposalId")
+        val isLiked = arguments?.getBoolean("isLiked", false) ?: false
+        val likesCount = arguments?.getInt("likesCount", proposal?.likesCount ?: 0) ?: 0
 
         if (proposal != null) {
             currentProposal = proposal
+            likeCache[proposal.id] = isLiked
+            likesCountCache[proposal.id] = likesCount
             setupUI(proposal)
-            setupSocialButtons(proposal)
-            setupShareButton()
+            setupLikeButton(proposal)
+            viewLifecycleOwner.lifecycleScope.launch {
+                initializeCaches(proposal)
+                setupSocialButtons(proposal)
+                setupShareButton()
+            }
         } else if (proposalId != null) {
             loadProposalById(proposalId)
         }
@@ -86,9 +104,14 @@ class ProposalDetailFragment : Fragment() {
         profileViewModel.loadProposalById(proposalId).observe(viewLifecycleOwner) { proposal ->
             proposal?.let {
                 currentProposal = it
+                likesCountCache[proposal.id] = arguments?.getInt("likesCount", proposal.likesCount) ?: proposal.likesCount
                 setupUI(it)
-                setupSocialButtons(it)
-                setupShareButton()
+                viewLifecycleOwner.lifecycleScope.launch {
+                    initializeCaches(it)
+                    setupSocialButtons(it)
+                    setupShareButton()
+                    setupLikeButton(it)
+                }
             } ?: run {
                 if (isAdded) {
                     findNavController().navigate(R.id.MainMenuFragment)
@@ -97,10 +120,19 @@ class ProposalDetailFragment : Fragment() {
         }
     }
 
+    private suspend fun initializeCaches(proposal: Proposal) {
+        val currentUserId = supabaseClient.auth.currentSessionOrNull()?.user?.id ?: return
+        if (!likeCache.containsKey(proposal.id)) {
+            val isLiked = supabaseUserDao.isProposalLiked(proposal.id, currentUserId)
+            likeCache[proposal.id] = isLiked
+        }
+    }
+
     private fun setupUI(proposal: Proposal) {
         binding.textUserName.text = proposal.username
         binding.textTime.text = formatTimeAgo(proposal.createdAt)
         binding.textContent.text = proposal.content
+        binding.textLikesCount.text = formatLikesCount(likesCountCache[proposal.id] ?: proposal.likesCount)
 
         Glide.with(this)
             .load(proposal.userAvatar)
@@ -133,6 +165,80 @@ class ProposalDetailFragment : Fragment() {
         binding.buttonShare.setOnClickListener {
             currentProposal?.let { proposal ->
                 shareProposal(proposal)
+            }
+        }
+    }
+
+    private fun setupLikeButton(proposal: Proposal) {
+        binding.imageLike.setImageResource(
+            if (likeCache[proposal.id] == true) R.drawable.ic_heart else R.drawable.ic_heart_outline
+        )
+
+        binding.imageLike.setOnClickListener {
+            val currentUserId = supabaseClient.auth.currentSessionOrNull()?.user?.id
+            if (currentUserId != null && !isProcessingLike) {
+                isProcessingLike = true
+                binding.imageLike.isEnabled = false
+                binding.imageLike.alpha = 0.5f
+
+                val isCurrentlyLiked = likeCache[proposal.id] ?: false
+                val currentLikesCount = likesCountCache[proposal.id] ?: proposal.likesCount
+
+                if (isCurrentlyLiked) {
+                    val newLikesCount = currentLikesCount - 1
+                    binding.textLikesCount.text = formatLikesCount(newLikesCount.coerceAtLeast(0))
+                    binding.imageLike.setImageResource(R.drawable.ic_heart_outline)
+                    likeCache[proposal.id] = false
+                    likesCountCache[proposal.id] = newLikesCount
+
+                    profileViewModel.unlikeProposal(proposal.id, currentUserId) { success, serverLikesCount ->
+                        likeJob = lifecycleScope.launch {
+                            isProcessingLike = false
+                            if (isAdded) {
+                                _binding?.let {
+                                    it.imageLike.isEnabled = true
+                                    it.imageLike.alpha = 1.0f
+                                    if (!success) {
+                                        it.textLikesCount.text = formatLikesCount(currentLikesCount)
+                                        it.imageLike.setImageResource(R.drawable.ic_heart)
+                                        likeCache[proposal.id] = true
+                                        likesCountCache[proposal.id] = currentLikesCount
+                                    } else {
+                                        likesCountCache[proposal.id] = serverLikesCount
+                                        it.textLikesCount.text = formatLikesCount(serverLikesCount)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    val newLikesCount = currentLikesCount + 1
+                    binding.textLikesCount.text = formatLikesCount(newLikesCount)
+                    binding.imageLike.setImageResource(R.drawable.ic_heart)
+                    likeCache[proposal.id] = true
+                    likesCountCache[proposal.id] = newLikesCount
+
+                    profileViewModel.likeProposal(proposal.id, currentUserId) { success, serverLikesCount ->
+                        likeJob = lifecycleScope.launch {
+                            isProcessingLike = false
+                            if (isAdded) {
+                                _binding?.let {
+                                    it.imageLike.isEnabled = true
+                                    it.imageLike.alpha = 1.0f
+                                    if (!success) {
+                                        it.textLikesCount.text = formatLikesCount(currentLikesCount)
+                                        it.imageLike.setImageResource(R.drawable.ic_heart_outline)
+                                        likeCache[proposal.id] = false
+                                        likesCountCache[proposal.id] = currentLikesCount
+                                    } else {
+                                        likesCountCache[proposal.id] = serverLikesCount
+                                        it.textLikesCount.text = formatLikesCount(serverLikesCount)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -198,6 +304,24 @@ class ProposalDetailFragment : Fragment() {
                 val formatter = DateTimeFormatter.ofPattern("MM/dd")
                 createdAt.format(formatter)
             }
+        }
+    }
+
+    private fun formatLikesCount(count: Int): String {
+        return when {
+            count >= 999_999_950 -> {
+                val billions = count / 1_000_000_000.0
+                String.format(Locale.US, "%.1fB", billions)
+            }
+            count >= 999_950 -> {
+                val millions = count / 1_000_000.0
+                String.format(Locale.US, "%.1fM", millions)
+            }
+            count >= 1_000 -> {
+                val thousands = count / 1_000.0
+                String.format(Locale.US, "%.1fK", thousands)
+            }
+            else -> count.toString()
         }
     }
 }

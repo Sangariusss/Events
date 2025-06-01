@@ -3,6 +3,7 @@ package com.komiker.events.data.database.dao.implementation
 import com.komiker.events.data.database.SupabaseClientProvider.client
 import com.komiker.events.data.database.dao.UserDao
 import com.komiker.events.data.database.models.Event
+import com.komiker.events.data.database.models.Like
 import com.komiker.events.data.database.models.Proposal
 import com.komiker.events.data.database.models.User
 import io.github.jan.supabase.SupabaseClient
@@ -114,6 +115,48 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
         } catch (e: Exception) {
             e.printStackTrace()
             null
+        }
+    }
+
+    suspend fun insertLike(proposalId: String, userId: String) {
+        withContext(Dispatchers.IO) {
+            supabase.from("proposal_likes").insert(
+                mapOf(
+                    "proposal_id" to proposalId,
+                    "user_id" to userId
+                )
+            )
+        }
+    }
+
+    suspend fun deleteLike(proposalId: String, userId: String) {
+        withContext(Dispatchers.IO) {
+            supabase.from("proposal_likes").delete {
+                filter {
+                    eq("proposal_id", proposalId)
+                    eq("user_id", userId)
+                }
+            }
+        }
+    }
+
+    suspend fun isProposalLiked(proposalId: String, userId: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            supabase.from("proposal_likes").select {
+                filter {
+                    eq("proposal_id", proposalId)
+                    eq("user_id", userId)
+                }
+            }.decodeList<Like>().isNotEmpty()
+        }
+    }
+
+    suspend fun getLikesCount(proposalId: String): Int {
+        return withContext(Dispatchers.IO) {
+            val proposal = supabase.from("proposals").select {
+                filter { eq("id", proposalId) }
+            }.decodeSingleOrNull<Proposal>()
+            proposal?.likesCount ?: 0
         }
     }
 }
