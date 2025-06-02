@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,13 +18,14 @@ import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
 import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
 import com.komiker.events.data.database.models.Event
-import com.komiker.events.data.database.models.EventLike
 import com.komiker.events.data.database.models.EventResponse
 import com.komiker.events.databinding.FragmentHomeBinding
 import com.komiker.events.ui.adapters.EventsAdapter
 import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.rpc
 import io.github.jan.supabase.realtime.RealtimeChannel
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
@@ -66,7 +68,6 @@ class HomeFragment : Fragment() {
         setupEditTextBackgroundChange()
         setupButtonFilter()
         setupRecyclerView()
-        loadEvents()
         setupRealtimeUpdates()
         startHeartbeat()
     }
@@ -91,11 +92,7 @@ class HomeFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (s.isNullOrEmpty()) {
-                    editText.background = emptyDrawable
-                } else {
-                    editText.background = filledDrawable
-                }
+                editText.background = if (s.isNullOrEmpty()) emptyDrawable else filledDrawable
             }
 
             override fun afterTextChanged(s: Editable?) {}
@@ -123,14 +120,19 @@ class HomeFragment : Fragment() {
                 layoutManager = LinearLayoutManager(context)
                 adapter = eventsAdapter
             }
-            loadEvents()
+            if (user != null) {
+                loadEvents(user.user_id)
+            }
         }
     }
 
-    private fun loadEvents() {
-        CoroutineScope(Dispatchers.Main).launch {
+    private fun loadEvents(userId: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val response = supabaseClient.from("events").select().decodeList<EventResponse>()
+                val response = supabaseClient.postgrest.rpc(
+                    "get_events_with_likes",
+                    mapOf("user_id_input" to userId)
+                ).decodeList<EventResponse>()
                 val events = response.map { eventResponse ->
                     Event(
                         id = eventResponse.id!!,
@@ -147,41 +149,40 @@ class HomeFragment : Fragment() {
                         images = eventResponse.images,
                         createdAt = eventResponse.createdAt,
                         likesCount = eventResponse.likesCount
-                    )
+                    ).also {
+                        likeCache[eventResponse.id] = eventResponse.isLiked ?: false
+                        likesCountCache[eventResponse.id] = eventResponse.likesCount
+                    }
                 }.sortedByDescending { it.createdAt }
-                initializeCaches(events)
                 eventsAdapter.submitList(events)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("HomeFragment", "Error loading events: ${e.message}", e)
             }
-        }
-    }
-
-    private suspend fun initializeCaches(events: List<Event>) {
-        val currentUserId = profileViewModel.userLiveData.value?.user_id ?: return
-        events.forEach { event ->
-            if (!likeCache.containsKey(event.id)) {
-                val isLiked = supabaseClient.from("event_likes")
-                    .select { filter { eq("event_id", event.id); eq("user_id", currentUserId) } }
-                    .decodeList<EventLike>()
-                    .isNotEmpty()
-                likeCache[event.id] = isLiked
-            }
-            likesCountCache[event.id] = event.likesCount
         }
     }
 
     private fun handleLike(eventId: String, isLiked: Boolean, callback: (Boolean, Int) -> Unit) {
         val userId = profileViewModel.userLiveData.value?.user_id ?: return
-        if (isLiked) {
-            profileViewModel.likeEvent(eventId, userId, callback)
-        } else {
-            profileViewModel.unlikeEvent(eventId, userId, callback)
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                if (isLiked) {
+                    supabaseUserDao.insertEventLike(eventId, userId)
+                } else {
+                    supabaseUserDao.deleteEventLike(eventId, userId)
+                }
+                val newLikesCount = supabaseUserDao.getEventLikesCount(eventId)
+                likeCache[eventId] = isLiked
+                likesCountCache[eventId] = newLikesCount
+                callback(true, newLikesCount)
+            } catch (e: Exception) {
+                Log.e("HomeFragment", "Error handling like: ${e.message}", e)
+                callback(false, likesCountCache[eventId] ?: 0)
+            }
         }
     }
 
     private fun deleteEvent(event: Event) {
-        CoroutineScope(Dispatchers.IO).launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             try {
                 supabaseClient.from("events").delete {
                     filter { eq("id", event.id) }
@@ -194,7 +195,7 @@ class HomeFragment : Fragment() {
                     eventsAdapter.submitList(currentList)
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("HomeFragment", "Error deleting event: ${e.message}", e)
             }
         }
     }
@@ -204,27 +205,34 @@ class HomeFragment : Fragment() {
         val changeFlow = channel.postgresChangeFlow<PostgresAction.Insert>(schema = "public") { table = "events" }
         viewLifecycleOwner.lifecycleScope.launch {
             changeFlow.collect { change ->
-                val eventResponse = change.decodeRecord<EventResponse>()
-                val newEvent = Event(
-                    id = eventResponse.id!!,
-                    userId = eventResponse.userId,
-                    username = eventResponse.username,
-                    userAvatar = eventResponse.userAvatar,
-                    title = eventResponse.title,
-                    description = eventResponse.description,
-                    startDate = eventResponse.startDate,
-                    endDate = eventResponse.endDate,
-                    eventTime = eventResponse.eventTime,
-                    tags = eventResponse.tags,
-                    location = eventResponse.location,
-                    images = eventResponse.images,
-                    createdAt = eventResponse.createdAt,
-                    likesCount = eventResponse.likesCount
-                )
-                val currentList = eventsAdapter.currentList.toMutableList()
-                currentList.add(0, newEvent)
-                initializeCaches(listOf(newEvent))
-                eventsAdapter.submitList(currentList)
+                try {
+                    val eventResponse = change.decodeRecord<EventResponse>()
+                    val newEvent = Event(
+                        id = eventResponse.id!!,
+                        userId = eventResponse.userId,
+                        username = eventResponse.username,
+                        userAvatar = eventResponse.userAvatar,
+                        title = eventResponse.title,
+                        description = eventResponse.description,
+                        startDate = eventResponse.startDate,
+                        endDate = eventResponse.endDate,
+                        eventTime = eventResponse.eventTime,
+                        tags = eventResponse.tags,
+                        location = eventResponse.location,
+                        images = eventResponse.images,
+                        createdAt = eventResponse.createdAt,
+                        likesCount = eventResponse.likesCount
+                    )
+                    val userId = profileViewModel.userLiveData.value?.user_id ?: return@collect
+                    val isLiked = supabaseUserDao.isEventLiked(newEvent.id, userId)
+                    likeCache[newEvent.id] = isLiked
+                    likesCountCache[newEvent.id] = newEvent.likesCount
+                    val currentList = eventsAdapter.currentList.toMutableList()
+                    currentList.add(0, newEvent)
+                    eventsAdapter.submitList(currentList.sortedByDescending { it.createdAt })
+                } catch (e: Exception) {
+                    Log.e("HomeFragment", "Error processing realtime update: ${e.message}", e)
+                }
             }
         }
         CoroutineScope(Dispatchers.IO).launch { channel.subscribe() }
@@ -249,7 +257,6 @@ class HomeFragment : Fragment() {
                 val updatedEvents = supabaseClient.from("events")
                     .select { filter { isIn("id", eventIds) } }
                     .decodeList<Event>()
-
                 updatedEvents.forEach { updatedEvent ->
                     val currentLikesCount = likesCountCache[updatedEvent.id] ?: return@forEach
                     if (currentLikesCount != updatedEvent.likesCount) {
@@ -261,7 +268,7 @@ class HomeFragment : Fragment() {
                     }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("HomeFragment", "Error updating likes count: ${e.message}", e)
             }
         }
     }

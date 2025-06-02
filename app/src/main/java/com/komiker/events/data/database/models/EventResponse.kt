@@ -23,5 +23,6 @@ data class EventResponse(
     @Serializable(with = NullableListSerializer::class) val images: List<String>?,
     @Serializable(with = OffsetDateTimeSerializer::class)
     @SerialName("created_at") val createdAt: OffsetDateTime?,
-    @SerialName("likes_count") val likesCount: Int
+    @SerialName("likes_count") val likesCount: Int,
+    @SerialName("is_liked") val isLiked: Boolean? = null
 )
