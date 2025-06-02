@@ -3,8 +3,9 @@ package com.komiker.events.data.database.dao.implementation
 import com.komiker.events.data.database.SupabaseClientProvider.client
 import com.komiker.events.data.database.dao.UserDao
 import com.komiker.events.data.database.models.Event
-import com.komiker.events.data.database.models.Like
+import com.komiker.events.data.database.models.EventLike
 import com.komiker.events.data.database.models.Proposal
+import com.komiker.events.data.database.models.ProposalLike
 import com.komiker.events.data.database.models.User
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.exceptions.UnknownRestException
@@ -147,7 +148,7 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
                     eq("proposal_id", proposalId)
                     eq("user_id", userId)
                 }
-            }.decodeList<Like>().isNotEmpty()
+            }.decodeList<ProposalLike>().isNotEmpty()
         }
     }
 
@@ -157,6 +158,48 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
                 filter { eq("id", proposalId) }
             }.decodeSingleOrNull<Proposal>()
             proposal?.likesCount ?: 0
+        }
+    }
+
+    suspend fun insertEventLike(eventId: String, userId: String) {
+        withContext(Dispatchers.IO) {
+            supabase.from("event_likes").insert(
+                mapOf(
+                    "event_id" to eventId,
+                    "user_id" to userId
+                )
+            )
+        }
+    }
+
+    suspend fun deleteEventLike(eventId: String, userId: String) {
+        withContext(Dispatchers.IO) {
+            supabase.from("event_likes").delete {
+                filter {
+                    eq("event_id", eventId)
+                    eq("user_id", userId)
+                }
+            }
+        }
+    }
+
+    suspend fun isEventLiked(eventId: String, userId: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            supabase.from("event_likes").select {
+                filter {
+                    eq("event_id", eventId)
+                    eq("user_id", userId)
+                }
+            }.decodeList<EventLike>().isNotEmpty()
+        }
+    }
+
+    suspend fun getEventLikesCount(eventId: String): Int {
+        return withContext(Dispatchers.IO) {
+            val event = supabase.from("events").select {
+                filter { eq("id", eventId) }
+            }.decodeSingleOrNull<Event>()
+            event?.likesCount ?: 0
         }
     }
 }

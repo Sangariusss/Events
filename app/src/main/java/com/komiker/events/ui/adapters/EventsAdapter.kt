@@ -20,11 +20,15 @@ import com.komiker.events.glide.CircleCropTransformation
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class EventsAdapter(
     private val currentUserId: String?,
     private val onDeleteClicked: (Event) -> Unit,
-    private val navController: NavController
+    private val navController: NavController,
+    private val likeCache: MutableMap<String, Boolean>,
+    private val likesCountCache: MutableMap<String, Int>,
+    private val onLikeClicked: (String, Boolean, (Boolean, Int) -> Unit) -> Unit
 ) : ListAdapter<Event, EventsAdapter.EventViewHolder>(EventDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventViewHolder {
@@ -36,16 +40,36 @@ class EventsAdapter(
         holder.bind(getItem(position))
     }
 
-    inner class EventViewHolder(private val binding: ItemEventBinding) : RecyclerView.ViewHolder(binding.root) {
+    override fun onBindViewHolder(holder: EventViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isNotEmpty()) {
+            val payload = payloads[0] as? Int
+            payload?.let {
+                holder.updateLikesCount(it)
+            }
+        } else {
+            holder.bind(getItem(position))
+        }
+    }
 
+    inner class EventViewHolder(private val binding: ItemEventBinding) : RecyclerView.ViewHolder(binding.root) {
         private var popupWindow: PopupWindow? = null
         private var overlayView: View? = null
+        private var isProcessingLike = false
 
         fun bind(event: Event) {
             bindUserInfo(event)
             bindEventDetails(event)
             setupClickListeners(event)
             setupMoreButton(event)
+            setupLikeButton(event)
+        }
+
+        fun updateLikesCount(likesCount: Int) {
+            binding.textLikesCount.text = formatLikesCount(likesCount)
+            val position = bindingAdapterPosition
+            if (position != RecyclerView.NO_POSITION) {
+                likesCountCache[getItem(position).id] = likesCount
+            }
         }
 
         private fun bindUserInfo(event: Event) {
@@ -60,7 +84,7 @@ class EventsAdapter(
         private fun bindEventDetails(event: Event) {
             binding.textTitle.text = event.title
             binding.textContent.text = event.description
-            binding.textLikesCount.text = event.likesCount.toString()
+            binding.textLikesCount.text = formatLikesCount(likesCountCache[event.id] ?: event.likesCount)
             binding.textTime.text = formatTimeAgo(event.createdAt)
         }
 
@@ -83,6 +107,65 @@ class EventsAdapter(
             }
         }
 
+        private fun setupLikeButton(event: Event) {
+            binding.imageLike.setImageResource(
+                if (likeCache[event.id] == true) R.drawable.ic_heart else R.drawable.ic_heart_outline
+            )
+
+            binding.imageLike.setOnClickListener {
+                if (currentUserId != null && !isProcessingLike) {
+                    isProcessingLike = true
+                    binding.imageLike.isEnabled = false
+                    binding.imageLike.alpha = 0.5f
+
+                    val isCurrentlyLiked = likeCache[event.id] ?: false
+                    val currentLikesCount = likesCountCache[event.id] ?: event.likesCount
+
+                    if (isCurrentlyLiked) {
+                        val newLikesCount = currentLikesCount - 1
+                        binding.textLikesCount.text = formatLikesCount(newLikesCount.coerceAtLeast(0))
+                        binding.imageLike.setImageResource(R.drawable.ic_heart_outline)
+                        likeCache[event.id] = false
+                        likesCountCache[event.id] = newLikesCount
+                        onLikeClicked(event.id, false) { success, serverLikesCount ->
+                            isProcessingLike = false
+                            binding.imageLike.isEnabled = true
+                            binding.imageLike.alpha = 1.0f
+                            if (!success) {
+                                binding.textLikesCount.text = formatLikesCount(currentLikesCount)
+                                binding.imageLike.setImageResource(R.drawable.ic_heart)
+                                likeCache[event.id] = true
+                                likesCountCache[event.id] = currentLikesCount
+                            } else {
+                                likesCountCache[event.id] = serverLikesCount
+                                binding.textLikesCount.text = formatLikesCount(serverLikesCount)
+                            }
+                        }
+                    } else {
+                        val newLikesCount = currentLikesCount + 1
+                        binding.textLikesCount.text = formatLikesCount(newLikesCount)
+                        binding.imageLike.setImageResource(R.drawable.ic_heart)
+                        likeCache[event.id] = true
+                        likesCountCache[event.id] = newLikesCount
+                        onLikeClicked(event.id, true) { success, serverLikesCount ->
+                            isProcessingLike = false
+                            binding.imageLike.isEnabled = true
+                            binding.imageLike.alpha = 1.0f
+                            if (!success) {
+                                binding.textLikesCount.text = formatLikesCount(currentLikesCount)
+                                binding.imageLike.setImageResource(R.drawable.ic_heart_outline)
+                                likeCache[event.id] = false
+                                likesCountCache[event.id] = currentLikesCount
+                            } else {
+                                likesCountCache[event.id] = serverLikesCount
+                                binding.textLikesCount.text = formatLikesCount(serverLikesCount)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         private fun shareEvent(event: Event) {
             val username = event.username.replace(" ", "_")
             val deepLink = "https://excito.netlify.app/@$username/event/${event.id}"
@@ -96,7 +179,11 @@ class EventsAdapter(
         }
 
         private fun navigateToEventDetail(event: Event) {
-            val bundle = Bundle().apply { putParcelable("event", event) }
+            val bundle = Bundle().apply {
+                putParcelable("event", event)
+                putBoolean("isLiked", likeCache[event.id] ?: false)
+                putInt("likesCount", likesCountCache[event.id] ?: event.likesCount)
+            }
             navController.navigate(R.id.action_MainMenuFragment_to_EventDetailFragment, bundle)
         }
 
@@ -167,10 +254,31 @@ class EventsAdapter(
                 else -> it.format(DateTimeFormatter.ofPattern("MM/dd"))
             }
         } ?: "Unknown"
+
+        private fun formatLikesCount(count: Int): String {
+            return when {
+                count >= 999_999_950 -> {
+                    val billions = count / 1_000_000_000.0
+                    String.format(Locale.US, "%.1fB", billions)
+                }
+                count >= 999_950 -> {
+                    val millions = count / 1_000_000.0
+                    String.format(Locale.US, "%.1fM", millions)
+                }
+                count >= 1_000 -> {
+                    val thousands = count / 1_000.0
+                    String.format(Locale.US, "%.1fK", thousands)
+                }
+                else -> count.toString()
+            }
+        }
     }
 
     class EventDiffCallback : DiffUtil.ItemCallback<Event>() {
         override fun areItemsTheSame(oldItem: Event, newItem: Event) = oldItem.id == newItem.id
         override fun areContentsTheSame(oldItem: Event, newItem: Event) = oldItem == newItem
+        override fun getChangePayload(oldItem: Event, newItem: Event): Any? {
+            return if (oldItem.likesCount != newItem.likesCount) newItem.likesCount else null
+        }
     }
 }

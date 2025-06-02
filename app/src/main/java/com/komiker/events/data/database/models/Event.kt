@@ -11,7 +11,7 @@ import java.time.OffsetDateTime
 @Serializable
 data class Event(
 
-    val id: String?,
+    val id: String,
     @SerialName("user_id")
     val userId: String,
     @SerialName("user_name")

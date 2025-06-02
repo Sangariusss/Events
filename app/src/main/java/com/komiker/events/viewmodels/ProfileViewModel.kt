@@ -87,6 +87,32 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
         }
     }
 
+    fun likeEvent(eventId: String, userId: String, callback: (Boolean, Int) -> Unit) {
+        viewModelScope.launch {
+            try {
+                supabaseUserDao.insertEventLike(eventId, userId)
+                val likesCount = supabaseUserDao.getEventLikesCount(eventId)
+                callback(true, likesCount)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                callback(false, 0)
+            }
+        }
+    }
+
+    fun unlikeEvent(eventId: String, userId: String, callback: (Boolean, Int) -> Unit) {
+        viewModelScope.launch {
+            try {
+                supabaseUserDao.deleteEventLike(eventId, userId)
+                val likesCount = supabaseUserDao.getEventLikesCount(eventId)
+                callback(true, likesCount)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                callback(false, 0)
+            }
+        }
+    }
+
     private fun updateUserField(updateAction: User.() -> Unit) {
         viewModelScope.launch {
             val user = userLiveData.value

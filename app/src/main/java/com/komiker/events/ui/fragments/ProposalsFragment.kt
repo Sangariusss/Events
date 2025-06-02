@@ -15,7 +15,7 @@ import com.bumptech.glide.signature.ObjectKey
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
 import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
-import com.komiker.events.data.database.models.Like
+import com.komiker.events.data.database.models.ProposalLike
 import com.komiker.events.data.database.models.Proposal
 import com.komiker.events.data.database.models.ProposalResponse
 import com.komiker.events.databinding.FragmentProposalsBinding
@@ -154,7 +154,7 @@ class ProposalsFragment : Fragment() {
             if (!likeCache.containsKey(proposal.id)) {
                 val isLiked = supabaseClient.from("proposal_likes")
                     .select { filter { eq("proposal_id", proposal.id); eq("user_id", currentUserId) } }
-                    .decodeList<Like>()
+                    .decodeList<ProposalLike>()
                     .isNotEmpty()
                 likeCache[proposal.id] = isLiked
             }

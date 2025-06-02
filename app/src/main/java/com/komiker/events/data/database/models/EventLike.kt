@@ -6,11 +6,11 @@ import kotlinx.serialization.Serializable
 import java.time.OffsetDateTime
 
 @Serializable
-data class Like(
+data class EventLike(
 
     val id: String,
-    @SerialName("proposal_id")
-    val proposalId: String,
+    @SerialName("event_id")
+    val eventId: String,
     @SerialName("user_id")
     val userId: String,
     @Serializable(with = OffsetDateTimeSerializer::class)
