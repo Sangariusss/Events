@@ -71,10 +71,10 @@ class TagsFragment : Fragment() {
     private fun setupSearchField() {
         val emptyDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_empty)
         val filledDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_filled)
-        binding.editTextFindLocation.addTextChangedListener(object : TextWatcher {
+        binding.editTextFindTags.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                binding.editTextFindLocation.background = if (s.isNullOrEmpty()) emptyDrawable else filledDrawable
+                binding.editTextFindTags.background = if (s.isNullOrEmpty()) emptyDrawable else filledDrawable
                 if (s.isNullOrEmpty()) loadTags() else filterTags(s.toString())
             }
             override fun afterTextChanged(s: Editable?) {}
@@ -118,8 +118,16 @@ class TagsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             tagRepository.getTagCategories().collectLatest { categories ->
                 val filteredItems = categories.flatMap { category ->
-                    val filteredSubTags = category.subTags.filter { it.contains(query, ignoreCase = true) }
-                    if (filteredSubTags.isNotEmpty()) prepareTagItems(listOf(category.copy(subTags = filteredSubTags))) else emptyList()
+                    when {
+                        category.name.contains(query, ignoreCase = true) -> {
+                            prepareTagItems(listOf(category))
+                        }
+                        category.subTags.any { it.contains(query, ignoreCase = true) } -> {
+                            val filteredSubTags = category.subTags.filter { it.contains(query, ignoreCase = true) }
+                            prepareTagItems(listOf(category.copy(subTags = filteredSubTags)))
+                        }
+                        else -> emptyList()
+                    }
                 }
                 tagsAdapter.submitList(filteredItems)
             }

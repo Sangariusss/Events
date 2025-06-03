@@ -1,10 +1,13 @@
 package com.komiker.events.ui.fragments
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -53,13 +56,19 @@ class ProposalsFragment : Fragment() {
     private val likesCountCache = mutableMapOf<String, Int>()
     private var heartbeatJob: Job? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
-        FragmentProposalsBinding.inflate(inflater, container, false).also { _binding = it }.root
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentProposalsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupButtonFilter()
         setupWriteProposalButton()
+        setupSearchField()
         setupUserProfile()
         setupRecyclerView()
         setupRealtimeUpdates()
@@ -73,6 +82,25 @@ class ProposalsFragment : Fragment() {
             supabaseClient.realtime.removeChannel(channel)
             withContext(Dispatchers.Main) { _binding = null }
         }
+    }
+
+    private fun setupSearchField() {
+        val emptyDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_empty)
+        val filledDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_filled)
+        var searchJob: Job? = null
+        binding.editTextFindProposals.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                binding.editTextFindProposals.background = if (s.isNullOrEmpty()) emptyDrawable else filledDrawable
+                searchJob?.cancel()
+                searchJob = viewLifecycleOwner.lifecycleScope.launch {
+                    delay(300)
+                    val userId = profileViewModel.userLiveData.value?.user_id ?: return@launch
+                    if (s.isNullOrEmpty()) loadProposals(userId) else filterProposals(userId, s.toString())
+                }
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
     }
 
     private fun setupButtonFilter() {
@@ -156,6 +184,64 @@ class ProposalsFragment : Fragment() {
         }
     }
 
+    private fun normalizeText(text: String): String {
+        return text.lowercase()
+            .replace(Regex("[^a-z0-9]"), "")
+    }
+
+    private fun calculateMatchScore(text: String, query: String): Int {
+        val normalizedText = normalizeText(text)
+        val normalizedQuery = normalizeText(query)
+        return when {
+            normalizedText == normalizedQuery -> 3
+            normalizedText.startsWith(normalizedQuery) -> 2
+            normalizedText.contains(normalizedQuery) -> 1
+            else -> 0
+        }
+    }
+
+    private fun filterProposals(userId: String, query: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = supabaseClient.postgrest.rpc(
+                    "get_proposals_with_likes",
+                    mapOf("user_id_input" to userId)
+                ).decodeList<ProposalResponse>()
+                val filteredProposals = response
+                    .asSequence()
+                    .map { proposalResponse ->
+                        val contentScore = calculateMatchScore(proposalResponse.content, query)
+                        val usernameScore = calculateMatchScore(proposalResponse.username, query)
+                        Pair(
+                            proposalResponse,
+                            maxOf(contentScore, usernameScore)
+                        )
+                    }
+                    .filter { it.second > 0 }
+                    .sortedByDescending { it.second }
+                    .map { (proposalResponse, _) ->
+                        Proposal(
+                            id = proposalResponse.id,
+                            userId = proposalResponse.userId,
+                            username = proposalResponse.username,
+                            userAvatar = proposalResponse.userAvatar,
+                            content = proposalResponse.content,
+                            createdAt = proposalResponse.createdAt,
+                            likesCount = proposalResponse.likesCount
+                        ).also {
+                            likeCache[proposalResponse.id] = proposalResponse.isLiked ?: false
+                            likesCountCache[proposalResponse.id] = proposalResponse.likesCount
+                        }
+                    }.sortedByDescending { it.createdAt }
+                    .toList()
+                proposalsAdapter.submitList(filteredProposals)
+            } catch (e: Exception) {
+                Log.e("ProposalsFragment", "Error filtering proposals: ${e.message}", e)
+                proposalsAdapter.submitList(emptyList())
+            }
+        }
+    }
+
     private fun handleLike(proposalId: String, isLiked: Boolean, callback: (Boolean, Int) -> Unit) {
         val userId = profileViewModel.userLiveData.value?.user_id ?: return
         viewLifecycleOwner.lifecycleScope.launch {
@@ -211,8 +297,13 @@ class ProposalsFragment : Fragment() {
                     likeCache[newProposal.id] = isLiked
                     likesCountCache[newProposal.id] = newProposal.likesCount
                     val currentList = proposalsAdapter.currentList.toMutableList()
-                    currentList.add(0, newProposal)
-                    proposalsAdapter.submitList(currentList.sortedByDescending { it.createdAt })
+                    val query = binding.editTextFindProposals.text.toString()
+                    if (query.isEmpty() ||
+                        normalizeText(newProposal.content).contains(normalizeText(query)) ||
+                        normalizeText(newProposal.username).contains(normalizeText(query))) {
+                        currentList.add(0, newProposal)
+                        proposalsAdapter.submitList(currentList.sortedByDescending { it.createdAt })
+                    }
                 } catch (e: Exception) {
                     Log.e("ProposalsFragment", "Error processing realtime update: ${e.message}", e)
                 }
