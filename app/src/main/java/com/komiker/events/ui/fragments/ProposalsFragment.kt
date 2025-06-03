@@ -1,6 +1,7 @@
 package com.komiker.events.ui.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +16,6 @@ import com.bumptech.glide.signature.ObjectKey
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
 import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
-import com.komiker.events.data.database.models.ProposalLike
 import com.komiker.events.data.database.models.Proposal
 import com.komiker.events.data.database.models.ProposalResponse
 import com.komiker.events.databinding.FragmentProposalsBinding
@@ -24,6 +24,8 @@ import com.komiker.events.ui.adapters.ProposalsAdapter
 import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.rpc
 import io.github.jan.supabase.realtime.RealtimeChannel
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
@@ -60,7 +62,6 @@ class ProposalsFragment : Fragment() {
         setupWriteProposalButton()
         setupUserProfile()
         setupRecyclerView()
-        loadProposals()
         setupRealtimeUpdates()
         startHeartbeat()
     }
@@ -121,14 +122,19 @@ class ProposalsFragment : Fragment() {
                 layoutManager = LinearLayoutManager(context)
                 adapter = proposalsAdapter
             }
-            loadProposals()
+            if (user != null) {
+                loadProposals(user.user_id)
+            }
         }
     }
 
-    private fun loadProposals() {
-        CoroutineScope(Dispatchers.Main).launch {
+    private fun loadProposals(userId: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val response = supabaseClient.from("proposals").select().decodeList<ProposalResponse>()
+                val response = supabaseClient.postgrest.rpc(
+                    "get_proposals_with_likes",
+                    mapOf("user_id_input" to userId)
+                ).decodeList<ProposalResponse>()
                 val proposals = response.map { proposalResponse ->
                     Proposal(
                         id = proposalResponse.id,
@@ -138,59 +144,37 @@ class ProposalsFragment : Fragment() {
                         content = proposalResponse.content,
                         createdAt = proposalResponse.createdAt,
                         likesCount = proposalResponse.likesCount
-                    )
+                    ).also {
+                        likeCache[proposalResponse.id] = proposalResponse.isLiked ?: false
+                        likesCountCache[proposalResponse.id] = proposalResponse.likesCount
+                    }
                 }.sortedByDescending { it.createdAt }
-                initializeCaches(proposals)
                 proposalsAdapter.submitList(proposals)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("ProposalsFragment", "Error loading proposals: ${e.message}", e)
             }
-        }
-    }
-
-    private suspend fun initializeCaches(proposals: List<Proposal>) {
-        val currentUserId = profileViewModel.userLiveData.value?.user_id ?: return
-        proposals.forEach { proposal ->
-            if (!likeCache.containsKey(proposal.id)) {
-                val isLiked = supabaseClient.from("proposal_likes")
-                    .select { filter { eq("proposal_id", proposal.id); eq("user_id", currentUserId) } }
-                    .decodeList<ProposalLike>()
-                    .isNotEmpty()
-                likeCache[proposal.id] = isLiked
-            }
-            likesCountCache[proposal.id] = proposal.likesCount
         }
     }
 
     private fun handleLike(proposalId: String, isLiked: Boolean, callback: (Boolean, Int) -> Unit) {
-        CoroutineScope(Dispatchers.IO).launch {
+        val userId = profileViewModel.userLiveData.value?.user_id ?: return
+        viewLifecycleOwner.lifecycleScope.launch {
             try {
                 if (isLiked) {
-                    supabaseClient.from("proposal_likes").insert(
-                        mapOf("proposal_id" to proposalId, "user_id" to profileViewModel.userLiveData.value?.user_id)
-                    )
+                    profileViewModel.likeProposal(proposalId, userId, callback)
                 } else {
-                    supabaseClient.from("proposal_likes").delete {
-                        filter { eq("proposal_id", proposalId); eq("user_id", profileViewModel.userLiveData.value?.user_id!!) }
-                    }
+                    profileViewModel.unlikeProposal(proposalId, userId, callback)
                 }
-                val updatedProposal = supabaseClient.from("proposals")
-                    .select { filter { eq("id", proposalId) } }
-                    .decodeSingle<Proposal>()
-                withContext(Dispatchers.Main) {
-                    callback(true, updatedProposal.likesCount)
-                }
+                likeCache[proposalId] = isLiked
             } catch (e: Exception) {
-                e.printStackTrace()
-                withContext(Dispatchers.Main) {
-                    callback(false, 0)
-                }
+                Log.e("ProposalsFragment", "Error handling like: ${e.message}", e)
+                callback(false, likesCountCache[proposalId] ?: 0)
             }
         }
     }
 
     private fun deleteProposal(proposal: Proposal) {
-        CoroutineScope(Dispatchers.IO).launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             try {
                 supabaseClient.from("proposals").delete { filter { eq("id", proposal.id) } }
                 withContext(Dispatchers.Main) {
@@ -201,7 +185,7 @@ class ProposalsFragment : Fragment() {
                     proposalsAdapter.submitList(currentList)
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("ProposalsFragment", "Error deleting proposal: ${e.message}", e)
             }
         }
     }
@@ -211,20 +195,27 @@ class ProposalsFragment : Fragment() {
         val changeFlowProposals = channel.postgresChangeFlow<PostgresAction.Insert>(schema = "public") { table = "proposals" }
         viewLifecycleOwner.lifecycleScope.launch {
             changeFlowProposals.collect { change ->
-                val proposalResponse = change.decodeRecord<ProposalResponse>()
-                val newProposal = Proposal(
-                    id = proposalResponse.id,
-                    userId = proposalResponse.userId,
-                    username = proposalResponse.username,
-                    userAvatar = proposalResponse.userAvatar,
-                    content = proposalResponse.content,
-                    createdAt = proposalResponse.createdAt,
-                    likesCount = proposalResponse.likesCount
-                )
-                val currentList = proposalsAdapter.currentList.toMutableList()
-                currentList.add(0, newProposal)
-                initializeCaches(listOf(newProposal))
-                proposalsAdapter.submitList(currentList)
+                try {
+                    val proposalResponse = change.decodeRecord<ProposalResponse>()
+                    val newProposal = Proposal(
+                        id = proposalResponse.id,
+                        userId = proposalResponse.userId,
+                        username = proposalResponse.username,
+                        userAvatar = proposalResponse.userAvatar,
+                        content = proposalResponse.content,
+                        createdAt = proposalResponse.createdAt,
+                        likesCount = proposalResponse.likesCount
+                    )
+                    val userId = profileViewModel.userLiveData.value?.user_id ?: return@collect
+                    val isLiked = profileViewModel.isProposalLiked(newProposal.id, userId)
+                    likeCache[newProposal.id] = isLiked
+                    likesCountCache[newProposal.id] = newProposal.likesCount
+                    val currentList = proposalsAdapter.currentList.toMutableList()
+                    currentList.add(0, newProposal)
+                    proposalsAdapter.submitList(currentList.sortedByDescending { it.createdAt })
+                } catch (e: Exception) {
+                    Log.e("ProposalsFragment", "Error processing realtime update: ${e.message}", e)
+                }
             }
         }
         CoroutineScope(Dispatchers.IO).launch { channel.subscribe() }
@@ -244,12 +235,10 @@ class ProposalsFragment : Fragment() {
             try {
                 val currentList = proposalsAdapter.currentList
                 if (currentList.isEmpty()) return@withContext
-
                 val proposalIds = currentList.map { it.id }
                 val updatedProposals = supabaseClient.from("proposals")
                     .select { filter { isIn("id", proposalIds) } }
                     .decodeList<Proposal>()
-
                 updatedProposals.forEach { updatedProposal ->
                     val currentLikesCount = likesCountCache[updatedProposal.id] ?: return@forEach
                     if (currentLikesCount != updatedProposal.likesCount) {
@@ -261,7 +250,7 @@ class ProposalsFragment : Fragment() {
                     }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("ProposalsFragment", "Error updating likes count: ${e.message}", e)
             }
         }
     }

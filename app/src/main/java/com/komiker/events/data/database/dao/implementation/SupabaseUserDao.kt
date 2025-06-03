@@ -119,7 +119,7 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
         }
     }
 
-    suspend fun insertLike(proposalId: String, userId: String) {
+    suspend fun insertProposalLike(proposalId: String, userId: String) {
         withContext(Dispatchers.IO) {
             supabase.from("proposal_likes").insert(
                 mapOf(
@@ -130,7 +130,7 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
         }
     }
 
-    suspend fun deleteLike(proposalId: String, userId: String) {
+    suspend fun deleteProposalLike(proposalId: String, userId: String) {
         withContext(Dispatchers.IO) {
             supabase.from("proposal_likes").delete {
                 filter {
@@ -152,7 +152,7 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
         }
     }
 
-    suspend fun getLikesCount(proposalId: String): Int {
+    suspend fun getProposalLikesCount(proposalId: String): Int {
         return withContext(Dispatchers.IO) {
             val proposal = supabase.from("proposals").select {
                 filter { eq("id", proposalId) }

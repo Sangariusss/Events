@@ -64,8 +64,8 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
     fun likeProposal(proposalId: String, userId: String, callback: (Boolean, Int) -> Unit) {
         viewModelScope.launch {
             try {
-                supabaseUserDao.insertLike(proposalId, userId)
-                val likesCount = supabaseUserDao.getLikesCount(proposalId)
+                supabaseUserDao.insertProposalLike(proposalId, userId)
+                val likesCount = supabaseUserDao.getProposalLikesCount(proposalId)
                 callback(true, likesCount)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -77,8 +77,8 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
     fun unlikeProposal(proposalId: String, userId: String, callback: (Boolean, Int) -> Unit) {
         viewModelScope.launch {
             try {
-                supabaseUserDao.deleteLike(proposalId, userId)
-                val likesCount = supabaseUserDao.getLikesCount(proposalId)
+                supabaseUserDao.deleteProposalLike(proposalId, userId)
+                val likesCount = supabaseUserDao.getProposalLikesCount(proposalId)
                 callback(true, likesCount)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -111,6 +111,14 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
                 callback(false, 0)
             }
         }
+    }
+
+    suspend fun isProposalLiked(proposalId: String, userId: String): Boolean {
+        return supabaseUserDao.isProposalLiked(proposalId, userId)
+    }
+
+    suspend fun isEventLiked(eventId: String, userId: String): Boolean {
+        return supabaseUserDao.isEventLiked(eventId, userId)
     }
 
     private fun updateUserField(updateAction: User.() -> Unit) {

@@ -166,14 +166,11 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 if (isLiked) {
-                    supabaseUserDao.insertEventLike(eventId, userId)
+                    profileViewModel.likeEvent(eventId, userId, callback)
                 } else {
-                    supabaseUserDao.deleteEventLike(eventId, userId)
+                    profileViewModel.unlikeEvent(eventId, userId, callback)
                 }
-                val newLikesCount = supabaseUserDao.getEventLikesCount(eventId)
                 likeCache[eventId] = isLiked
-                likesCountCache[eventId] = newLikesCount
-                callback(true, newLikesCount)
             } catch (e: Exception) {
                 Log.e("HomeFragment", "Error handling like: ${e.message}", e)
                 callback(false, likesCountCache[eventId] ?: 0)
@@ -224,7 +221,7 @@ class HomeFragment : Fragment() {
                         likesCount = eventResponse.likesCount
                     )
                     val userId = profileViewModel.userLiveData.value?.user_id ?: return@collect
-                    val isLiked = supabaseUserDao.isEventLiked(newEvent.id, userId)
+                    val isLiked = profileViewModel.isEventLiked(newEvent.id, userId)
                     likeCache[newEvent.id] = isLiked
                     likesCountCache[newEvent.id] = newEvent.likesCount
                     val currentList = eventsAdapter.currentList.toMutableList()
@@ -252,7 +249,6 @@ class HomeFragment : Fragment() {
             try {
                 val currentList = eventsAdapter.currentList
                 if (currentList.isEmpty()) return@withContext
-
                 val eventIds = currentList.map { it.id }
                 val updatedEvents = supabaseClient.from("events")
                     .select { filter { isIn("id", eventIds) } }
