@@ -10,19 +10,24 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Task
+import com.google.android.material.chip.Chip
 import com.komiker.events.R
 import com.komiker.events.databinding.FragmentFilterBinding
+import com.komiker.events.viewmodels.CreateEventViewModel
 import com.shawnlin.numberpicker.NumberPicker
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.Calendar
 import java.util.Locale
@@ -33,7 +38,7 @@ class FilterFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationText: TextView
+    private val viewModel: CreateEventViewModel by activityViewModels()
 
     private val locationPermissionRequest = this.registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -46,7 +51,9 @@ class FilterFragment : Fragment() {
                 fetchLastLocation()
             }
             else -> {
-                locationText.text = getString(R.string.permission_denied)
+                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                    addLocationChip(getString(R.string.permission_denied))
+                }
             }
         }
     }
@@ -66,14 +73,25 @@ class FilterFragment : Fragment() {
         setupTitleWithRedAsterisk()
         setupOnBackPressed()
         setupButtonBack()
-        setupNumberPickers(view)
+        setupNumberPickers(view, savedInstanceState)
         setupButtonLocation()
         setupButtonAllCategory()
+        setupButtonCheckmark()
+        observeViewModel()
 
-        locationText = view.findViewById(R.id.text_location)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
-        handleLocationRequest()
+        if (viewModel.location.value.isNullOrEmpty()) {
+            handleLocationRequest()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        saveFilters()
+        outState.putInt("savedMonth", binding.numberPickerMonth.value)
+        outState.putInt("savedDay", binding.numberPickerDay.value)
+        outState.putInt("savedYear", binding.numberPickerYear.value)
     }
 
     override fun onDestroyView() {
@@ -111,6 +129,8 @@ class FilterFragment : Fragment() {
     private fun setupOnBackPressed() {
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                saveFilters()
+                viewModel.clear()
                 findNavController().navigate(R.id.action_FilterFragment_to_MainMenuFragment)
             }
         }
@@ -120,11 +140,36 @@ class FilterFragment : Fragment() {
 
     private fun setupButtonBack() {
         binding.buttonBack.setOnClickListener {
+            saveFilters()
+            viewModel.clear()
             findNavController().navigate(R.id.action_FilterFragment_to_MainMenuFragment)
         }
     }
 
-    private fun setupNumberPickers(view: View) {
+    private fun setupButtonCheckmark() {
+        binding.buttonCheckmark.setOnClickListener {
+            saveFilters()
+            viewModel.clear()
+            findNavController().navigate(R.id.action_FilterFragment_to_MainMenuFragment)
+        }
+    }
+
+    private fun saveFilters() {
+        val monthPicker = binding.numberPickerMonth
+        val dayPicker = binding.numberPickerDay
+        val yearPicker = binding.numberPickerYear
+
+        val month = monthPicker.displayedValues[monthPicker.value]
+        val day = dayPicker.value
+        val year = yearPicker.value
+
+        viewModel.startDate = "$month $day, $year"
+        viewModel.selectedMonth = monthPicker.value
+        viewModel.selectedDay = dayPicker.value
+        viewModel.selectedYear = yearPicker.value
+    }
+
+    private fun setupNumberPickers(view: View, savedInstanceState: Bundle?) {
         val monthPicker = view.findViewById<NumberPicker>(R.id.number_picker_month)
         val dayPicker = view.findViewById<NumberPicker>(R.id.number_picker_day)
         val yearPicker = view.findViewById<NumberPicker>(R.id.number_picker_year)
@@ -141,14 +186,44 @@ class FilterFragment : Fragment() {
         val customFormatter = NumberPicker.Formatter { value -> value.toString() }
         yearPicker.formatter = customFormatter
 
-        setCurrentDateInPickers(monthPicker, dayPicker, yearPicker)
+        if (savedInstanceState != null) {
+            val savedMonthValue = savedInstanceState.getInt("savedMonth", -1)
+            val savedDayValue = savedInstanceState.getInt("savedDay", -1)
+            val savedYearValue = savedInstanceState.getInt("savedYear", -1)
 
-        monthPicker.setOnValueChangedListener { _, _, _ ->
-            updateDayPickerMaxValue(monthPicker.value, yearPicker.value)
+            if (savedMonthValue != -1 && savedDayValue != -1 && savedYearValue != -1) {
+                monthPicker.value = savedMonthValue.coerceIn(0, 11)
+                dayPicker.value = savedDayValue.coerceIn(1, 31)
+                yearPicker.value = savedYearValue.coerceIn(currentYear, currentYear + 10)
+                updateDayPickerMaxValue(savedMonthValue, savedYearValue)
+            }
+        } else {
+            val vmMonth = viewModel.selectedMonth
+            val vmDay = viewModel.selectedDay
+            val vmYear = viewModel.selectedYear
+
+            if (vmMonth != null && vmDay != null && vmYear != null) {
+                monthPicker.value = vmMonth.coerceIn(0, 11)
+                dayPicker.value = vmDay.coerceIn(1, 31)
+                yearPicker.value = vmYear.coerceIn(currentYear, currentYear + 10)
+                updateDayPickerMaxValue(vmMonth, vmYear)
+            } else {
+                setCurrentDateInPickers(monthPicker, dayPicker, yearPicker)
+            }
+        }
+
+        monthPicker.setOnValueChangedListener { _, _, newVal ->
+            updateDayPickerMaxValue(newVal, yearPicker.value)
+            saveFilters()
+        }
+
+        dayPicker.setOnValueChangedListener { _, _, _ ->
+            saveFilters()
         }
 
         yearPicker.setOnValueChangedListener { _, _, newVal ->
             updateDayPickerMaxValue(monthPicker.value, newVal)
+            saveFilters()
         }
     }
 
@@ -176,6 +251,7 @@ class FilterFragment : Fragment() {
         monthPicker.value = currentMonth
         updateDayPickerMaxValue(currentMonth, currentYear)
         dayPicker.value = currentDay
+        saveFilters()
     }
 
     private fun updateDayPickerMaxValue(month: Int, year: Int) {
@@ -193,6 +269,7 @@ class FilterFragment : Fragment() {
 
     private fun setupButtonLocation() {
         binding.buttonLocation.setOnClickListener {
+            saveFilters()
             val bundle = Bundle().apply {
                 putInt("sourceFragmentId", R.id.FilterFragment)
             }
@@ -205,6 +282,7 @@ class FilterFragment : Fragment() {
 
     private fun setupButtonAllCategory() {
         binding.buttonTags.setOnClickListener {
+            saveFilters()
             val bundle = Bundle().apply {
                 putInt("sourceFragmentId", R.id.FilterFragment)
             }
@@ -241,12 +319,16 @@ class FilterFragment : Fragment() {
                 if (location != null) {
                     getAddressFromLocation(location)
                 } else {
-                    locationText.text = getString(R.string.location_not_available)
+                    viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                        addLocationChip(getString(R.string.location_not_available))
+                    }
                 }
             }
 
         } else {
-            locationText.text = getString(R.string.permission_denied)
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                addLocationChip(getString(R.string.permission_denied))
+            }
         }
     }
 
@@ -256,20 +338,28 @@ class FilterFragment : Fragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             geocoder.getFromLocation(location.latitude, location.longitude, 1, object : Geocoder.GeocodeListener {
                 override fun onGeocode(addresses: MutableList<android.location.Address>) {
-                    displayAddressFromLocation(addresses)
+                    viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                        displayAddressFromLocation(addresses)
+                    }
                 }
 
                 override fun onError(errorMessage: String?) {
-                    locationText.text = getString(R.string.location_not_available)
+                    viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                        addLocationChip(getString(R.string.location_not_available))
+                    }
                 }
             })
         } else {
             try {
                 @Suppress("DEPRECATION")
                 val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-                displayAddressFromLocation(addresses)
+                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                    displayAddressFromLocation(addresses)
+                }
             } catch (e: IOException) {
-                locationText.text = getString(R.string.location_not_available)
+                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                    addLocationChip(getString(R.string.location_not_available))
+                }
             }
         }
     }
@@ -281,9 +371,72 @@ class FilterFragment : Fragment() {
             val state = address.adminArea ?: "Unknown state"
             val country = address.countryName ?: "Unknown country"
             val addressString = "$city, $state, $country"
-            locationText.text = addressString
+            if (viewModel.location.value.isNullOrEmpty()) {
+                viewModel.setLocation(addressString)
+            }
         } else {
-            locationText.text = getString(R.string.location_not_available)
+            addLocationChip(getString(R.string.location_not_available))
         }
+    }
+
+    private fun observeViewModel() {
+        viewModel.location.observe(viewLifecycleOwner) { location ->
+            binding.chipGroupLocation.removeAllViews()
+            if (!location.isNullOrEmpty()) {
+                addLocationChip(location)
+            }
+        }
+
+        viewModel.tags.observe(viewLifecycleOwner) { tags ->
+            binding.chipGroupTags.removeAllViews()
+            tags?.forEach { tag ->
+                addTagChip(tag)
+            }
+        }
+    }
+
+    private fun addLocationChip(location: String) {
+        binding.chipGroupLocation.removeAllViews()
+        val chip = Chip(requireContext(), null, com.google.android.material.R.style.Widget_Material3_Chip_Filter).apply {
+            text = location
+            isCloseIconVisible = true
+            configureChip()
+            setOnCloseIconClickListener {
+                viewModel.setLocation(null)
+                binding.chipGroupLocation.removeView(this)
+            }
+        }
+        binding.chipGroupLocation.addView(chip)
+    }
+
+    private fun addTagChip(tag: String) {
+        val chip = Chip(requireContext(), null, com.google.android.material.R.style.Widget_Material3_Chip_Filter).apply {
+            text = tag
+            isCloseIconVisible = true
+            configureChip()
+            setOnCloseIconClickListener {
+                val currentTags = viewModel.tags.value?.toMutableList() ?: mutableListOf()
+                currentTags.remove(tag)
+                viewModel.setTags(currentTags)
+                binding.chipGroupTags.removeView(this)
+            }
+        }
+        binding.chipGroupTags.addView(chip)
+    }
+
+    private fun Chip.configureChip() {
+        chipBackgroundColor = ContextCompat.getColorStateList(context, R.color.neutral_98)
+        setTextColor(ContextCompat.getColorStateList(context, R.color.neutral_0))
+        setCloseIconResource(R.drawable.ic_close)
+        closeIconTint = ContextCompat.getColorStateList(context, R.color.neutral_0)
+        chipStrokeColor = ContextCompat.getColorStateList(context, R.color.neutral_95)
+        chipStrokeWidth = resources.getDimension(R.dimen.chip_stroke_width)
+        typeface = ResourcesCompat.getFont(context, R.font.fixel_semibold)
+        val contentPadding = resources.getDimension(R.dimen.chip_content_padding)
+        chipStartPadding = contentPadding
+        chipEndPadding = contentPadding
+        textStartPadding = contentPadding
+        textEndPadding = contentPadding
+        iconStartPadding = contentPadding
     }
 }

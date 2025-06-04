@@ -17,6 +17,10 @@ class CreateEventViewModel : ViewModel() {
     var isAmSelected: Boolean = true
     private var isCleared: Boolean = false
 
+    var selectedMonth: Int? = null
+    var selectedDay: Int? = null
+    var selectedYear: Int? = null
+
     private val _location = MutableLiveData<String?>()
     val location: LiveData<String?> = _location
 
@@ -40,6 +44,9 @@ class CreateEventViewModel : ViewModel() {
         hour = null
         minute = null
         isAmSelected = true
+        selectedMonth = null
+        selectedDay = null
+        selectedYear = null
         setLocation(null)
         setTags(null)
         isCleared = true

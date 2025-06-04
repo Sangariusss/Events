@@ -16,4 +16,7 @@
 
 	<dimen name="size_image_social_media">24dp</dimen>
 	<dimen name="size_image_facebook">28dp</dimen>
+
+    <dimen name="chip_stroke_width">1dp</dimen>
+	<dimen name="chip_content_padding">10dp</dimen>
 </resources>
