@@ -94,7 +94,7 @@ class ProposalsFragment : Fragment() {
                 binding.editTextFindProposals.background = if (s.isNullOrEmpty()) emptyDrawable else filledDrawable
                 searchJob?.cancel()
                 searchJob = viewLifecycleOwner.lifecycleScope.launch {
-                    delay(300)
+                    delay(300) // Debouncing for 300ms
                     val userId = profileViewModel.userLiveData.value?.user_id ?: return@launch
                     if (s.isNullOrEmpty()) loadProposals(userId) else filterProposals(userId, s.toString())
                 }
@@ -193,9 +193,9 @@ class ProposalsFragment : Fragment() {
         val normalizedText = normalizeText(text)
         val normalizedQuery = normalizeText(query)
         return when {
-            normalizedText == normalizedQuery -> 3
-            normalizedText.startsWith(normalizedQuery) -> 2
-            normalizedText.contains(normalizedQuery) -> 1
+            normalizedText == normalizedQuery -> 3 // Full match
+            normalizedText.startsWith(normalizedQuery) -> 2 // Starts with
+            normalizedText.contains(normalizedQuery) -> 1 // Contains
             else -> 0
         }
     }

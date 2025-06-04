@@ -1,6 +1,5 @@
 package com.komiker.events.ui.fragments
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -65,7 +64,7 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupEditTextBackgroundChange()
+        setupSearchField()
         setupButtonFilter()
         setupRecyclerView()
         setupRealtimeUpdates()
@@ -83,18 +82,21 @@ class HomeFragment : Fragment() {
         super.onDestroyView()
     }
 
-    private fun setupEditTextBackgroundChange() {
-        val editText = binding.editTextFindEvents
-        val emptyDrawable: Drawable? = ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_empty)
-        val filledDrawable: Drawable? = ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_filled)
-
-        editText.addTextChangedListener(object : TextWatcher {
+    private fun setupSearchField() {
+        val emptyDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_empty)
+        val filledDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_filled)
+        var searchJob: Job? = null
+        binding.editTextFindEvents.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                editText.background = if (s.isNullOrEmpty()) emptyDrawable else filledDrawable
+                binding.editTextFindEvents.background = if (s.isNullOrEmpty()) emptyDrawable else filledDrawable
+                searchJob?.cancel()
+                searchJob = viewLifecycleOwner.lifecycleScope.launch {
+                    delay(300) // Debouncing for 300ms
+                    val userId = profileViewModel.userLiveData.value?.user_id ?: return@launch
+                    if (s.isNullOrEmpty()) loadEvents(userId) else filterEvents(userId, s.toString())
+                }
             }
-
             override fun afterTextChanged(s: Editable?) {}
         })
     }
@@ -123,6 +125,22 @@ class HomeFragment : Fragment() {
             if (user != null) {
                 loadEvents(user.user_id)
             }
+        }
+    }
+
+    private fun normalizeText(text: String): String {
+        return text.lowercase()
+            .replace(Regex("[^a-z0-9]"), "")
+    }
+
+    private fun calculateMatchScore(text: String, query: String): Int {
+        val normalizedText = normalizeText(text)
+        val normalizedQuery = normalizeText(query)
+        return when {
+            normalizedText == normalizedQuery -> 3 // Full match
+            normalizedText.startsWith(normalizedQuery) -> 2 // Starts with
+            normalizedText.contains(normalizedQuery) -> 1 // Contains
+            else -> 0
         }
     }
 
@@ -157,6 +175,56 @@ class HomeFragment : Fragment() {
                 eventsAdapter.submitList(events)
             } catch (e: Exception) {
                 Log.e("HomeFragment", "Error loading events: ${e.message}", e)
+            }
+        }
+    }
+
+    private fun filterEvents(userId: String, query: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = supabaseClient.postgrest.rpc(
+                    "get_events_with_likes",
+                    mapOf("user_id_input" to userId)
+                ).decodeList<EventResponse>()
+                val filteredEvents = response
+                    .asSequence()
+                    .map { eventResponse ->
+                        val titleScore = calculateMatchScore(eventResponse.title, query)
+                        val descriptionScore = calculateMatchScore(eventResponse.description!!, query)
+                        val usernameScore = calculateMatchScore(eventResponse.username, query)
+                        Pair(
+                            eventResponse,
+                            maxOf(titleScore, descriptionScore, usernameScore)
+                        )
+                    }
+                    .filter { it.second > 0 }
+                    .sortedByDescending { it.second }
+                    .map { (eventResponse, _) ->
+                        Event(
+                            id = eventResponse.id!!,
+                            userId = eventResponse.userId,
+                            username = eventResponse.username,
+                            userAvatar = eventResponse.userAvatar,
+                            title = eventResponse.title,
+                            description = eventResponse.description,
+                            startDate = eventResponse.startDate,
+                            endDate = eventResponse.endDate,
+                            eventTime = eventResponse.eventTime,
+                            tags = eventResponse.tags,
+                            location = eventResponse.location,
+                            images = eventResponse.images,
+                            createdAt = eventResponse.createdAt,
+                            likesCount = eventResponse.likesCount
+                        ).also {
+                            likeCache[eventResponse.id] = eventResponse.isLiked ?: false
+                            likesCountCache[eventResponse.id] = eventResponse.likesCount
+                        }
+                    }.sortedByDescending { it.createdAt }
+                    .toList()
+                eventsAdapter.submitList(filteredEvents)
+            } catch (e: Exception) {
+                Log.e("HomeFragment", "Error filtering events: ${e.message}", e)
+                eventsAdapter.submitList(emptyList())
             }
         }
     }
@@ -225,8 +293,14 @@ class HomeFragment : Fragment() {
                     likeCache[newEvent.id] = isLiked
                     likesCountCache[newEvent.id] = newEvent.likesCount
                     val currentList = eventsAdapter.currentList.toMutableList()
-                    currentList.add(0, newEvent)
-                    eventsAdapter.submitList(currentList.sortedByDescending { it.createdAt })
+                    val query = binding.editTextFindEvents.text.toString()
+                    if (query.isEmpty() ||
+                        normalizeText(newEvent.title!!).contains(normalizeText(query)) ||
+                        normalizeText(newEvent.description!!).contains(normalizeText(query)) ||
+                        normalizeText(newEvent.username).contains(normalizeText(query))) {
+                        currentList.add(0, newEvent)
+                        eventsAdapter.submitList(currentList.sortedByDescending { it.createdAt })
+                    }
                 } catch (e: Exception) {
                     Log.e("HomeFragment", "Error processing realtime update: ${e.message}", e)
                 }
