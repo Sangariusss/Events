@@ -12,10 +12,11 @@ import com.komiker.events.databinding.ItemSubTagBinding
 import com.komiker.events.databinding.ItemTagHeaderBinding
 
 class TagsAdapter(
+    initialSelectedTags: List<String>,
     private val onSubTagSelectionChanged: (List<String>) -> Unit
 ) : ListAdapter<TagItem, RecyclerView.ViewHolder>(TagItemDiffCallback()) {
 
-    private val selectedSubTags = mutableSetOf<String>()
+    private val selectedSubTags = mutableSetOf<String>().apply { addAll(initialSelectedTags) }
     private var headerHeight: Int = 0
     private var subTagHeight: Int = 0
     private lateinit var transparentDrawable: android.graphics.drawable.Drawable

@@ -82,7 +82,10 @@ class TagsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        tagsAdapter = TagsAdapter {}
+        val savedTags = viewModel.tags.value ?: emptyList()
+        tagsAdapter = TagsAdapter(savedTags) { selectedTags ->
+            viewModel.setTags(selectedTags)
+        }
         binding.recyclerViewTags.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = tagsAdapter
