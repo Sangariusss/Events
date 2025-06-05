@@ -69,7 +69,7 @@ class FilterFragment : Fragment() {
         setupDatePickers(savedInstanceState)
         setupLocationManager()
         setupButtonLocation()
-        setupButtonAllCategory()
+        setupButtonTags()
         setupButtonCheckmark()
         observeViewModel()
 
@@ -171,7 +171,7 @@ class FilterFragment : Fragment() {
         }
     }
 
-    private fun setupButtonAllCategory() {
+    private fun setupButtonTags() {
         binding.buttonTags.setOnClickListener {
             navigateToFragmentWithSource(R.id.action_FilterFragment_to_TagsFragment)
         }
@@ -232,26 +232,15 @@ class FilterFragment : Fragment() {
 
     private fun navigateBack() {
         datePickerManager.saveFilters()
-        val sourceFragmentId = arguments?.getInt("sourceFragmentId") ?: R.id.HomeFragment
-        when (sourceFragmentId) {
-            R.id.HomeFragment -> {
-                navigateToMainMenuWithSection("home")
-            }
-            R.id.ProposalsFragment -> {
-                navigateToMainMenuWithSection("proposals")
-            }
-            else -> {
-                navigateToMainMenuWithSection("home")
-            }
-        }
+        navigateToMainMenuWithSection()
     }
 
-    private fun navigateToMainMenuWithSection(section: String) {
+    private fun navigateToMainMenuWithSection() {
         viewModel.clear()
         findNavController().navigate(
             R.id.action_FilterFragment_to_MainMenuFragment,
             Bundle().apply {
-                putString("navigateTo", section)
+                putString("navigateTo", "home")
             }
         )
     }

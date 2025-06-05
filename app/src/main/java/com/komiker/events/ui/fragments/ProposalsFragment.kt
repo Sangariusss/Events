@@ -66,7 +66,6 @@ class ProposalsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupButtonFilter()
         setupWriteProposalButton()
         setupSearchField()
         setupUserProfile()
@@ -101,13 +100,6 @@ class ProposalsFragment : Fragment() {
             }
             override fun afterTextChanged(s: Editable?) {}
         })
-    }
-
-    private fun setupButtonFilter() {
-        binding.buttonFilter.setOnClickListener {
-            val bundle = Bundle().apply { putInt("sourceFragmentId", R.id.ProposalsFragment) }
-            findNavController().navigate(R.id.action_MainMenuFragment_to_FilterFragment, bundle)
-        }
     }
 
     private fun setupWriteProposalButton() {

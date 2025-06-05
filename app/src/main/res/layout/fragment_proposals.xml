@@ -40,22 +40,6 @@
         app:layout_constraintWidth_percent="0.911"
         tools:ignore="LabelFor" />
 
-    <ImageButton
-        android:id="@+id/button_filter"
-        style="@style/ButtonFilterInactive"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/filter_button"
-        android:scaleType="centerInside"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintBottom_toBottomOf="@id/guideline3"
-        app:layout_constraintEnd_toEndOf="@id/edit_text_find_proposals"
-        app:layout_constraintHorizontal_bias="0.947"
-        app:layout_constraintStart_toStartOf="@id/edit_text_find_proposals"
-        app:layout_constraintTop_toTopOf="@+id/guideline2"
-        app:layout_constraintWidth_percent="0.067" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_proposals"
         android:layout_width="0dp"
