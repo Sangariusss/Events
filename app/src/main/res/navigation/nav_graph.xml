@@ -330,6 +330,12 @@
             app:destination="@id/CheckYourEmailFragment" />
     </fragment>
     <fragment
+        android:id="@+id/HomeFragment"
+        android:name="com.komiker.events.ui.fragments.HomeFragment"
+        android:label="@string/home_fragment"
+        tools:layout="@layout/fragment_home" >
+    </fragment>
+    <fragment
         android:id="@+id/ProposalsFragment"
         android:name="com.komiker.events.ui.fragments.ProposalsFragment"
         android:label="@string/proposals_fragment"

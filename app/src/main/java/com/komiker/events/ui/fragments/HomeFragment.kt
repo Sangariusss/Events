@@ -103,7 +103,8 @@ class HomeFragment : Fragment() {
 
     private fun setupButtonFilter() {
         binding.buttonFilter.setOnClickListener {
-            findNavController().navigate(R.id.action_MainMenuFragment_to_FilterFragment)
+            val bundle = Bundle().apply { putInt("sourceFragmentId", R.id.HomeFragment) }
+            findNavController().navigate(R.id.action_MainMenuFragment_to_FilterFragment, bundle)
         }
     }
 

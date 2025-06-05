@@ -177,6 +177,7 @@
     <string name="proposals">Proposals</string>
     <string name="favorites">Favorites</string>
     <string name="write_your_event_proposal">Write your event proposal…</string>
+    <string name="home_fragment">HomeFragment</string>
     <string name="proposals_fragment">ProposalsFragment</string>
     <string name="create_proposal_fragment">CreateProposalFragment</string>
     <string name="new_proposal">New proposal</string>

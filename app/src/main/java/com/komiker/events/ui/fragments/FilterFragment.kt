@@ -120,7 +120,7 @@ class FilterFragment : Fragment() {
     private fun setupOnBackPressed() {
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                navigateTo(R.id.action_FilterFragment_to_MainMenuFragment)
+                navigateBack()
             }
         }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
@@ -128,13 +128,13 @@ class FilterFragment : Fragment() {
 
     private fun setupButtonBack() {
         binding.buttonBack.setOnClickListener {
-            navigateTo(R.id.action_FilterFragment_to_MainMenuFragment)
+            navigateBack()
         }
     }
 
     private fun setupButtonCheckmark() {
         binding.buttonCheckmark.setOnClickListener {
-            navigateTo(R.id.action_FilterFragment_to_MainMenuFragment)
+            navigateBack()
         }
     }
 
@@ -230,10 +230,30 @@ class FilterFragment : Fragment() {
         }
     }
 
-    private fun navigateTo(destinationId: Int) {
+    private fun navigateBack() {
         datePickerManager.saveFilters()
+        val sourceFragmentId = arguments?.getInt("sourceFragmentId") ?: R.id.HomeFragment
+        when (sourceFragmentId) {
+            R.id.HomeFragment -> {
+                navigateToMainMenuWithSection("home")
+            }
+            R.id.ProposalsFragment -> {
+                navigateToMainMenuWithSection("proposals")
+            }
+            else -> {
+                navigateToMainMenuWithSection("home")
+            }
+        }
+    }
+
+    private fun navigateToMainMenuWithSection(section: String) {
         viewModel.clear()
-        findNavController().navigate(destinationId)
+        findNavController().navigate(
+            R.id.action_FilterFragment_to_MainMenuFragment,
+            Bundle().apply {
+                putString("navigateTo", section)
+            }
+        )
     }
 
     private fun navigateToFragmentWithSource(destinationId: Int) {
