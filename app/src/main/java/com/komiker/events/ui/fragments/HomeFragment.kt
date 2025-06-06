@@ -20,6 +20,7 @@ import com.komiker.events.data.database.models.Event
 import com.komiker.events.data.database.models.EventResponse
 import com.komiker.events.databinding.FragmentHomeBinding
 import com.komiker.events.ui.adapters.EventsAdapter
+import com.komiker.events.viewmodels.CreateEventViewModel
 import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.postgrest.from
@@ -37,6 +38,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class HomeFragment : Fragment() {
 
@@ -48,11 +51,13 @@ class HomeFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by activityViewModels {
         ProfileViewModelFactory(supabaseUserDao)
     }
+    private val createEventViewModel: CreateEventViewModel by activityViewModels()
     private lateinit var eventsAdapter: EventsAdapter
     private lateinit var channel: RealtimeChannel
     private val likeCache = mutableMapOf<String, Boolean>()
     private val likesCountCache = mutableMapOf<String, Int>()
     private var heartbeatJob: Job? = null
+    private val TAG = "HomeFragment"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -69,6 +74,7 @@ class HomeFragment : Fragment() {
         setupRecyclerView()
         setupRealtimeUpdates()
         startHeartbeat()
+        observeFilters()
     }
 
     override fun onDestroyView() {
@@ -82,6 +88,22 @@ class HomeFragment : Fragment() {
         super.onDestroyView()
     }
 
+    private fun observeFilters() {
+        createEventViewModel.filtersApplied.observe(viewLifecycleOwner) { applied ->
+            if (applied) {
+                profileViewModel.userLiveData.value?.user_id?.let { userId ->
+                    val query = binding.editTextFindEvents.text.toString()
+                    if (query.isEmpty()) {
+                        loadEvents(userId)
+                    } else {
+                        filterEvents(userId, query)
+                    }
+                }
+                createEventViewModel.resetFiltersApplied()
+            }
+        }
+    }
+
     private fun setupSearchField() {
         val emptyDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_empty)
         val filledDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.bg_et_find_filled)
@@ -92,7 +114,7 @@ class HomeFragment : Fragment() {
                 binding.editTextFindEvents.background = if (s.isNullOrEmpty()) emptyDrawable else filledDrawable
                 searchJob?.cancel()
                 searchJob = viewLifecycleOwner.lifecycleScope.launch {
-                    delay(300) // Debouncing for 300ms
+                    delay(300)
                     val userId = profileViewModel.userLiveData.value?.user_id ?: return@launch
                     if (s.isNullOrEmpty()) loadEvents(userId) else filterEvents(userId, s.toString())
                 }
@@ -138,11 +160,58 @@ class HomeFragment : Fragment() {
         val normalizedText = normalizeText(text)
         val normalizedQuery = normalizeText(query)
         return when {
-            normalizedText == normalizedQuery -> 3 // Full match
-            normalizedText.startsWith(normalizedQuery) -> 2 // Starts with
-            normalizedText.contains(normalizedQuery) -> 1 // Contains
+            normalizedText == normalizedQuery -> 3
+            normalizedText.startsWith(normalizedQuery) -> 2
+            normalizedText.contains(normalizedQuery) -> 1
             else -> 0
         }
+    }
+
+    private fun applyFilters(events: List<EventResponse>): List<EventResponse> {
+        var filteredEvents = events
+
+        val selectedYear = createEventViewModel.selectedYear
+        val selectedMonth = createEventViewModel.selectedMonth
+        val selectedDay = createEventViewModel.selectedDay
+        val location = createEventViewModel.location.value
+        val tags = createEventViewModel.tags.value
+
+        if (selectedYear != null && selectedMonth != null && selectedDay != null) {
+            val filterDate = LocalDate.of(selectedYear, selectedMonth, selectedDay)
+            val dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
+            filteredEvents = filteredEvents.filter { event ->
+                val startDateStr = event.startDate
+                if (startDateStr.isNullOrEmpty()) {
+                    false
+                } else {
+                    try {
+                        val startDate = LocalDate.parse(startDateStr, dateFormatter)
+                        startDate.isEqual(filterDate)
+                    } catch (e: Exception) {
+                        false
+                    }
+                }
+            }
+        }
+
+        location?.let { loc ->
+            if (loc.isNotEmpty()) {
+                filteredEvents = filteredEvents.filter { event ->
+                    event.location?.contains(loc, ignoreCase = true) == true
+                }
+            }
+        }
+
+        tags?.let { tagList ->
+            if (tagList.isNotEmpty()) {
+                filteredEvents = filteredEvents.filter { event ->
+                    val eventTags = event.tags
+                    eventTags?.any { tag -> tagList.contains(tag) } == true
+                }
+            }
+        }
+
+        return filteredEvents
     }
 
     private fun loadEvents(userId: String) {
@@ -152,7 +221,10 @@ class HomeFragment : Fragment() {
                     "get_events_with_likes",
                     mapOf("user_id_input" to userId)
                 ).decodeList<EventResponse>()
-                val events = response.map { eventResponse ->
+
+                val filteredResponse = applyFilters(response)
+
+                val events = filteredResponse.map { eventResponse ->
                     Event(
                         id = eventResponse.id!!,
                         userId = eventResponse.userId,
@@ -175,7 +247,7 @@ class HomeFragment : Fragment() {
                 }.sortedByDescending { it.createdAt }
                 eventsAdapter.submitList(events)
             } catch (e: Exception) {
-                Log.e("HomeFragment", "Error loading events: ${e.message}", e)
+              Log.e(TAG, "Error loading events: ${e.message}")
             }
         }
     }
@@ -187,11 +259,14 @@ class HomeFragment : Fragment() {
                     "get_events_with_likes",
                     mapOf("user_id_input" to userId)
                 ).decodeList<EventResponse>()
-                val filteredEvents = response
+
+                var filteredResponse = applyFilters(response)
+
+                filteredResponse = filteredResponse
                     .asSequence()
                     .map { eventResponse ->
                         val titleScore = calculateMatchScore(eventResponse.title, query)
-                        val descriptionScore = calculateMatchScore(eventResponse.description!!, query)
+                        val descriptionScore = calculateMatchScore(eventResponse.description ?: "", query)
                         val usernameScore = calculateMatchScore(eventResponse.username, query)
                         Pair(
                             eventResponse,
@@ -200,32 +275,33 @@ class HomeFragment : Fragment() {
                     }
                     .filter { it.second > 0 }
                     .sortedByDescending { it.second }
-                    .map { (eventResponse, _) ->
-                        Event(
-                            id = eventResponse.id!!,
-                            userId = eventResponse.userId,
-                            username = eventResponse.username,
-                            userAvatar = eventResponse.userAvatar,
-                            title = eventResponse.title,
-                            description = eventResponse.description,
-                            startDate = eventResponse.startDate,
-                            endDate = eventResponse.endDate,
-                            eventTime = eventResponse.eventTime,
-                            tags = eventResponse.tags,
-                            location = eventResponse.location,
-                            images = eventResponse.images,
-                            createdAt = eventResponse.createdAt,
-                            likesCount = eventResponse.likesCount
-                        ).also {
-                            likeCache[eventResponse.id] = eventResponse.isLiked ?: false
-                            likesCountCache[eventResponse.id] = eventResponse.likesCount
-                        }
-                    }.sortedByDescending { it.createdAt }
+                    .map { it.first }
                     .toList()
+
+                val filteredEvents = filteredResponse.map { eventResponse ->
+                    Event(
+                        id = eventResponse.id!!,
+                        userId = eventResponse.userId,
+                        username = eventResponse.username,
+                        userAvatar = eventResponse.userAvatar,
+                        title = eventResponse.title,
+                        description = eventResponse.description,
+                        startDate = eventResponse.startDate,
+                        endDate = eventResponse.endDate,
+                        eventTime = eventResponse.eventTime,
+                        tags = eventResponse.tags,
+                        location = eventResponse.location,
+                        images = eventResponse.images,
+                        createdAt = eventResponse.createdAt,
+                        likesCount = eventResponse.likesCount
+                    ).also {
+                        likeCache[eventResponse.id] = eventResponse.isLiked ?: false
+                        likesCountCache[eventResponse.id] = eventResponse.likesCount
+                    }
+                }.sortedByDescending { it.createdAt }
                 eventsAdapter.submitList(filteredEvents)
             } catch (e: Exception) {
-                Log.e("HomeFragment", "Error filtering events: ${e.message}", e)
-                eventsAdapter.submitList(emptyList())
+               Log.e(TAG, "Error filtering events: ${e.message}")
             }
         }
     }
@@ -241,7 +317,7 @@ class HomeFragment : Fragment() {
                 }
                 likeCache[eventId] = isLiked
             } catch (e: Exception) {
-                Log.e("HomeFragment", "Error handling like: ${e.message}", e)
+                Log.e(TAG, "Error handling like: ${e.message}")
                 callback(false, likesCountCache[eventId] ?: 0)
             }
         }
@@ -261,7 +337,7 @@ class HomeFragment : Fragment() {
                     eventsAdapter.submitList(currentList)
                 }
             } catch (e: Exception) {
-                Log.e("HomeFragment", "Error deleting event: ${e.message}", e)
+                Log.e(TAG, "Error deleting event: ${e.message}")
             }
         }
     }
@@ -273,37 +349,43 @@ class HomeFragment : Fragment() {
             changeFlow.collect { change ->
                 try {
                     val eventResponse = change.decodeRecord<EventResponse>()
-                    val newEvent = Event(
-                        id = eventResponse.id!!,
-                        userId = eventResponse.userId,
-                        username = eventResponse.username,
-                        userAvatar = eventResponse.userAvatar,
-                        title = eventResponse.title,
-                        description = eventResponse.description,
-                        startDate = eventResponse.startDate,
-                        endDate = eventResponse.endDate,
-                        eventTime = eventResponse.eventTime,
-                        tags = eventResponse.tags,
-                        location = eventResponse.location,
-                        images = eventResponse.images,
-                        createdAt = eventResponse.createdAt,
-                        likesCount = eventResponse.likesCount
-                    )
-                    val userId = profileViewModel.userLiveData.value?.user_id ?: return@collect
-                    val isLiked = profileViewModel.isEventLiked(newEvent.id, userId)
-                    likeCache[newEvent.id] = isLiked
-                    likesCountCache[newEvent.id] = newEvent.likesCount
-                    val currentList = eventsAdapter.currentList.toMutableList()
-                    val query = binding.editTextFindEvents.text.toString()
-                    if (query.isEmpty() ||
-                        normalizeText(newEvent.title!!).contains(normalizeText(query)) ||
-                        normalizeText(newEvent.description!!).contains(normalizeText(query)) ||
-                        normalizeText(newEvent.username).contains(normalizeText(query))) {
-                        currentList.add(0, newEvent)
-                        eventsAdapter.submitList(currentList.sortedByDescending { it.createdAt })
+                    val newEventResponse = listOf(eventResponse)
+                    val filteredResponse = applyFilters(newEventResponse)
+
+                    if (filteredResponse.isNotEmpty()) {
+                        val newEvent = Event(
+                            id = eventResponse.id!!,
+                            userId = eventResponse.userId,
+                            username = eventResponse.username,
+                            userAvatar = eventResponse.userAvatar,
+                            title = eventResponse.title,
+                            description = eventResponse.description,
+                            startDate = eventResponse.startDate,
+                            endDate = eventResponse.endDate,
+                            eventTime = eventResponse.eventTime,
+                            tags = eventResponse.tags,
+                            location = eventResponse.location,
+                            images = eventResponse.images,
+                            createdAt = eventResponse.createdAt,
+                            likesCount = eventResponse.likesCount
+                        )
+                        val userId = profileViewModel.userLiveData.value?.user_id ?: return@collect
+                        val isLiked = profileViewModel.isEventLiked(newEvent.id, userId)
+                        likeCache[newEvent.id] = isLiked
+                        likesCountCache[newEvent.id] = newEvent.likesCount
+                        val currentList = eventsAdapter.currentList.toMutableList()
+                        val query = binding.editTextFindEvents.text.toString()
+                        val matchesQuery = query.isEmpty() ||
+                                normalizeText(newEvent.title!!).contains(normalizeText(query)) ||
+                                normalizeText(newEvent.description!!).contains(normalizeText(query)) ||
+                                normalizeText(newEvent.username).contains(normalizeText(query))
+                        if (matchesQuery) {
+                            currentList.add(0, newEvent)
+                            eventsAdapter.submitList(currentList.sortedByDescending { it.createdAt })
+                        }
                     }
                 } catch (e: Exception) {
-                    Log.e("HomeFragment", "Error processing realtime update: ${e.message}", e)
+                    Log.e(TAG, "Error processing realtime update: ${e.message}")
                 }
             }
         }
@@ -323,7 +405,9 @@ class HomeFragment : Fragment() {
         withContext(Dispatchers.Main) {
             try {
                 val currentList = eventsAdapter.currentList
-                if (currentList.isEmpty()) return@withContext
+                if (currentList.isEmpty()) {
+                    return@withContext
+                }
                 val eventIds = currentList.map { it.id }
                 val updatedEvents = supabaseClient.from("events")
                     .select { filter { isIn("id", eventIds) } }
@@ -339,7 +423,7 @@ class HomeFragment : Fragment() {
                     }
                 }
             } catch (e: Exception) {
-                Log.e("HomeFragment", "Error updating likes count: ${e.message}", e)
+                Log.e(TAG, "Error updating likes count: ${e.message}")
             }
         }
     }

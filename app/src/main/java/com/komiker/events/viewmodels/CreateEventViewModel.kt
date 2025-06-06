@@ -27,12 +27,37 @@ class CreateEventViewModel : ViewModel() {
     private val _tags = MutableLiveData<List<String>?>()
     val tags: LiveData<List<String>?> = _tags
 
+    private val _filtersApplied = MutableLiveData(false)
+    val filtersApplied: LiveData<Boolean> = _filtersApplied
+
+    private var shouldRequestLocation: Boolean = true
+
     fun setLocation(newLocation: String?) {
         _location.value = newLocation
     }
 
     fun setTags(newTags: List<String>?) {
         _tags.value = newTags
+    }
+
+    fun applyFilters() {
+        _filtersApplied.value = true
+    }
+
+    fun resetFiltersApplied() {
+        _filtersApplied.value = false
+    }
+
+    fun shouldRequestLocation(): Boolean {
+        return shouldRequestLocation
+    }
+
+    fun disableLocationRequest() {
+        shouldRequestLocation = false
+    }
+
+    fun enableLocationRequest() {
+        shouldRequestLocation = true
     }
 
     fun clear() {
@@ -49,6 +74,7 @@ class CreateEventViewModel : ViewModel() {
         selectedYear = null
         setLocation(null)
         setTags(null)
+        resetFiltersApplied()
         isCleared = true
     }
 

@@ -209,4 +209,5 @@
     <string name="button_copy_address">ButtonCopyAddress</string>
     <string name="edit_proposal">Edit proposal</string>
     <string name="button_share">ButtonShare</string>
+    <string name="reset_filters">Reset filters</string>
 </resources>

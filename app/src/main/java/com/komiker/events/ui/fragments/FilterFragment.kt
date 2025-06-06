@@ -71,19 +71,23 @@ class FilterFragment : Fragment() {
         setupButtonLocation()
         setupButtonTags()
         setupButtonCheckmark()
+        setupButtonResetFilters()
         observeViewModel()
 
-        if (viewModel.location.value.isNullOrEmpty()) {
+        if (viewModel.location.value.isNullOrEmpty() && viewModel.shouldRequestLocation()) {
             handleLocationRequest()
+            viewModel.disableLocationRequest()
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        datePickerManager.saveFilters()
-        outState.putInt("savedMonth", binding.numberPickerMonth.value)
-        outState.putInt("savedDay", binding.numberPickerDay.value)
-        outState.putInt("savedYear", binding.numberPickerYear.value)
+        if (_binding != null) {
+            datePickerManager.saveFilters()
+            outState.putInt("savedMonth", binding.numberPickerMonth.value)
+            outState.putInt("savedDay", binding.numberPickerDay.value)
+            outState.putInt("savedYear", binding.numberPickerYear.value)
+        }
     }
 
     override fun onDestroyView() {
@@ -134,6 +138,15 @@ class FilterFragment : Fragment() {
 
     private fun setupButtonCheckmark() {
         binding.buttonCheckmark.setOnClickListener {
+            datePickerManager.saveFilters()
+            viewModel.applyFilters()
+            navigateBack()
+        }
+    }
+
+    private fun setupButtonResetFilters() {
+        binding.buttonResetFilters.setOnClickListener {
+            viewModel.clear()
             navigateBack()
         }
     }
@@ -155,9 +168,7 @@ class FilterFragment : Fragment() {
             context = requireContext(),
             lifecycleScope = viewLifecycleOwner.lifecycleScope,
             onLocationResult = { address ->
-                if (viewModel.location.value.isNullOrEmpty()) {
-                    viewModel.setLocation(address)
-                }
+                viewModel.setLocation(address)
             },
             onError = { error ->
                 addLocationChip(error)
@@ -167,6 +178,7 @@ class FilterFragment : Fragment() {
 
     private fun setupButtonLocation() {
         binding.buttonLocation.setOnClickListener {
+            viewModel.enableLocationRequest()
             navigateToFragmentWithSource(R.id.action_FilterFragment_to_LocationFragment)
         }
     }
@@ -231,12 +243,10 @@ class FilterFragment : Fragment() {
     }
 
     private fun navigateBack() {
-        datePickerManager.saveFilters()
         navigateToMainMenuWithSection()
     }
 
     private fun navigateToMainMenuWithSection() {
-        viewModel.clear()
         findNavController().navigate(
             R.id.action_FilterFragment_to_MainMenuFragment,
             Bundle().apply {
