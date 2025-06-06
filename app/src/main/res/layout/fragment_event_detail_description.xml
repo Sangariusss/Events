@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/neutral_100"
+    tools:context=".ui.fragments.EventDetailDescriptionFragment">
+
+    <LinearLayout
+        android:id="@+id/card_status"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_info_card"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingHorizontal="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.104"
+        app:layout_constraintHorizontal_bias="0.062"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.278" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status"
+            android:textColor="@color/neutral_60"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/title_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/fixel_medium"
+            android:maxLines="1"
+            android:textColor="@color/green_60"
+            android:textSize="16sp"
+            tools:text="Active event" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/card_reviewed"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/bg_info_card"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingHorizontal="8dp"
+        app:layout_constraintHeight_percent="0.104"
+        app:layout_constraintStart_toStartOf="@id/card_status"
+        app:layout_constraintTop_toBottomOf="@id/card_status"
+        app:layout_constraintWidth_percent="0.278" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reviewed"
+            android:textColor="@color/neutral_60"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/content_reviewed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/fixel_medium"
+            android:textColor="@color/neutral_0"
+            android:textSize="16sp"
+            tools:text="953" />
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/card_date_time"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_info_card"
+        android:padding="12dp"
+        app:layout_constraintBottom_toBottomOf="@id/card_reviewed"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.882"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/card_status"
+        app:layout_constraintWidth_percent="0.622" >
+
+        <TextView
+            android:id="@+id/title_start_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/fixel_medium"
+            android:text="@string/start_time"
+            android:textColor="@color/neutral_60"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/title_start_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/fixel_medium"
+            android:textColor="@color/neutral_0"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title_start_time"
+            tools:text="11:30 PM" />
+
+        <TextView
+            android:id="@+id/title_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:fontFamily="@font/fixel_medium"
+            android:text="@string/start_and_end_date"
+            android:textColor="@color/neutral_60"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toTopOf="@id/title_start_date_content"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/title_start_date_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/fixel_semibold"
+            android:maxLines="1"
+            android:textColor="@color/neutral_0"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="02.14.2025 - 02.20.2025" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/text_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:fontFamily="@font/fixel_semibold"
+        android:lineSpacingMultiplier="1.4"
+        android:textColor="@color/neutral_0"
+        android:textSize="22sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card_reviewed"
+        app:layout_constraintWidth_percent="0.911"
+        tools:text="Frühlingsmarkt im Stadtpark" />
+
+    <TextView
+        android:id="@+id/text_content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="@font/fixel_regular"
+        android:lineSpacingMultiplier="1.4"
+        android:textColor="@color/neutral_0"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@id/text_title"
+        app:layout_constraintStart_toStartOf="@id/text_title"
+        app:layout_constraintTop_toBottomOf="@id/text_title"
+        app:layout_constraintWidth_percent="0.911"
+        tools:text="Erleben Sie den Zauber des Frühlings auf unserem bunten Markt im Herzen der Stadt! Freuen Sie sich auf regionale Köstlichkeiten, handgemachte Produkte, Livemusik und ein abwechslungsreiches Kinderprogramm." />
+
+    <TextView
+        android:id="@+id/title_tags"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:fontFamily="@font/fixel_semibold"
+        android:text="@string/tags"
+        android:textColor="@color/neutral_0"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="@id/text_content"
+        app:layout_constraintTop_toBottomOf="@id/text_content" />
+
+    <TextView
+        android:id="@+id/title_tags_content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/fixel_regular"
+        android:textColor="@color/neutral_20"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@id/text_content"
+        app:layout_constraintStart_toStartOf="@id/text_content"
+        app:layout_constraintTop_toBottomOf="@id/title_tags"
+        tools:text="#Frühlingsmarkt, #Markt, #Frühling" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

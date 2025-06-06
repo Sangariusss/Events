@@ -199,15 +199,19 @@
     <string name="event_images">EventImages</string>
     <string name="event_date_range">%1$s - %2$s</string>
     <string name="tags_content_example">News, Streaming, Marathon, IT</string>
-    <string name="status_active">Status: Active</string>
+    <string name="status_active">Active</string>
     <string name="start_08_00_am">Start 08:00 AM</string>
     <string name="_14_02_2025_16_02_2025">14.02.2025 – 16.02.2025</string>
     <string name="address">Address</string>
     <string name="address_content_example">2984 Hollow Creek Rd, Springfield, IL 62704, United States</string>
-    <string name="check_location">Check location</string>
-    <string name="start_time_format">Start %s</string>
+    <string name="start_time_format">%s</string>
     <string name="button_copy_address">ButtonCopyAddress</string>
     <string name="edit_proposal">Edit proposal</string>
     <string name="button_share">ButtonShare</string>
     <string name="reset_filters">Reset filters</string>
+    <string name="images">Images</string>
+    <string name="status">Status</string>
+    <string name="reviewed">Reviewed</string>
+    <string name="start_time">Start time</string>
+    <string name="start_and_end_date">Start and end date</string>
 </resources>

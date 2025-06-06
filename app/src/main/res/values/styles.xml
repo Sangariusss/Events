@@ -251,7 +251,7 @@
     </style>
 
     <style name="ButtonPublishProposal" parent="Widget.AppCompat.Button">
-        <item name="android:background">@drawable/bg_button_publish</item>
+        <item name="android:background">@drawable/bg_btn_publish</item>
         <item name="backgroundTint">@null</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="android:fontFamily">@font/fixel_semibold</item>
@@ -274,13 +274,23 @@
     </style>
 
     <style name="ButtonCheckLocation" parent="Widget.AppCompat.Button">
-        <item name="android:background">@drawable/bg_button_publish</item>
+        <item name="android:background">@drawable/bg_btn_check_location</item>
         <item name="backgroundTint">@null</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="android:fontFamily">@font/fixel_semibold</item>
-        <item name="android:text">@string/check_location</item>
+        <item name="android:text">@string/location</item>
         <item name="android:textColor">@color/neutral_100</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="TabButtonEventDetail" parent="Widget.AppCompat.Button">
+        <item name="android:padding">0dp</item>
+        <item name="android:textColor">@color/neutral_35</item>
+        <item name="android:fontFamily">@font/fixel_medium</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
     </style>
 </resources>

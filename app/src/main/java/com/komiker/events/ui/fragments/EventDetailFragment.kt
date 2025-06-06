@@ -1,27 +1,20 @@
 package com.komiker.events.ui.fragments
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewOutlineProvider
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
+import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
@@ -29,26 +22,19 @@ import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
 import com.komiker.events.data.database.models.Event
 import com.komiker.events.databinding.FragmentEventDetailBinding
 import com.komiker.events.glide.CircleCropTransformation
-import com.komiker.events.ui.adapters.EventImageAdapter
+import com.komiker.events.ui.adapters.EventDetailPagerAdapter
 import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.gotrue.auth
-import io.github.jan.supabase.storage.storage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.seconds
 
 class EventDetailFragment : Fragment() {
 
     private var _binding: FragmentEventDetailBinding? = null
     private val binding get() = _binding!!
-    private val supabaseClientProvider = SupabaseClientProvider
-    private val supabaseUserDao = SupabaseUserDao(supabaseClientProvider.client)
+    private val supabaseUserDao = SupabaseUserDao(SupabaseClientProvider.client)
     private val profileViewModel: ProfileViewModel by activityViewModels {
         ProfileViewModelFactory(supabaseUserDao)
     }
@@ -65,15 +51,7 @@ class EventDetailFragment : Fragment() {
         handleArguments()
         initButtonBack()
         setupCustomOnBackPressed()
-        setupButtonCheckLocation()
-        setupCopyAddressButton()
         setupShareButton()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        _binding?.shimmerLayout?.stopShimmer()
-        _binding?.shimmerLayout?.visibility = View.GONE
     }
 
     override fun onDestroyView() {
@@ -87,62 +65,41 @@ class EventDetailFragment : Fragment() {
     }
 
     private fun handleArguments() {
-        val event = BundleCompat.getParcelable(requireArguments(), "event", Event::class.java)
+        val event = arguments?.let { BundleCompat.getParcelable(it, "event", Event::class.java) }
         val eventId = arguments?.getString("eventId")
 
         if (event != null) {
-            currentEvent = event
-            viewLifecycleOwner.lifecycleScope.launch { setupUI(event) }
-        } else if (eventId != null) {
+            setupUI(event)
+        } else if (!eventId.isNullOrEmpty()) {
             loadEventById(eventId)
+        } else {
+            findNavController().popBackStack()
         }
     }
 
     private fun loadEventById(eventId: String) {
         profileViewModel.loadEventById(eventId).observe(viewLifecycleOwner) { event ->
-            event?.let {
-                currentEvent = it
-                viewLifecycleOwner.lifecycleScope.launch {
-                    setupUI(it)
-                }
-            } ?: run {
+            if (event != null) {
+                setupUI(event)
+            } else {
                 if (isAdded) {
-                    findNavController().navigate(R.id.MainMenuFragment)
+                    Toast.makeText(requireContext(), "Event not found", Toast.LENGTH_SHORT).show()
+                    findNavController().popBackStack()
                 }
             }
         }
     }
 
-    private suspend fun setupUI(event: Event) {
+    private fun setupUI(event: Event) {
+        currentEvent = event
         setTextFields(event)
-        styleStatusText()
         loadUserAvatar(event)
-        setupImagePager(event)
+        setupTabsAndViewPager()
     }
 
     private fun setTextFields(event: Event) = with(binding) {
         textUserName.text = event.username
         textTime.text = formatTimeAgo(event.createdAt)
-        textTitle.text = event.title
-        textContent.text = event.description
-        titleStartDateContent.text = getString(R.string.event_date_range, event.startDate, event.endDate)
-        titleStartDate.text = getString(R.string.start_time_format, event.eventTime ?: "Not specified")
-        titleAddressContent.text = event.location ?: "Not specified"
-        titleTagsContent.text = event.tags?.joinToString(", ") ?: "No tags"
-    }
-
-    private fun styleStatusText() {
-        val statusText = getString(R.string.status_active)
-        val spannable = SpannableString(statusText)
-        statusText.indexOf("Active").takeIf { it != -1 }?.let { start ->
-            spannable.setSpan(
-                ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.green_60)),
-                start,
-                start + "Active".length,
-                SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-        }
-        binding.titleStatus.text = spannable
     }
 
     private fun loadUserAvatar(event: Event) {
@@ -153,46 +110,44 @@ class EventDetailFragment : Fragment() {
             .into(binding.imageProfile)
     }
 
-    private suspend fun setupImagePager(event: Event) {
-        if (!isAdded || event.images.isNullOrEmpty()) {
-            return
-        }
+    private fun setupTabsAndViewPager() {
+        currentEvent?.let { event ->
+            val adapter = EventDetailPagerAdapter(requireActivity(), event)
+            binding.viewPager.adapter = adapter
+            binding.viewPager.offscreenPageLimit = 3
+            binding.viewPager.isUserInputEnabled = false
 
-        val urls = withContext(Dispatchers.IO) {
-            event.images.map {
-                supabaseClientProvider.client.storage
-                    .from("event-images")
-                    .createSignedUrl(it, 60.seconds)
+            updateTabSelection(0)
+
+            binding.tabDescription.setOnClickListener {
+                binding.viewPager.currentItem = 0
             }
-        }
+            binding.tabImages.setOnClickListener {
+                binding.viewPager.currentItem = 1
+            }
+            binding.tabLocation.setOnClickListener {
+                binding.viewPager.currentItem = 2
+            }
 
-        if (!isAdded || _binding == null) return
-
-        binding.apply {
-            imageEventPager.visibility = View.VISIBLE
-            shimmerLayout.visibility = View.VISIBLE
-            shimmerLayout.startShimmer()
-
-            val radius = (20 * resources.displayMetrics.density).roundToInt()
-            listOf(imageEventPager, shimmerLayout).forEach { view ->
-                view.outlineProvider = object : ViewOutlineProvider() {
-                    override fun getOutline(view: View, outline: android.graphics.Outline) {
-                        outline.setRoundRect(0, 0, view.width, view.height, radius.toFloat())
-                    }
+            binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    updateTabSelection(position)
                 }
-                view.clipToOutline = true
-            }
-
-            imageEventPager.adapter = EventImageAdapter(urls) {
-                if (isAdded && _binding != null) {
-                    shimmerLayout.post {
-                        shimmerLayout.stopShimmer()
-                        shimmerLayout.visibility = View.GONE
-                    }
-                }
-            }
-            imageEventPager.offscreenPageLimit = urls.size
+            })
         }
+    }
+
+    private fun updateTabSelection(position: Int) {
+        binding.tabDescription.isSelected = position == 0
+        binding.tabImages.isSelected = position == 1
+        binding.tabLocation.isSelected = position == 2
+
+        val selectedColor = ContextCompat.getColor(requireContext(), R.color.neutral_0)
+        val unselectedColor = ContextCompat.getColor(requireContext(), R.color.neutral_35)
+
+        binding.tabDescription.setTextColor(if (position == 0) selectedColor else unselectedColor)
+        binding.tabImages.setTextColor(if (position == 1) selectedColor else unselectedColor)
+        binding.tabLocation.setTextColor(if (position == 2) selectedColor else unselectedColor)
     }
 
     private fun initButtonBack() {
@@ -230,21 +185,6 @@ class EventDetailFragment : Fragment() {
         }
     } ?: "Unknown"
 
-    private fun setupButtonCheckLocation() {
-        binding.buttonCheckLocation.setOnClickListener {
-            openLocationInMaps(binding.titleAddressContent.text.toString())
-        }
-    }
-
-    private fun setupCopyAddressButton() {
-        binding.buttonCopyAddress.setOnClickListener {
-            val address = binding.titleAddressContent.text.toString()
-            val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = ClipData.newPlainText("Address", address)
-            clipboard.setPrimaryClip(clip)
-        }
-    }
-
     private fun setupShareButton() {
         binding.buttonShare.setOnClickListener {
             currentEvent?.let { event ->
@@ -265,25 +205,5 @@ class EventDetailFragment : Fragment() {
         }
         val shareIntent = Intent.createChooser(sendIntent, null)
         startActivity(shareIntent)
-    }
-
-    private fun openLocationInMaps(address: String) {
-        if (address.isBlank() || address == "Not specified") return
-
-        val uri = "geo:0,0?q=${Uri.encode(address)}"
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
-        intent.setPackage("com.google.android.apps.maps")
-
-        if (intent.resolveActivity(requireActivity().packageManager) != null) {
-            startActivity(intent)
-        } else {
-            val fallbackUri = Uri.parse("geo:0,0?q=${Uri.encode(address)}")
-            val mapIntent = Intent(Intent.ACTION_VIEW, fallbackUri)
-            if (mapIntent.resolveActivity(requireActivity().packageManager) != null) {
-                startActivity(mapIntent)
-            } else {
-                Toast.makeText(requireContext(), "No map application found", Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 }
