@@ -18,6 +18,8 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
     val proposalAuthorLiveData = MutableLiveData<User?>()
     private val eventLiveData = MutableLiveData<Event?>()
     private val proposalLiveData = MutableLiveData<Proposal?>()
+    private val _likedEvents = MutableLiveData<List<Event>>()
+    val likedEvents: LiveData<List<Event>> = _likedEvents
 
     private fun loadUserInternal(userId: String, liveData: MutableLiveData<User?>) {
         viewModelScope.launch {
@@ -59,6 +61,43 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
             }
         }
         return proposalLiveData
+    }
+
+    fun loadLikedEvents(userId: String) {
+        viewModelScope.launch {
+            try {
+                val response = supabaseUserDao.getLikedEvents(userId)
+                val events = response.map { eventResponse ->
+                    Event(
+                        id = eventResponse.id!!,
+                        userId = eventResponse.userId,
+                        username = eventResponse.username,
+                        userAvatar = eventResponse.userAvatar,
+                        title = eventResponse.title,
+                        description = eventResponse.description,
+                        startDate = eventResponse.startDate,
+                        endDate = eventResponse.endDate,
+                        eventTime = eventResponse.eventTime,
+                        tags = eventResponse.tags,
+                        location = eventResponse.location,
+                        images = eventResponse.images,
+                        createdAt = eventResponse.createdAt,
+                        likesCount = eventResponse.likesCount,
+                        viewsCount = eventResponse.viewsCount
+                    )
+                }
+                _likedEvents.postValue(events)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _likedEvents.postValue(emptyList())
+            }
+        }
+    }
+
+    fun removeEventFromFavorites(eventId: String) {
+        val currentList = _likedEvents.value?.toMutableList() ?: return
+        currentList.removeAll { it.id == eventId }
+        _likedEvents.value = currentList
     }
 
     fun likeProposal(proposalId: String, userId: String, callback: (Boolean, Int) -> Unit) {

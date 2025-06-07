@@ -137,11 +137,19 @@ class HomeFragment : Fragment() {
             eventsAdapter = EventsAdapter(
                 currentUserId = currentUserId,
                 onDeleteClicked = { event -> deleteEvent(event) },
-                navController = findNavController(),
                 likeCache = likeCache,
                 likesCountCache = likesCountCache,
-                viewsCountCache = viewsCountCache,
-                onLikeClicked = ::handleLike
+                onLikeClicked = ::handleLike,
+                onItemClicked = { event ->
+                    val bundle = Bundle().apply {
+                        putParcelable("event", event)
+                        putBoolean("isLiked", likeCache[event.id] ?: false)
+                        putInt("likesCount", likesCountCache[event.id] ?: event.likesCount)
+                        putInt("viewsCount", viewsCountCache[event.id] ?: event.viewsCount)
+                        putString("sourceFragment", "home")
+                    }
+                    findNavController().navigate(R.id.action_MainMenuFragment_to_EventDetailFragment, bundle)
+                }
             )
             binding.recyclerViewEvents.apply {
                 layoutManager = LinearLayoutManager(context)

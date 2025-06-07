@@ -1,13 +1,11 @@
 package com.komiker.events.ui.adapters
 
 import android.content.Intent
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
 import androidx.core.content.ContextCompat
-import androidx.navigation.NavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -25,10 +23,9 @@ import java.util.Locale
 class EventsAdapter(
     private val currentUserId: String?,
     private val onDeleteClicked: (Event) -> Unit,
-    private val navController: NavController,
+    private val onItemClicked: (Event) -> Unit,
     private val likeCache: MutableMap<String, Boolean>,
     private val likesCountCache: MutableMap<String, Int>,
-    private val viewsCountCache: MutableMap<String, Int>,
     private val onLikeClicked: (String, Boolean, (Boolean, Int) -> Unit) -> Unit
 ) : ListAdapter<Event, EventsAdapter.EventViewHolder>(EventDiffCallback()) {
 
@@ -94,7 +91,7 @@ class EventsAdapter(
                 shareEvent(event)
             }
             binding.root.setOnClickListener {
-                navigateToEventDetail(event)
+                onItemClicked(event)
             }
         }
 
@@ -177,16 +174,6 @@ class EventsAdapter(
             }
             val shareIntent = Intent.createChooser(sendIntent, null)
             binding.root.context.startActivity(shareIntent)
-        }
-
-        private fun navigateToEventDetail(event: Event) {
-            val bundle = Bundle().apply {
-                putParcelable("event", event)
-                putBoolean("isLiked", likeCache[event.id] ?: false)
-                putInt("likesCount", likesCountCache[event.id] ?: event.likesCount)
-                putInt("viewsCount", viewsCountCache[event.id] ?: event.viewsCount)
-            }
-            navController.navigate(R.id.action_MainMenuFragment_to_EventDetailFragment, bundle)
         }
 
         private fun showPopupMenu(event: Event) {

@@ -4,6 +4,7 @@ import com.komiker.events.data.database.SupabaseClientProvider.client
 import com.komiker.events.data.database.dao.UserDao
 import com.komiker.events.data.database.models.Event
 import com.komiker.events.data.database.models.EventLike
+import com.komiker.events.data.database.models.EventResponse
 import com.komiker.events.data.database.models.Proposal
 import com.komiker.events.data.database.models.ProposalLike
 import com.komiker.events.data.database.models.User
@@ -11,8 +12,10 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.exceptions.UnknownRestException
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.result.PostgrestResult
+import io.github.jan.supabase.postgrest.rpc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -116,6 +119,20 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
         } catch (e: Exception) {
             e.printStackTrace()
             null
+        }
+    }
+
+    suspend fun getLikedEvents(userId: String): List<EventResponse> {
+        return withContext(Dispatchers.IO) {
+            try {
+                supabase.postgrest.rpc(
+                    "get_liked_events_by_user",
+                    mapOf("user_id_input" to userId)
+                ).decodeList()
+            } catch (e: Exception) {
+                println("Error fetching liked events: ${e.message}")
+                emptyList()
+            }
         }
     }
 

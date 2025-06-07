@@ -39,6 +39,7 @@ class EventDetailFragment : Fragment() {
         ProfileViewModelFactory(supabaseUserDao)
     }
     private var currentEvent: Event? = null
+    private var sourceFragmentTag: String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentEventDetailBinding.inflate(inflater, container, false)
@@ -67,6 +68,7 @@ class EventDetailFragment : Fragment() {
     private fun handleArguments() {
         val event = arguments?.let { BundleCompat.getParcelable(it, "event", Event::class.java) }
         val eventId = arguments?.getString("eventId")
+        sourceFragmentTag = arguments?.getString("sourceFragment")
 
         if (event != null) {
             setupUI(event)
@@ -158,18 +160,24 @@ class EventDetailFragment : Fragment() {
 
     private fun setupCustomOnBackPressed() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
-            val isAuthenticated = SupabaseClientProvider.client.auth.currentSessionOrNull() != null
             val navController = findNavController()
 
-            val navOptionsToRoot = navOptions {
-                popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
-                launchSingleTop = true
-            }
-
-            if (isAuthenticated) {
-                navController.navigate(R.id.MainMenuFragment, null, navOptionsToRoot)
+            if (sourceFragmentTag == "home" || sourceFragmentTag == "favorites" || sourceFragmentTag == "proposals" || sourceFragmentTag == "profile") {
+                val bundle = Bundle().apply {
+                    putString("navigateTo", sourceFragmentTag)
+                }
+                navController.navigate(R.id.action_EventDetailFragment_to_MainMenuFragment, bundle)
             } else {
-                navController.navigate(R.id.WelcomeFragment, null, navOptionsToRoot)
+                val isAuthenticated = SupabaseClientProvider.client.auth.currentSessionOrNull() != null
+                val navOptionsToRoot = navOptions {
+                    popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                    launchSingleTop = true
+                }
+                if (isAuthenticated) {
+                    navController.navigate(R.id.MainMenuFragment, null, navOptionsToRoot)
+                } else {
+                    navController.navigate(R.id.WelcomeFragment, null, navOptionsToRoot)
+                }
             }
         }
     }

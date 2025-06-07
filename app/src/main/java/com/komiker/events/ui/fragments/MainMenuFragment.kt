@@ -76,42 +76,41 @@ class MainMenuFragment : Fragment() {
     private fun handleNavigationArguments() {
         val navigateTo = arguments?.getString("navigateTo")
         when (navigateTo) {
-            "profile" -> {
-                binding.bottomNavigation.selectedItemId = R.id.navigation_profile
-                replaceFragment(ProfileFragment())
+            "home" -> {
+                binding.bottomNavigation.selectedItemId = R.id.navigation_home
+                replaceFragment(HomeFragment())
             }
             "proposals" -> {
                 binding.bottomNavigation.selectedItemId = R.id.navigation_proposals
                 replaceFragment(ProposalsFragment())
             }
+            "favorites" -> {
+                binding.bottomNavigation.selectedItemId = R.id.navigation_favorites
+                replaceFragment(FavoritesFragment())
+            }
+            "profile" -> {
+                binding.bottomNavigation.selectedItemId = R.id.navigation_profile
+                replaceFragment(ProfileFragment())
+            }
             else -> {
-                binding.bottomNavigation.selectedItemId = R.id.navigation_home
-                replaceFragment(HomeFragment())
+                if (childFragmentManager.findFragmentById(R.id.fragment_container) == null) {
+                    binding.bottomNavigation.selectedItemId = R.id.navigation_home
+                    replaceFragment(HomeFragment())
+                }
             }
         }
+        arguments?.clear()
     }
 
     private fun setupNavigationItemSelectedListener(bottomNavigationView: BottomNavigationView) {
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.navigation_home -> {
-                    replaceFragment(HomeFragment())
-                    true
-                }
-                R.id.navigation_proposals -> {
-                    replaceFragment(ProposalsFragment())
-                    true
-                }
-                R.id.navigation_favorites -> {
-                    replaceFragment(FavoritesFragment())
-                    true
-                }
-                R.id.navigation_profile -> {
-                    replaceFragment(ProfileFragment())
-                    true
-                }
-                else -> false
+                R.id.navigation_home -> replaceFragment(HomeFragment())
+                R.id.navigation_proposals -> replaceFragment(ProposalsFragment())
+                R.id.navigation_favorites -> replaceFragment(FavoritesFragment())
+                R.id.navigation_profile -> replaceFragment(ProfileFragment())
             }
+            true
         }
     }
 
