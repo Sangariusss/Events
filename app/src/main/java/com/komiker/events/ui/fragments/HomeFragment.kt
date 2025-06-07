@@ -56,6 +56,7 @@ class HomeFragment : Fragment() {
     private lateinit var channel: RealtimeChannel
     private val likeCache = mutableMapOf<String, Boolean>()
     private val likesCountCache = mutableMapOf<String, Int>()
+    private val viewsCountCache = mutableMapOf<String, Int>()
     private var heartbeatJob: Job? = null
     private val TAG = "HomeFragment"
 
@@ -139,6 +140,7 @@ class HomeFragment : Fragment() {
                 navController = findNavController(),
                 likeCache = likeCache,
                 likesCountCache = likesCountCache,
+                viewsCountCache = viewsCountCache,
                 onLikeClicked = ::handleLike
             )
             binding.recyclerViewEvents.apply {
@@ -239,7 +241,8 @@ class HomeFragment : Fragment() {
                         location = eventResponse.location,
                         images = eventResponse.images,
                         createdAt = eventResponse.createdAt,
-                        likesCount = eventResponse.likesCount
+                        likesCount = eventResponse.likesCount,
+                        viewsCount = eventResponse.viewsCount
                     ).also {
                         likeCache[eventResponse.id] = eventResponse.isLiked ?: false
                         likesCountCache[eventResponse.id] = eventResponse.likesCount
@@ -293,7 +296,8 @@ class HomeFragment : Fragment() {
                         location = eventResponse.location,
                         images = eventResponse.images,
                         createdAt = eventResponse.createdAt,
-                        likesCount = eventResponse.likesCount
+                        likesCount = eventResponse.likesCount,
+                        viewsCount = eventResponse.viewsCount
                     ).also {
                         likeCache[eventResponse.id] = eventResponse.isLiked ?: false
                         likesCountCache[eventResponse.id] = eventResponse.likesCount
@@ -367,7 +371,8 @@ class HomeFragment : Fragment() {
                             location = eventResponse.location,
                             images = eventResponse.images,
                             createdAt = eventResponse.createdAt,
-                            likesCount = eventResponse.likesCount
+                            likesCount = eventResponse.likesCount,
+                            viewsCount = eventResponse.viewsCount
                         )
                         val userId = profileViewModel.userLiveData.value?.user_id ?: return@collect
                         val isLiked = profileViewModel.isEventLiked(newEvent.id, userId)

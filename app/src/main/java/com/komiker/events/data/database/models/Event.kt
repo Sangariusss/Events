@@ -33,5 +33,7 @@ data class Event(
     @SerialName("created_at")
     val createdAt: OffsetDateTime?,
     @SerialName("likes_count")
-    val likesCount: Int
+    val likesCount: Int,
+    @SerialName("views_count")
+    val viewsCount: Int = 0
 ) : Parcelable

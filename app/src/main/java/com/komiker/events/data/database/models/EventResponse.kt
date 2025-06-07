@@ -24,5 +24,6 @@ data class EventResponse(
     @Serializable(with = OffsetDateTimeSerializer::class)
     @SerialName("created_at") val createdAt: OffsetDateTime?,
     @SerialName("likes_count") val likesCount: Int,
-    @SerialName("is_liked") val isLiked: Boolean? = null
+    @SerialName("views_count") val viewsCount: Int,
+    @SerialName("is_liked") val isLiked: Boolean? = null,
 )

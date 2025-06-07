@@ -154,7 +154,8 @@ class CreateEventOtherFragment : Fragment() {
                             location = viewModel.location.value,
                             images = imageNames,
                             createdAt = OffsetDateTime.now(),
-                            likesCount = 0
+                            likesCount = 0,
+                            viewsCount = 0
                         )
                         supabaseClient.from("events").insert(event)
                         viewModel.images.forEach { it.file.delete() }

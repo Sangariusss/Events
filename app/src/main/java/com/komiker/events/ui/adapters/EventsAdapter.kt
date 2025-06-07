@@ -28,6 +28,7 @@ class EventsAdapter(
     private val navController: NavController,
     private val likeCache: MutableMap<String, Boolean>,
     private val likesCountCache: MutableMap<String, Int>,
+    private val viewsCountCache: MutableMap<String, Int>,
     private val onLikeClicked: (String, Boolean, (Boolean, Int) -> Unit) -> Unit
 ) : ListAdapter<Event, EventsAdapter.EventViewHolder>(EventDiffCallback()) {
 
@@ -183,6 +184,7 @@ class EventsAdapter(
                 putParcelable("event", event)
                 putBoolean("isLiked", likeCache[event.id] ?: false)
                 putInt("likesCount", likesCountCache[event.id] ?: event.likesCount)
+                putInt("viewsCount", viewsCountCache[event.id] ?: event.viewsCount)
             }
             navController.navigate(R.id.action_MainMenuFragment_to_EventDetailFragment, bundle)
         }
