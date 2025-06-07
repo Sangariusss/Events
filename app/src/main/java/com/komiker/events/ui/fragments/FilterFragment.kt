@@ -20,7 +20,7 @@ import com.komiker.events.databinding.FragmentFilterBinding
 import com.komiker.events.utils.DatePickerManager
 import com.komiker.events.utils.LocationManager
 import com.komiker.events.utils.addChip
-import com.komiker.events.viewmodels.CreateEventViewModel
+import com.komiker.events.viewmodels.FilterViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -30,7 +30,7 @@ class FilterFragment : Fragment() {
     private var _binding: FragmentFilterBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: CreateEventViewModel by activityViewModels()
+    private val viewModel: FilterViewModel by activityViewModels()
     private lateinit var datePickerManager: DatePickerManager
     private lateinit var locationManager: LocationManager
     private val saveFiltersJob = Job()
@@ -83,7 +83,7 @@ class FilterFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         if (_binding != null) {
-            datePickerManager.saveFilters()
+            datePickerManager.saveDate()
             outState.putInt("savedMonth", binding.numberPickerMonth.value)
             outState.putInt("savedDay", binding.numberPickerDay.value)
             outState.putInt("savedYear", binding.numberPickerYear.value)
@@ -138,7 +138,7 @@ class FilterFragment : Fragment() {
 
     private fun setupButtonCheckmark() {
         binding.buttonCheckmark.setOnClickListener {
-            datePickerManager.saveFilters()
+            datePickerManager.saveDate()
             viewModel.applyFilters()
             navigateBack()
         }
@@ -146,7 +146,7 @@ class FilterFragment : Fragment() {
 
     private fun setupButtonResetFilters() {
         binding.buttonResetFilters.setOnClickListener {
-            viewModel.clear()
+            viewModel.clearAll()
             navigateBack()
         }
     }
@@ -156,9 +156,16 @@ class FilterFragment : Fragment() {
             monthPicker = binding.numberPickerMonth,
             dayPicker = binding.numberPickerDay,
             yearPicker = binding.numberPickerYear,
-            viewModel = viewModel,
             context = requireContext(),
-            onDateChanged = { debounceSaveFilters() }
+            initialMonth = viewModel.selectedMonth,
+            initialDay = viewModel.selectedDay,
+            initialYear = viewModel.selectedYear,
+            onDateChanged = { debounceSaveFilters() },
+            onDateSaved = { month, day, year ->
+                viewModel.selectedMonth = month
+                viewModel.selectedDay = day
+                viewModel.selectedYear = year
+            }
         )
         datePickerManager.restoreState(savedInstanceState)
     }
@@ -256,7 +263,7 @@ class FilterFragment : Fragment() {
     }
 
     private fun navigateToFragmentWithSource(destinationId: Int) {
-        datePickerManager.saveFilters()
+        datePickerManager.saveDate()
         val bundle = Bundle().apply { putInt("sourceFragmentId", R.id.FilterFragment) }
         findNavController().navigate(destinationId, bundle)
     }
@@ -264,7 +271,7 @@ class FilterFragment : Fragment() {
     private fun debounceSaveFilters() {
         lifecycleScope.launch(saveFiltersJob) {
             delay(300)
-            datePickerManager.saveFilters()
+            datePickerManager.saveDate()
         }
     }
 }

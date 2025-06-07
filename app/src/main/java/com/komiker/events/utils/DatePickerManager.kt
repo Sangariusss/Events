@@ -1,9 +1,9 @@
 package com.komiker.events.utils
 
 import android.content.Context
+import android.os.Bundle
 import androidx.core.content.res.ResourcesCompat
 import com.komiker.events.R
-import com.komiker.events.viewmodels.CreateEventViewModel
 import com.shawnlin.numberpicker.NumberPicker
 import java.util.Calendar
 
@@ -11,9 +11,12 @@ class DatePickerManager(
     private val monthPicker: NumberPicker,
     private val dayPicker: NumberPicker,
     private val yearPicker: NumberPicker,
-    private val viewModel: CreateEventViewModel,
     private val context: Context,
-    private val onDateChanged: () -> Unit
+    private val initialMonth: Int?,
+    private val initialDay: Int?,
+    private val initialYear: Int?,
+    private val onDateChanged: () -> Unit,
+    private val onDateSaved: (month: Int, day: Int, year: Int) -> Unit
 ) {
     private val months = arrayOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
     private val calendar = Calendar.getInstance()
@@ -47,7 +50,7 @@ class DatePickerManager(
         }
     }
 
-    fun restoreState(savedInstanceState: android.os.Bundle?) {
+    fun restoreState(savedInstanceState: Bundle?) {
         if (savedInstanceState != null) {
             val savedMonth = savedInstanceState.getInt("savedMonth", -1)
             val savedDay = savedInstanceState.getInt("savedDay", -1)
@@ -58,29 +61,18 @@ class DatePickerManager(
                 yearPicker.value = savedYear.coerceIn(currentYear, currentYear + 10)
                 updateDayPickerMaxValue(savedMonth, savedYear)
             }
+        } else if (initialMonth != null && initialDay != null && initialYear != null) {
+            monthPicker.value = initialMonth.coerceIn(0, 11)
+            dayPicker.value = initialDay.coerceIn(1, 31)
+            yearPicker.value = initialYear.coerceIn(currentYear, currentYear + 10)
+            updateDayPickerMaxValue(initialMonth, initialYear)
         } else {
-            val vmMonth = viewModel.selectedMonth
-            val vmDay = viewModel.selectedDay
-            val vmYear = viewModel.selectedYear
-            if (vmMonth != null && vmDay != null && vmYear != null) {
-                monthPicker.value = vmMonth.coerceIn(0, 11)
-                dayPicker.value = vmDay.coerceIn(1, 31)
-                yearPicker.value = vmYear.coerceIn(currentYear, currentYear + 10)
-                updateDayPickerMaxValue(vmMonth, vmYear)
-            } else {
-                setCurrentDate()
-            }
+            setCurrentDate()
         }
     }
 
-    fun saveFilters() {
-        val month = months[monthPicker.value]
-        val day = dayPicker.value
-        val year = yearPicker.value
-        viewModel.startDate = "$month $day, $year"
-        viewModel.selectedMonth = monthPicker.value
-        viewModel.selectedDay = dayPicker.value
-        viewModel.selectedYear = yearPicker.value
+    fun saveDate() {
+        onDateSaved(monthPicker.value, dayPicker.value, yearPicker.value)
     }
 
     private fun setCurrentDate() {
@@ -88,7 +80,7 @@ class DatePickerManager(
         monthPicker.value = calendar.get(Calendar.MONTH)
         updateDayPickerMaxValue(monthPicker.value, yearPicker.value)
         dayPicker.value = calendar.get(Calendar.DAY_OF_MONTH)
-        saveFilters()
+        saveDate()
     }
 
     private fun setListeners() {
@@ -108,8 +100,7 @@ class DatePickerManager(
     private fun updateDayPickerMaxValue(month: Int, year: Int) {
         val maxDay = when (month) {
             0, 2, 4, 6, 7, 9, 11 -> 31
-            3, 5, 8, 10 -> 30
-            else -> if (isLeapYear(year)) 29 else 28
+            else -> if (month == 1 && isLeapYear(year)) 29 else if (month == 1) 28 else 30
         }
         dayPicker.maxValue = maxDay
     }

@@ -31,9 +31,6 @@ class CreateEventFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCreateEventBinding.inflate(inflater, container, false)
-        if (savedInstanceState == null) {
-            viewModel.clear()
-        }
         return binding.root
     }
 

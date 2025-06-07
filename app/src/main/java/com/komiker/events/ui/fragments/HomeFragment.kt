@@ -20,7 +20,7 @@ import com.komiker.events.data.database.models.Event
 import com.komiker.events.data.database.models.EventResponse
 import com.komiker.events.databinding.FragmentHomeBinding
 import com.komiker.events.ui.adapters.EventsAdapter
-import com.komiker.events.viewmodels.CreateEventViewModel
+import com.komiker.events.viewmodels.FilterViewModel
 import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.postgrest.from
@@ -51,7 +51,7 @@ class HomeFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by activityViewModels {
         ProfileViewModelFactory(supabaseUserDao)
     }
-    private val createEventViewModel: CreateEventViewModel by activityViewModels()
+    private val filterViewModel: FilterViewModel by activityViewModels()
     private lateinit var eventsAdapter: EventsAdapter
     private lateinit var channel: RealtimeChannel
     private val likeCache = mutableMapOf<String, Boolean>()
@@ -90,7 +90,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun observeFilters() {
-        createEventViewModel.filtersApplied.observe(viewLifecycleOwner) { applied ->
+        filterViewModel.filtersApplied.observe(viewLifecycleOwner) { applied ->
             if (applied) {
                 profileViewModel.userLiveData.value?.user_id?.let { userId ->
                     val query = binding.editTextFindEvents.text.toString()
@@ -100,7 +100,7 @@ class HomeFragment : Fragment() {
                         filterEvents(userId, query)
                     }
                 }
-                createEventViewModel.resetFiltersApplied()
+                filterViewModel.resetFiltersApplied()
             }
         }
     }
@@ -172,11 +172,11 @@ class HomeFragment : Fragment() {
     private fun applyFilters(events: List<EventResponse>): List<EventResponse> {
         var filteredEvents = events
 
-        val selectedYear = createEventViewModel.selectedYear
-        val selectedMonth = createEventViewModel.selectedMonth
-        val selectedDay = createEventViewModel.selectedDay
-        val location = createEventViewModel.location.value
-        val tags = createEventViewModel.tags.value
+        val selectedYear = filterViewModel.selectedYear
+        val selectedMonth = filterViewModel.selectedMonth
+        val selectedDay = filterViewModel.selectedDay
+        val location = filterViewModel.location.value
+        val tags = filterViewModel.tags.value
 
         if (selectedYear != null && selectedMonth != null && selectedDay != null) {
             val filterDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDay)
