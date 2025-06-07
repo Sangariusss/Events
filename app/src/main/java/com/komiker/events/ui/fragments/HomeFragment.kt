@@ -177,8 +177,8 @@ class HomeFragment : Fragment() {
         val tags = createEventViewModel.tags.value
 
         if (selectedYear != null && selectedMonth != null && selectedDay != null) {
-            val filterDate = LocalDate.of(selectedYear, selectedMonth, selectedDay)
-            val dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
+            val filterDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDay)
+            val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
             filteredEvents = filteredEvents.filter { event ->
                 val startDateStr = event.startDate
                 if (startDateStr.isNullOrEmpty()) {

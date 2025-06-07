@@ -46,7 +46,7 @@ class EventDetailDescriptionFragment : Fragment() {
         binding.titleStatus.text = getString(R.string.status_active)
         binding.titleStartDate.text = getString(R.string.start_time_format, event.eventTime ?: "Not specified")
         binding.titleStartDateContent.text = getString(R.string.event_date_range, event.startDate, event.endDate)
-        binding.titleTagsContent.text = event.tags?.joinToString(", ") ?: "No tags"
+        binding.titleTagsContent.text = event.tags?.joinToString(", ") { "#${it.replace(" ", "")}" } ?: "No tags"
     }
 
     override fun onDestroyView() {

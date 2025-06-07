@@ -44,7 +44,7 @@ class CreateEventOtherFragment : Fragment() {
     private var _binding: FragmentCreateEventOtherBinding? = null
     private val binding get() = _binding!!
     private val calendar = Calendar.getInstance()
-    private val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.US)
+    private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     private val viewModel: CreateEventViewModel by activityViewModels()
     private val supabaseClient = SupabaseClientProvider.client
     private val supabaseUserDao = SupabaseUserDao(supabaseClient)
