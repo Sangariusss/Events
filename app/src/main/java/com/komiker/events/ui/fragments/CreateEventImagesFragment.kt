@@ -7,6 +7,7 @@ import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -25,24 +26,40 @@ class CreateEventImagesFragment : Fragment() {
 
     private lateinit var imageAdapter: ImageAdapter
     private val viewModel: CreateEventViewModel by activityViewModels()
+    private val MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024L // 10 MB
 
     private val pickImagesLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
-        val startPosition = viewModel.images.size
+        val contentResolver = requireContext().contentResolver
+        val validImageItems = mutableListOf<ImageAdapter.ImageItem>()
+
         uris.forEach { uri ->
-            val contentResolver = requireContext().contentResolver
+            val fileSize = getFileSize(uri, contentResolver)
             val fileName = getFileName(uri, contentResolver) ?: "image_${System.currentTimeMillis()}"
-            val tempFile = uriToTempFile(uri, fileName)
-            if (tempFile != null) {
-                val imageItem = ImageAdapter.ImageItem(
-                    tempFile,
-                    fileName,
-                    "${getFileType(uri, contentResolver, fileName).uppercase()} | ${formatFileSize(getFileSize(uri, contentResolver))}"
-                )
-                viewModel.images.add(imageItem)
+
+            if (fileSize > MAX_FILE_SIZE_BYTES) {
+                val sizeInMB = String.format("%.2f", fileSize / (1024.0 * 1024.0))
+                Toast.makeText(
+                    requireContext(),
+                    "Image is too large ($sizeInMB MB). Max size is 10 MB.",
+                    Toast.LENGTH_LONG
+                ).show()
+            } else {
+                val tempFile = uriToTempFile(uri, fileName)
+                if (tempFile != null) {
+                    val imageItem = ImageAdapter.ImageItem(
+                        tempFile,
+                        fileName,
+                        "${getFileType(uri, contentResolver, fileName).uppercase()} | ${formatFileSize(fileSize)}"
+                    )
+                    validImageItems.add(imageItem)
+                }
             }
         }
-        if (uris.isNotEmpty()) {
-            imageAdapter.notifyItemRangeInserted(startPosition, uris.size)
+
+        if (validImageItems.isNotEmpty()) {
+            val startPosition = viewModel.images.size
+            viewModel.images.addAll(validImageItems)
+            imageAdapter.notifyItemRangeInserted(startPosition, validImageItems.size)
         }
     }
 
@@ -104,9 +121,10 @@ class CreateEventImagesFragment : Fragment() {
     }
 
     private fun formatFileSize(sizeBytes: Long): String {
-        val kb = sizeBytes / 1000.0
-        val df = DecimalFormat("#0.00")
-        return if (kb < 1000) "${df.format(kb)} kB" else "${df.format(kb / 1000)} MB"
+        if (sizeBytes <= 0) return "0 B"
+        val kb = sizeBytes / 1024.0
+        val df = DecimalFormat("#.##")
+        return if (kb < 1024) "${df.format(kb)} KB" else "${df.format(kb / 1024.0)} MB"
     }
 
     private fun getFileName(uri: Uri, contentResolver: ContentResolver): String? {
@@ -123,7 +141,9 @@ class CreateEventImagesFragment : Fragment() {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val fileSizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-                if (fileSizeIndex != -1) return cursor.getLong(fileSizeIndex)
+                if (fileSizeIndex != -1 && !cursor.isNull(fileSizeIndex)) {
+                    return cursor.getLong(fileSizeIndex)
+                }
             }
         }
         return 0L
@@ -148,6 +168,7 @@ class CreateEventImagesFragment : Fragment() {
                     requireContext().cacheDir
                 ).apply {
                     FileOutputStream(this).use { output -> input.copyTo(output) }
+                    deleteOnExit()
                 }
             }
         } catch (e: Exception) {
