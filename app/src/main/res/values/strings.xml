@@ -215,4 +215,5 @@
     <string name="start_time">Start time</string>
     <string name="start_and_end_date">Start and end date</string>
     <string name="you_haven_t_liked_any_events_yet">You haven\'t liked any events yet</string>
+    <string name="my_events_fragment">MyEventsFragment</string>
 </resources>

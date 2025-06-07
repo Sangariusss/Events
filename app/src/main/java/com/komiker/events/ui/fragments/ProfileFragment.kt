@@ -66,6 +66,7 @@ class ProfileFragment : Fragment() {
         initButtonAddSocialMedia()
         initButtonEditProfile()
         initButtonChangeEmail()
+        initButtonMyEvents()
         initButtonLogOut()
         initButtonDelete()
     }
@@ -111,6 +112,12 @@ class ProfileFragment : Fragment() {
     private fun initButtonChangeEmail() {
         binding.constraintChangeEmailButtonLayout.setOnClickListener {
             findNavController().navigate(R.id.action_ProfileFragment_to_ChangeEmailFragment)
+        }
+    }
+
+    private fun initButtonMyEvents() {
+        binding.constraintMyEventsButtonLayout.setOnClickListener {
+            findNavController().navigate(R.id.action_ProfileFragment_to_MyEventsFragment)
         }
     }
 

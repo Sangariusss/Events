@@ -161,13 +161,18 @@ class EventDetailFragment : Fragment() {
     private fun setupCustomOnBackPressed() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
             val navController = findNavController()
+            val mainTabs = listOf("home", "favorites", "proposals", "profile")
 
-            if (sourceFragmentTag == "home" || sourceFragmentTag == "favorites" || sourceFragmentTag == "proposals" || sourceFragmentTag == "profile") {
+            if (sourceFragmentTag in mainTabs) {
                 val bundle = Bundle().apply {
                     putString("navigateTo", sourceFragmentTag)
                 }
                 navController.navigate(R.id.action_EventDetailFragment_to_MainMenuFragment, bundle)
-            } else {
+            }
+            else if (navController.previousBackStackEntry != null) {
+                navController.popBackStack()
+            }
+            else {
                 val isAuthenticated = SupabaseClientProvider.client.auth.currentSessionOrNull() != null
                 val navOptionsToRoot = navOptions {
                     popUpTo(navController.graph.findStartDestination().id) { inclusive = true }

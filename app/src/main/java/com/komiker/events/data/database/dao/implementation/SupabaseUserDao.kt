@@ -122,6 +122,23 @@ class SupabaseUserDao(private val supabase: SupabaseClient) : UserDao {
         }
     }
 
+    suspend fun getEventsByAuthor(authorId: String, currentUserId: String): List<EventResponse> {
+        return withContext(Dispatchers.IO) {
+            try {
+                supabase.postgrest.rpc(
+                    "get_events_by_author",
+                    mapOf(
+                        "author_id_input" to authorId,
+                        "current_user_id_input" to currentUserId
+                    )
+                ).decodeList()
+            } catch (e: Exception) {
+                println("Error fetching events by author: ${e.message}")
+                emptyList()
+            }
+        }
+    }
+
     suspend fun getLikedEvents(userId: String): List<EventResponse> {
         return withContext(Dispatchers.IO) {
             try {

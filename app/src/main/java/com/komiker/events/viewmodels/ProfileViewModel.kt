@@ -8,6 +8,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
 import com.komiker.events.data.database.models.Event
+import com.komiker.events.data.database.models.EventResponse
 import com.komiker.events.data.database.models.Proposal
 import com.komiker.events.data.database.models.User
 import kotlinx.coroutines.launch
@@ -20,6 +21,8 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
     private val proposalLiveData = MutableLiveData<Proposal?>()
     private val _likedEvents = MutableLiveData<List<Event>>()
     val likedEvents: LiveData<List<Event>> = _likedEvents
+    private val _myEventsResponse = MutableLiveData<List<EventResponse>>()
+    val myEventsResponse: LiveData<List<EventResponse>> = _myEventsResponse
 
     private fun loadUserInternal(userId: String, liveData: MutableLiveData<User?>) {
         viewModelScope.launch {
@@ -61,6 +64,18 @@ class ProfileViewModel(private val supabaseUserDao: SupabaseUserDao) : ViewModel
             }
         }
         return proposalLiveData
+    }
+
+    fun loadMyEvents(authorId: String) {
+        viewModelScope.launch {
+            try {
+                val response = supabaseUserDao.getEventsByAuthor(authorId, authorId)
+                _myEventsResponse.postValue(response)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _myEventsResponse.postValue(emptyList())
+            }
+        }
     }
 
     fun loadLikedEvents(userId: String) {

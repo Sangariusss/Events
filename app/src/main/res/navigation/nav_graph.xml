@@ -110,6 +110,11 @@
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out" />
         <action
+            android:id="@+id/action_ProfileFragment_to_MyEventsFragment"
+            app:destination="@id/MyEventsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+        <action
             android:id="@+id/action_MainMenuFragment_to_ProposalDetailFragment"
             app:destination="@id/ProposalDetailFragment"
             app:enterAnim="@anim/fade_in"
@@ -204,21 +209,6 @@
         android:name="com.komiker.events.ui.fragments.ProfileFragment"
         android:label="@string/profile_fragment"
         tools:layout="@layout/fragment_profile" >
-        <action
-            android:id="@+id/action_ProfileFragment_to_AddSocialMediaFragment"
-            app:destination="@id/AddSocialMediaFragment"
-            app:enterAnim="@anim/fade_in"
-            app:exitAnim="@anim/fade_out" />
-        <action
-            android:id="@+id/action_ProfileFragment_to_EditProfileFragment"
-            app:destination="@id/EditProfileFragment"
-            app:enterAnim="@anim/fade_in"
-            app:exitAnim="@anim/fade_out" />
-        <action
-            android:id="@+id/action_ProfileFragment_to_ChangeEmailFragment"
-            app:destination="@id/ChangeEmailFragment"
-            app:enterAnim="@anim/fade_in"
-            app:exitAnim="@anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/AddSocialMediaFragment"
@@ -292,6 +282,22 @@
         <action
             android:id="@+id/action_ChangeEmailFragment_to_CheckYourNewEmailFragment"
             app:destination="@id/CheckYourNewEmailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/MyEventsFragment"
+        android:name="com.komiker.events.ui.fragments.MyEventsFragment"
+        android:label="@string/my_events_fragment"
+        tools:layout="@layout/fragment_my_events" >
+        <action
+            android:id="@+id/action_MyEventsFragment_to_MainMenuFragment"
+            app:destination="@id/MainMenuFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_MyEventsFragment_to_EventDetailFragment"
+            app:destination="@id/EventDetailFragment"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out" />
     </fragment>
