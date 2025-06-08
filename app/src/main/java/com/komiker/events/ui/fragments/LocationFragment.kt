@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
 import androidx.fragment.app.Fragment
@@ -19,6 +20,7 @@ import com.komiker.events.data.repository.LocationRepository
 import com.komiker.events.databinding.FragmentLocationBinding
 import com.komiker.events.ui.adapters.LocationAdapter
 import com.komiker.events.viewmodels.CreateEventViewModel
+import com.komiker.events.viewmodels.FilterViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -31,7 +33,9 @@ class LocationFragment : Fragment() {
 
     private lateinit var locationAdapter: LocationAdapter
     private lateinit var locationRepository: LocationRepository
-    private val viewModel: CreateEventViewModel by activityViewModels()
+
+    private val createEventViewModel: CreateEventViewModel by activityViewModels()
+    private val filterViewModel: FilterViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,6 +51,7 @@ class LocationFragment : Fragment() {
         setupRecyclerView()
         setupSearchField()
         setupButtonBack()
+        setupOnBackPressed()
         loadLocations()
     }
 
@@ -57,11 +62,36 @@ class LocationFragment : Fragment() {
 
     private fun setupButtonBack() {
         binding.buttonBack.setOnClickListener {
-            val sourceFragmentId = arguments?.getInt("sourceFragmentId") ?: R.id.FilterFragment
+            findNavController().popBackStack()
+        }
+    }
+
+    private fun setupOnBackPressed() {
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
+            findNavController().popBackStack()
+        }
+    }
+
+    private fun setupRecyclerView() {
+        locationAdapter = LocationAdapter { selectedLocation ->
+            val sourceFragmentId = arguments?.getInt("sourceFragmentId")
+
             if (sourceFragmentId == R.id.CreateEventFragment) {
-                findNavController().popBackStack(R.id.CreateEventFragment, false)
+                createEventViewModel.setLocation(selectedLocation.address)
             } else {
-                findNavController().navigate(R.id.action_LocationFragment_to_FilterFragment)
+                filterViewModel.setLocation(selectedLocation.address)
+            }
+
+            findNavController().popBackStack()
+        }
+        binding.recyclerViewLocations.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = locationAdapter
+            doOnLayout {
+                val recyclerHeight = height
+                if (recyclerHeight > 0) {
+                    locationAdapter.setItemHeight((recyclerHeight * 0.081).toInt())
+                }
             }
         }
     }
@@ -76,34 +106,12 @@ class LocationFragment : Fragment() {
                 binding.editTextFindLocation.background = if (s.isNullOrEmpty()) emptyDrawable else filledDrawable
                 searchJob?.cancel()
                 searchJob = viewLifecycleOwner.lifecycleScope.launch {
-                    delay(300) // Debounce for 300ms
+                    delay(300)
                     filterLocations(s.toString())
                 }
             }
             override fun afterTextChanged(s: Editable?) {}
         })
-    }
-
-    private fun setupRecyclerView() {
-        locationAdapter = LocationAdapter { selectedLocation ->
-            viewModel.setLocation(selectedLocation.address)
-            val sourceFragmentId = arguments?.getInt("sourceFragmentId") ?: R.id.FilterFragment
-            if (sourceFragmentId == R.id.CreateEventFragment) {
-                findNavController().popBackStack(R.id.CreateEventFragment, false)
-            } else {
-                findNavController().navigate(R.id.action_LocationFragment_to_FilterFragment)
-            }
-        }
-        binding.recyclerViewLocations.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = locationAdapter
-            doOnLayout {
-                val recyclerHeight = height
-                if (recyclerHeight > 0) {
-                    locationAdapter.setItemHeight((recyclerHeight * 0.081).toInt())
-                }
-            }
-        }
     }
 
     private fun loadLocations() {

@@ -11,7 +11,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import androidx.viewpager2.widget.ViewPager2
@@ -50,7 +49,7 @@ class EventDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupSystemBars()
         handleArguments()
-        initButtonBack()
+        setupButtonBack()
         setupCustomOnBackPressed()
         setupShareButton()
     }
@@ -152,38 +151,40 @@ class EventDetailFragment : Fragment() {
         binding.tabLocation.setTextColor(if (position == 2) selectedColor else unselectedColor)
     }
 
-    private fun initButtonBack() {
+    private fun setupButtonBack() {
         binding.buttonBack.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+            navigateBack()
         }
     }
 
     private fun setupCustomOnBackPressed() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
-            val navController = findNavController()
-            val mainTabs = listOf("home", "favorites", "proposals", "profile")
+            navigateBack()
+        }
+    }
 
-            if (sourceFragmentTag in mainTabs) {
-                val bundle = Bundle().apply {
-                    putString("navigateTo", sourceFragmentTag)
-                }
-                navController.navigate(R.id.action_EventDetailFragment_to_MainMenuFragment, bundle)
+    private fun navigateBack() {
+        val navController = findNavController()
+
+        if (navController.previousBackStackEntry != null && sourceFragmentTag !in listOf("home", "favorites", "proposals", "profile")) {
+            navController.popBackStack()
+            return
+        }
+
+        val isAuthenticated = SupabaseClientProvider.client.auth.currentSessionOrNull() != null
+        val navOptions = navOptions {
+            popUpTo(R.id.nav_graph) {
+                inclusive = true
             }
-            else if (navController.previousBackStackEntry != null) {
-                navController.popBackStack()
+        }
+
+        if (isAuthenticated) {
+            val bundle = Bundle().apply {
+                putString("navigateTo", sourceFragmentTag ?: "home")
             }
-            else {
-                val isAuthenticated = SupabaseClientProvider.client.auth.currentSessionOrNull() != null
-                val navOptionsToRoot = navOptions {
-                    popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
-                    launchSingleTop = true
-                }
-                if (isAuthenticated) {
-                    navController.navigate(R.id.MainMenuFragment, null, navOptionsToRoot)
-                } else {
-                    navController.navigate(R.id.WelcomeFragment, null, navOptionsToRoot)
-                }
-            }
+            navController.navigate(R.id.MainMenuFragment, bundle, navOptions)
+        } else {
+            navController.navigate(R.id.WelcomeFragment, null, navOptions)
         }
     }
 

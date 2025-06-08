@@ -10,8 +10,10 @@ import android.widget.Button
 import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.NavOptions
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
@@ -25,9 +27,6 @@ import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
@@ -121,23 +120,11 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun initButtonLogOut() {
         binding.constraintLogOutButtonLayout.setOnClickListener {
-            GlobalScope.launch(Dispatchers.Main) {
+            viewLifecycleOwner.lifecycleScope.launch {
                 supabaseClient.auth.signOut()
-
-                val fadeOutAnimation = R.anim.fade_out
-                val fadeInAnimation = R.anim.fade_in
-
-                findNavController().navigate(
-                    R.id.WelcomeFragment,
-                    null,
-                    NavOptions.Builder()
-                        .setEnterAnim(fadeInAnimation)
-                        .setExitAnim(fadeOutAnimation)
-                        .build()
-                )
+                navigateToWelcomeAndClearStack()
             }
         }
     }
@@ -148,7 +135,6 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun showDeleteAccountDialog() {
         val tempRoot = FrameLayout(requireContext())
 
@@ -163,31 +149,17 @@ class ProfileFragment : Fragment() {
         }
 
         dialogView.findViewById<Button>(R.id.button_submit).setOnClickListener {
-            GlobalScope.launch(Dispatchers.Main) {
+            viewLifecycleOwner.lifecycleScope.launch {
                 val userId = supabaseClient.auth.currentSessionOrNull()?.user?.id
                 userId?.let {
                     supabaseClient.from("users").delete {
-                        filter {
-                            eq("user_id", userId)
-                        }
+                        filter { eq("user_id", userId) }
                     }
                 } ?: run {
                     Log.e("UserId", "UserId is null")
                 }
-
                 supabaseClient.auth.signOut()
-
-                val fadeOutAnimation = R.anim.fade_out
-                val fadeInAnimation = R.anim.fade_in
-
-                findNavController().navigate(
-                    R.id.WelcomeFragment,
-                    null,
-                    NavOptions.Builder()
-                        .setEnterAnim(fadeInAnimation)
-                        .setExitAnim(fadeOutAnimation)
-                        .build()
-                )
+                navigateToWelcomeAndClearStack()
             }
             dialog.dismiss()
         }
@@ -206,5 +178,20 @@ class ProfileFragment : Fragment() {
 
             it.setDimAmount(0.2f)
         }
+    }
+
+    private fun navigateToWelcomeAndClearStack() {
+        val mainNavController = requireActivity().findNavController(R.id.fragment_nav_host_content_main)
+
+        val navOptions = navOptions {
+            anim {
+                enter = R.anim.fade_in
+                exit = R.anim.fade_out
+            }
+            popUpTo(R.id.nav_graph) {
+                inclusive = true
+            }
+        }
+        mainNavController.navigate(R.id.WelcomeFragment, null, navOptions)
     }
 }

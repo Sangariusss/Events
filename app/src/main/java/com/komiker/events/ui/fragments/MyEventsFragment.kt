@@ -66,7 +66,7 @@ class MyEventsFragment : Fragment() {
 
     private fun initButtonBack() {
         binding.buttonBack.setOnClickListener {
-            navigateToMainMenuWithProfile()
+            findNavController().popBackStack()
         }
     }
 
@@ -178,15 +178,6 @@ class MyEventsFragment : Fragment() {
                 Log.e(TAG, "Error deleting event: ${e.message}")
             }
         }
-    }
-
-    private fun navigateToMainMenuWithProfile() {
-        findNavController().navigate(
-            R.id.action_MyEventsFragment_to_MainMenuFragment,
-            Bundle().apply {
-                putString("navigateTo", "profile")
-            }
-        )
     }
 
     override fun onDestroyView() {

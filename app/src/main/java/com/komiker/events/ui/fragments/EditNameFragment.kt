@@ -187,6 +187,6 @@ class EditNameFragment : Fragment() {
     }
 
     private fun navigateToEditProfile() {
-        findNavController().navigate(R.id.action_EditNameFragment_to_EditProfileFragment)
+        findNavController().popBackStack()
     }
 }

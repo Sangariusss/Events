@@ -65,10 +65,7 @@ class AddSocialMediaFragment : Fragment() {
 
     private fun navigateWithSave() {
         saveSocialMediaLinks()
-        findNavController().navigate(
-            R.id.action_AddSocialMediaFragment_to_MainMenuFragment,
-            Bundle().apply { putString("navigateTo", "profile") }
-        )
+        findNavController().popBackStack()
     }
 
     private fun loadSavedLinks() {

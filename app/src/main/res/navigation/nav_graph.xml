@@ -62,7 +62,9 @@
         tools:layout="@layout/fragment_registration_success">
         <action
             android:id="@+id/action_RegistrationSuccessFragment_to_MainMenuFragment"
-            app:destination="@id/MainMenuFragment" />
+            app:destination="@id/MainMenuFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/InternetErrorFragment"

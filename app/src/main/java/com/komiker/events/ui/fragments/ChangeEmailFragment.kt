@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -47,7 +46,6 @@ class ChangeEmailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupSystemBars()
         initButtonBack()
-        setupOnBackPressedCallback()
         setupEmailEditText()
         setupButtonConfirm()
         observeUserData()
@@ -66,16 +64,8 @@ class ChangeEmailFragment : Fragment() {
 
     private fun initButtonBack() {
         binding.buttonBack.setOnClickListener {
-            navigateToMainMenuWithProfile()
+            findNavController().popBackStack()
         }
-    }
-
-    private fun setupOnBackPressedCallback() {
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                navigateToMainMenuWithProfile()
-            }
-        })
     }
 
     private fun setupEmailEditText() {
@@ -142,15 +132,6 @@ class ChangeEmailFragment : Fragment() {
 
     private fun navigateToCheckYourNewEmail() {
         findNavController().navigate(R.id.action_ChangeEmailFragment_to_CheckYourNewEmailFragment)
-    }
-
-    private fun navigateToMainMenuWithProfile() {
-        findNavController().navigate(
-            R.id.action_ChangeEmailFragment_to_MainMenuFragment,
-            Bundle().apply {
-                putString("navigateTo", "profile")
-            }
-        )
     }
 
     private fun isValidEmail(email: String): Boolean {

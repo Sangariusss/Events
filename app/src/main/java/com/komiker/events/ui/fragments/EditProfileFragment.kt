@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -50,7 +49,6 @@ class EditProfileFragment : Fragment() {
         initButtonUploadMedia()
         initButtonName()
         initButtonUsername()
-        setupOnBackPressedCallback()
         observeUserData()
 
         binding.root.viewTreeObserver.addOnGlobalLayoutListener(object :
@@ -74,7 +72,7 @@ class EditProfileFragment : Fragment() {
 
     private fun initButtonBack() {
         binding.buttonBack.setOnClickListener {
-            navigateToMainMenuWithProfile()
+            findNavController().popBackStack()
         }
     }
 
@@ -101,23 +99,6 @@ class EditProfileFragment : Fragment() {
         binding.buttonUsername.setOnClickListener {
             findNavController().navigate(R.id.action_EditProfileFragment_to_EditUsernameFragment)
         }
-    }
-
-    private fun setupOnBackPressedCallback() {
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                navigateToMainMenuWithProfile()
-            }
-        })
-    }
-
-    private fun navigateToMainMenuWithProfile() {
-        findNavController().navigate(
-            R.id.action_EditProfileFragment_to_MainMenuFragment,
-            Bundle().apply {
-                putString("navigateTo", "profile")
-            }
-        )
     }
 
     private fun observeUserData() {

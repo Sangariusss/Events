@@ -124,7 +124,7 @@ class FilterFragment : Fragment() {
     private fun setupOnBackPressed() {
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                navigateBack()
+                findNavController().popBackStack()
             }
         }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
@@ -132,7 +132,7 @@ class FilterFragment : Fragment() {
 
     private fun setupButtonBack() {
         binding.buttonBack.setOnClickListener {
-            navigateBack()
+            findNavController().popBackStack()
         }
     }
 
@@ -140,14 +140,14 @@ class FilterFragment : Fragment() {
         binding.buttonCheckmark.setOnClickListener {
             datePickerManager.saveDate()
             viewModel.applyFilters()
-            navigateBack()
+            findNavController().popBackStack()
         }
     }
 
     private fun setupButtonResetFilters() {
         binding.buttonResetFilters.setOnClickListener {
             viewModel.clearAll()
-            navigateBack()
+            findNavController().popBackStack()
         }
     }
 
@@ -247,19 +247,6 @@ class FilterFragment : Fragment() {
             viewModel.setTags(currentTags)
             binding.chipGroupTags.removeView(chip)
         }
-    }
-
-    private fun navigateBack() {
-        navigateToMainMenuWithSection()
-    }
-
-    private fun navigateToMainMenuWithSection() {
-        findNavController().navigate(
-            R.id.action_FilterFragment_to_MainMenuFragment,
-            Bundle().apply {
-                putString("navigateTo", "home")
-            }
-        )
     }
 
     private fun navigateToFragmentWithSource(destinationId: Int) {

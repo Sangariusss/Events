@@ -47,6 +47,7 @@
         android:text="@string/you_haven_t_liked_any_events_yet"
         android:textColor="@color/neutral_60"
         android:textSize="18sp"
+        android:fontFamily="@font/fixel_medium"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

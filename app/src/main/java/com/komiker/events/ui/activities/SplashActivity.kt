@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -13,6 +14,7 @@ import com.komiker.events.data.database.SupabaseClientProvider
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.user.UserSession
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,12 +27,14 @@ class SplashActivity : AppCompatActivity() {
     private val supabaseClient = SupabaseClientProvider.client
     private val minTimeBeforeExpiry = 1800L
     private val splashDuration = 1000L
+    private var splashJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeView()
         setupSystemBars()
         startSplashFlow()
+        setupOnBackPressed()
     }
 
     private fun initializeView() {
@@ -44,7 +48,7 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun startSplashFlow() {
-        lifecycleScope.launch(Dispatchers.Main) {
+        splashJob = lifecycleScope.launch(Dispatchers.Main) {
             val isAuthenticated = withContext(Dispatchers.IO) { checkAuthentication() }
             delay(splashDuration)
 
@@ -55,6 +59,15 @@ class SplashActivity : AppCompatActivity() {
             startActivity(intent, options.toBundle())
             finish()
         }
+    }
+
+    private fun setupOnBackPressed() {
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                splashJob?.cancel()
+                finish()
+            }
+        })
     }
 
     private suspend fun checkAuthentication(): Boolean {

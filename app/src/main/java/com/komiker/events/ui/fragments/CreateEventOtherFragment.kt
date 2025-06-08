@@ -23,6 +23,7 @@ import com.komiker.events.data.database.models.EventResponse
 import com.komiker.events.databinding.FragmentCreateEventOtherBinding
 import com.komiker.events.ui.adapters.ImageAdapter
 import com.komiker.events.viewmodels.CreateEventViewModel
+import com.komiker.events.viewmodels.FilterViewModel
 import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.gotrue.auth
@@ -46,6 +47,7 @@ class CreateEventOtherFragment : Fragment() {
     private val calendar = Calendar.getInstance()
     private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     private val viewModel: CreateEventViewModel by activityViewModels()
+    private val filterViewModel: FilterViewModel by activityViewModels()
     private val supabaseClient = SupabaseClientProvider.client
     private val supabaseUserDao = SupabaseUserDao(supabaseClient)
     private val profileViewModel: ProfileViewModel by activityViewModels {
@@ -59,6 +61,7 @@ class CreateEventOtherFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.resetCleared()
+        filterViewModel.clearAll()
         restoreState()
         setupUi()
         setupCreateEventButton()

@@ -6,8 +6,10 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.navOptions
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
 import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
@@ -98,9 +100,13 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (!isContentLink && !isSocialAuthHandled) {
-                val currentId = navController.currentDestination?.id
-                if (currentId != R.id.MainMenuFragment) {
-                    navController.navigate(R.id.MainMenuFragment)
+                val navOptions = navOptions {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        inclusive = true
+                    }
+                }
+                if (navController.currentDestination?.id != R.id.MainMenuFragment) {
+                    navController.navigate(R.id.MainMenuFragment, null, navOptions)
                 }
             }
         } else {

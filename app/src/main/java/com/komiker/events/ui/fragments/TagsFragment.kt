@@ -6,6 +6,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
 import androidx.fragment.app.Fragment
@@ -21,6 +22,7 @@ import com.komiker.events.data.repository.TagRepository
 import com.komiker.events.databinding.FragmentTagsBinding
 import com.komiker.events.ui.adapters.TagsAdapter
 import com.komiker.events.viewmodels.CreateEventViewModel
+import com.komiker.events.viewmodels.FilterViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -31,7 +33,8 @@ class TagsFragment : Fragment() {
 
     private lateinit var tagsAdapter: TagsAdapter
     private val tagRepository: TagRepository by lazy { TagRepository(AppDatabase.getDatabase(requireContext())) }
-    private val viewModel: CreateEventViewModel by activityViewModels()
+    private val createEventViewModel: CreateEventViewModel by activityViewModels()
+    private val filterViewModel: FilterViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,6 +49,7 @@ class TagsFragment : Fragment() {
         setupRecyclerView()
         setupSearchField()
         setupButtonBack()
+        setupOnBackPressed()
         loadTags()
         tagRepository.setupRealtimeUpdates(viewLifecycleOwner.lifecycleScope)
     }
@@ -58,12 +62,47 @@ class TagsFragment : Fragment() {
 
     private fun setupButtonBack() {
         binding.buttonBack.setOnClickListener {
-            viewModel.setTags(tagsAdapter.getSelectedTags())
-            val sourceFragmentId = arguments?.getInt("sourceFragmentId") ?: R.id.FilterFragment
-            if (sourceFragmentId == R.id.CreateEventFragment) {
-                findNavController().popBackStack(R.id.CreateEventFragment, false)
-            } else {
-                findNavController().navigate(R.id.action_TagsFragment_to_FilterFragment)
+            saveTagsAndNavigateBack()
+        }
+    }
+
+    private fun setupOnBackPressed() {
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
+            saveTagsAndNavigateBack()
+        }
+    }
+
+    private fun saveTagsAndNavigateBack() {
+        val selectedTags = tagsAdapter.getSelectedTags()
+        val sourceFragmentId = arguments?.getInt("sourceFragmentId")
+
+        if (sourceFragmentId == R.id.CreateEventFragment) {
+            createEventViewModel.setTags(selectedTags)
+        } else {
+            filterViewModel.setTags(selectedTags)
+        }
+        findNavController().popBackStack()
+    }
+
+    private fun setupRecyclerView() {
+        val sourceFragmentId = arguments?.getInt("sourceFragmentId")
+        val savedTags = if (sourceFragmentId == R.id.CreateEventFragment) {
+            createEventViewModel.tags.value
+        } else {
+            filterViewModel.tags.value
+        } ?: emptyList()
+
+        tagsAdapter = TagsAdapter(savedTags.toMutableList()) {}
+
+        binding.recyclerViewTags.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = tagsAdapter
+            doOnLayout {
+                val recyclerHeight = height
+                if (recyclerHeight > 0) {
+                    tagsAdapter.setHeaderHeight((recyclerHeight * 0.054).toInt())
+                    tagsAdapter.setSubTagHeight((recyclerHeight * 0.081).toInt())
+                }
             }
         }
     }
@@ -79,24 +118,6 @@ class TagsFragment : Fragment() {
             }
             override fun afterTextChanged(s: Editable?) {}
         })
-    }
-
-    private fun setupRecyclerView() {
-        val savedTags = viewModel.tags.value ?: emptyList()
-        tagsAdapter = TagsAdapter(savedTags) { selectedTags ->
-            viewModel.setTags(selectedTags)
-        }
-        binding.recyclerViewTags.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = tagsAdapter
-            doOnLayout {
-                val recyclerHeight = height
-                if (recyclerHeight > 0) {
-                    tagsAdapter.setHeaderHeight((recyclerHeight * 0.054).toInt())
-                    tagsAdapter.setSubTagHeight((recyclerHeight * 0.081).toInt())
-                }
-            }
-        }
     }
 
     private fun prepareTagItems(categories: List<TagCategoryEntity>): List<TagItem> {
@@ -122,9 +143,7 @@ class TagsFragment : Fragment() {
             tagRepository.getTagCategories().collectLatest { categories ->
                 val filteredItems = categories.flatMap { category ->
                     when {
-                        category.name.contains(query, ignoreCase = true) -> {
-                            prepareTagItems(listOf(category))
-                        }
+                        category.name.contains(query, ignoreCase = true) -> prepareTagItems(listOf(category))
                         category.subTags.any { it.contains(query, ignoreCase = true) } -> {
                             val filteredSubTags = category.subTags.filter { it.contains(query, ignoreCase = true) }
                             prepareTagItems(listOf(category.copy(subTags = filteredSubTags)))

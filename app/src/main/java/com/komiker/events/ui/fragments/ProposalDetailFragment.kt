@@ -12,7 +12,6 @@ import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.bumptech.glide.Glide
@@ -61,7 +60,7 @@ class ProposalDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupSystemBars()
         handleArguments()
-        initButtonBack()
+        setupButtonBack()
         setupOnBackPressedCallback()
     }
 
@@ -255,30 +254,35 @@ class ProposalDetailFragment : Fragment() {
         startActivity(shareIntent)
     }
 
-    private fun initButtonBack() {
+    private fun setupButtonBack() {
         binding.buttonBack.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+            navigateBack()
         }
     }
 
     private fun setupOnBackPressedCallback() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
-            val isAuthenticated = supabaseClient.auth.currentSessionOrNull() != null
-            val navController = findNavController()
+            navigateBack()
+        }
+    }
 
-            val navOptionsToRoot = navOptions {
-                popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
-                launchSingleTop = true
-            }
+    private fun navigateBack() {
+        val navController = findNavController()
+        val isAuthenticated = supabaseClient.auth.currentSessionOrNull() != null
 
-            if (isAuthenticated) {
-                val bundle = Bundle().apply {
-                    putString("navigateTo", "proposals")
-                }
-                navController.navigate(R.id.MainMenuFragment, bundle, navOptionsToRoot)
-            } else {
-                navController.navigate(R.id.WelcomeFragment, null, navOptionsToRoot)
+        val navOptions = navOptions {
+            popUpTo(R.id.nav_graph) {
+                inclusive = true
             }
+        }
+
+        if (isAuthenticated) {
+            val bundle = Bundle().apply {
+                putString("navigateTo", "proposals")
+            }
+            navController.navigate(R.id.MainMenuFragment, bundle, navOptions)
+        } else {
+            navController.navigate(R.id.WelcomeFragment, null, navOptions)
         }
     }
 
