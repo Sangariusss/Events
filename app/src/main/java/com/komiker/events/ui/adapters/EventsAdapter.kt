@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.komiker.events.R
 import com.komiker.events.data.database.models.Event
 import com.komiker.events.databinding.ItemEventBinding
@@ -74,6 +75,8 @@ class EventsAdapter(
             binding.textUserName.text = event.username
             Glide.with(binding.imageProfile.context)
                 .load(event.userAvatar)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
                 .placeholder(R.drawable.img_profile_placeholder)
                 .transform(CircleCropTransformation())
                 .into(binding.imageProfile)

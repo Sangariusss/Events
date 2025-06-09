@@ -25,6 +25,7 @@ import com.komiker.events.viewmodels.ProfileViewModel
 import com.komiker.events.viewmodels.ProfileViewModelFactory
 import io.github.jan.supabase.gotrue.auth
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
@@ -135,6 +136,8 @@ class ProposalDetailFragment : Fragment() {
 
         Glide.with(this)
             .load(proposal.userAvatar)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .skipMemoryCache(true)
             .placeholder(R.drawable.img_profile_placeholder)
             .transform(CircleCropTransformation())
             .into(binding.imageProfile)

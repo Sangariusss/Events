@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.komiker.events.R
 import com.komiker.events.data.database.models.Proposal
 import com.komiker.events.databinding.ItemProposalBinding
@@ -64,6 +65,8 @@ class ProposalsAdapter(
 
             Glide.with(binding.imageProfile.context)
                 .load(proposal.userAvatar)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
                 .placeholder(R.drawable.img_profile_placeholder)
                 .transform(CircleCropTransformation())
                 .into(binding.imageProfile)

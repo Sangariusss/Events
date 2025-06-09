@@ -14,6 +14,7 @@
 	<dimen name="button_popup_menu">10dp</dimen>
 
 	<dimen name="text_size_button">18sp</dimen>
+	<dimen name="description_text_size">14sp</dimen>
 
 	<dimen name="size_image_social_media">24dp</dimen>
 	<dimen name="size_image_facebook">28dp</dimen>

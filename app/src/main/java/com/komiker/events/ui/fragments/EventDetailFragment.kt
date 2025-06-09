@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
 import com.komiker.events.data.database.dao.implementation.SupabaseUserDao
@@ -106,6 +107,8 @@ class EventDetailFragment : Fragment() {
     private fun loadUserAvatar(event: Event) {
         Glide.with(this)
             .load(event.userAvatar)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .skipMemoryCache(true)
             .placeholder(R.drawable.img_profile_placeholder)
             .transform(CircleCropTransformation())
             .into(binding.imageProfile)
