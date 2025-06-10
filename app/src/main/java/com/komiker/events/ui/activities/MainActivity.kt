@@ -128,6 +128,7 @@ class MainActivity : AppCompatActivity() {
                         when (contentType) {
                             "event" -> putString("eventId", contentId)
                             "proposal" -> putString("proposalId", contentId)
+                            else -> return@let
                         }
                         putString("username", username)
                     }

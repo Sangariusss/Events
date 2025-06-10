@@ -86,7 +86,14 @@ class EventDetailFragment : Fragment() {
             } else {
                 if (isAdded) {
                     Toast.makeText(requireContext(), "Event not found", Toast.LENGTH_SHORT).show()
-                    findNavController().popBackStack()
+                    val navController = findNavController()
+                    val navOptions = navOptions {
+                        popUpTo(R.id.nav_graph) { inclusive = true }
+                    }
+                    val bundle = Bundle().apply {
+                        putString("navigateTo", "home")
+                    }
+                    navController.navigate(R.id.MainMenuFragment, bundle, navOptions)
                 }
             }
         }
@@ -169,25 +176,23 @@ class EventDetailFragment : Fragment() {
     private fun navigateBack() {
         val navController = findNavController()
 
-        if (navController.previousBackStackEntry != null && sourceFragmentTag !in listOf("home", "favorites", "proposals", "profile")) {
+        if (sourceFragmentTag != null && sourceFragmentTag !in listOf("home", "favorites", "proposals", "profile")) {
             navController.popBackStack()
-            return
         }
-
-        val isAuthenticated = SupabaseClientProvider.client.auth.currentSessionOrNull() != null
-        val navOptions = navOptions {
-            popUpTo(R.id.nav_graph) {
-                inclusive = true
+        else {
+            val isAuthenticated = SupabaseClientProvider.client.auth.currentSessionOrNull() != null
+            val navOptions = navOptions {
+                popUpTo(R.id.nav_graph) { inclusive = true }
             }
-        }
 
-        if (isAuthenticated) {
-            val bundle = Bundle().apply {
-                putString("navigateTo", sourceFragmentTag ?: "home")
+            if (isAuthenticated) {
+                val bundle = Bundle().apply {
+                    putString("navigateTo", sourceFragmentTag ?: "home")
+                }
+                navController.navigate(R.id.MainMenuFragment, bundle, navOptions)
+            } else {
+                navController.navigate(R.id.WelcomeFragment, null, navOptions)
             }
-            navController.navigate(R.id.MainMenuFragment, bundle, navOptions)
-        } else {
-            navController.navigate(R.id.WelcomeFragment, null, navOptions)
         }
     }
 

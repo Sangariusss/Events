@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.core.os.BundleCompat
@@ -114,7 +115,15 @@ class ProposalDetailFragment : Fragment() {
                 }
             } ?: run {
                 if (isAdded) {
-                    findNavController().navigate(R.id.MainMenuFragment)
+                    Toast.makeText(requireContext(), "Proposal not found", Toast.LENGTH_SHORT).show()
+                    val navController = findNavController()
+                    val navOptions = navOptions {
+                        popUpTo(R.id.nav_graph) { inclusive = true }
+                    }
+                    val bundle = Bundle().apply {
+                        putString("navigateTo", "proposals")
+                    }
+                    navController.navigate(R.id.MainMenuFragment, bundle, navOptions)
                 }
             }
         }
