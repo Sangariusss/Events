@@ -37,6 +37,7 @@
     <string name="no_internet">No Internet</string>
     <string name="check_your_internet_connection">Check your internet connection</string>
     <string name="retry">Retry</string>
+    <string name="no_internet_connection">No internet connection. Please try again later.</string>
     <string name="button_back_image">ButtonBackImage</string>
     <string name="check_the_correctness_of_the_email">Check the correctness of the email</string>
     <string name="_60">60</string>
@@ -200,6 +201,7 @@
     <string name="event_date_range">%1$s - %2$s</string>
     <string name="tags_content_example">News, Streaming, Marathon, IT</string>
     <string name="status_active">Active</string>
+    <string name="status_inactive">Inactive</string>
     <string name="start_08_00_am">Start 08:00 AM</string>
     <string name="_14_02_2025_16_02_2025">14.02.2025 – 16.02.2025</string>
     <string name="address">Address</string>

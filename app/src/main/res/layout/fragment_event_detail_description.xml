@@ -38,7 +38,7 @@
             android:maxLines="1"
             android:textColor="@color/green_60"
             android:textSize="16sp"
-            tools:text="Active event" />
+            tools:text="Active" />
     </LinearLayout>
 
     <LinearLayout

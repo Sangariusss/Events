@@ -143,7 +143,7 @@ class RegistrationFragment : Fragment() {
 
             startLottieAnimation()
 
-            if (!isNetworkAvailable(requireContext())) {
+            if (!isInternetAvailable(requireContext())) {
                 findNavController().navigate(
                     R.id.action_RegistrationFragment_to_InternetErrorFragment,
                     null,
@@ -280,16 +280,11 @@ class RegistrationFragment : Fragment() {
         return signInWithEmail.signIn()
     }
 
-    private fun isNetworkAvailable(context: Context): Boolean {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    private fun isInternetAvailable(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork ?: return false
-        val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
-        return when {
-            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            else -> false
-        }
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
     private fun setupClickableAndUnderlinedText(textView: TextView) {

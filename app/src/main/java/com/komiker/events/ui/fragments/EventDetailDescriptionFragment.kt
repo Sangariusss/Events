@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.BundleCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.komiker.events.R
 import com.komiker.events.data.database.SupabaseClientProvider
@@ -18,7 +19,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.UUID
 
@@ -69,7 +72,6 @@ class EventDetailDescriptionFragment : Fragment() {
             val eventFromBundle = BundleCompat.getParcelable(bundle, ARG_EVENT, Event::class.java)
                 ?: throw IllegalArgumentException("Event object is null in arguments")
             event = eventFromBundle
-
             currentViewsCount = bundle.getInt("viewsCount", event.viewsCount)
         }
     }
@@ -77,11 +79,19 @@ class EventDetailDescriptionFragment : Fragment() {
     private fun updateUI() {
         binding.textTitle.text = event.title
         binding.textContent.text = event.description
-        binding.titleStatus.text = getString(R.string.status_active)
         binding.titleStartDate.text = getString(R.string.start_time_format, event.eventTime ?: "Not specified")
         binding.titleStartDateContent.text = getString(R.string.event_date_range, event.startDate, event.endDate)
         binding.titleTagsContent.text = event.tags?.joinToString(", ") { "#${it.replace(" ", "")}" } ?: "No tags"
         binding.contentReviewed.text = formatCount(currentViewsCount)
+        updateEventStatus()
+    }
+
+    private fun updateEventStatus() {
+        val currentDate = OffsetDateTime.now().toLocalDate()
+        val endDate = event.endDate?.let { parseDate(it).toLocalDate() } ?: currentDate
+        val isActive = !currentDate.isAfter(endDate)
+        binding.titleStatus.text = if (isActive) getString(R.string.status_active) else getString(R.string.status_inactive)
+        binding.titleStatus.setTextColor(ContextCompat.getColor(requireContext(), if (isActive) R.color.green_60 else R.color.red_60))
     }
 
     private fun incrementViewCountIfNeeded() {
@@ -99,7 +109,7 @@ class EventDetailDescriptionFragment : Fragment() {
                     val newViewsCount = currentViewsCount + 1
 
                     withContext(Dispatchers.Main) {
-                        if(isAdded) {
+                        if (isAdded) {
                             binding.contentReviewed.text = formatCount(newViewsCount)
                         }
                     }
@@ -141,5 +151,11 @@ class EventDetailDescriptionFragment : Fragment() {
             }
             else -> count.toString()
         }
+    }
+
+    private fun parseDate(dateStr: String): OffsetDateTime {
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        val localDate = LocalDate.parse(dateStr, formatter)
+        return localDate.atStartOfDay(OffsetDateTime.now().offset).toOffsetDateTime()
     }
 }
